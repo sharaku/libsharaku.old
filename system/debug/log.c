@@ -86,14 +86,14 @@ sharaku_logger_add(struct sharaku_logger_handle *hdl, void *recode)
 
 void
 sharaku_logger_flush_to_file(struct sharaku_logger_handle *hdl,
-						const char *filename)
+				const char *filename, const char *mode)
 {
 	static char buffer[256];
 	int i;
 	FILE *fp;
 	char	*buffer_current = hdl->buffer;
 
-	fp = fopen(filename, "w+");
+	fp = fopen(filename, mode);
 
 	// log overlapが発生している場合はcurrentよりも後ろを出力する
 	if (hdl->is_overlap) {
@@ -144,12 +144,12 @@ void sharaku_dblog_initialize(void)
 
 void sharaku_dblog_flush(void)
 {
-	sharaku_logger_flush_to_file(_dblog_handle, SHARAKU_DBLOG_FILENAME);
+	sharaku_logger_flush_to_file(_dblog_handle, SHARAKU_DBLOG_FILENAME, "w+");
 }
 
 void sharaku_dblog_finalize(void)
 {
-	sharaku_logger_flush_to_file(_dblog_handle, SHARAKU_DBLOG_FILENAME);
+	sharaku_logger_flush_to_file(_dblog_handle, SHARAKU_DBLOG_FILENAME, "w+");
 	sharaku_logger_release(_dblog_handle);
 }
 
@@ -181,7 +181,7 @@ struct sharaku_datalogger_recode {
 };
 struct sharaku_datalogger_recode_header {
 	int32_t	type;
-	char	title[1020];
+	char	title[252];
 };
 struct sharaku_datalogger_context
 {
@@ -205,19 +205,22 @@ sharaku_datalogger_convert(char *buf, size_t bufsz, void *recode)
 	for (i = 0; i < _logger.index && sz < bufsz; i++) {
 		switch (_logger.recode_header[i].type) {
 		case SHARAKU_DATALOGGER_TYPE_INT32:
-			sz += snprintf(buf, bufsz - sz, "%d,", rcd[i].i);
+			sz += snprintf(buf + sz, bufsz - sz, "%d,", rcd[i].i);
 			break;
 		case SHARAKU_DATALOGGER_TYPE_FLOAT:
-			sz += snprintf(buf, bufsz - sz, "%f,", rcd[i].f);
+			sz += snprintf(buf + sz, bufsz - sz, "%f,", rcd[i].f);
 			break;
 		case SHARAKU_DATALOGGER_TYPE_STR4:
-			sz += snprintf(buf, bufsz - sz, "%c%c%c%c,",
+			sz += snprintf(buf + sz, bufsz - sz, "%c%c%c%c,",
 					 rcd[i].c[0], rcd[i].c[1],
 					 rcd[i].c[2], rcd[i].c[3]);
 			break;
+		default:
+			sz += snprintf(buf, bufsz - sz, "error,");
+			break;
 		}
 	}
-	snprintf(buf, bufsz, "\n");
+	snprintf(buf + sz, bufsz - sz, "\n");
 }
 
 void
@@ -226,10 +229,6 @@ sharaku_datalogger_initialize(void)
 	struct sharaku_logger_create	create;
 
 	_logger.max_counts 	= SHARAKU_DATALOGGER_MAXCOUNT;
-	_logger.index		= 0;
-	_logger.max_counts	= 0;
-
-	sharaku_datalogger_create(SHARAKU_DATALOGGER_TYPE_INT32, "time(us)");
 	create.recode_sz	= sizeof(struct sharaku_datalogger_recode) * _logger.index;
 	create.count		= _logger.max_counts;
 	create.log_rotation	= 0;
@@ -248,22 +247,23 @@ sharaku_datalogger_create(int32_t t, char *title)
 		struct sharaku_logger_create	create;
 
 		sharaku_logger_release(_logger.handle);
-		_logger.recode_header = malloc(sizeof(struct sharaku_datalogger_recode)
-						 * _logger.index);
-		_logger.recode = malloc(sizeof(struct sharaku_datalogger_recode)
-						 * _logger.index);
-
+		_logger.handle		= NULL;
 		create.recode_sz	= sizeof(struct sharaku_datalogger_recode) * _logger.index;
 		create.count		= _logger.max_counts;
 		create.log_rotation	= 0;
 		create.cb_conv		= sharaku_datalogger_convert;
-
-		_logger.handle = sharaku_logger_init(&create);
+		sharaku_datalogger_initialize();
 	}
+
+	_logger.recode_header = realloc(_logger.recode_header,
+					sizeof(struct sharaku_datalogger_recode_header) * _logger.index);
+	_logger.recode = malloc(sizeof(struct sharaku_datalogger_recode)
+					 * _logger.index);
+	memset(_logger.recode, 0, sizeof(struct sharaku_datalogger_recode) * _logger.index);
 
 	// mod_loggerに対してログを登録する
 	_logger.recode_header[handle].type	= t;
-	strncpy(_logger.recode_header[handle].title, title, 1020);
+	strncpy(_logger.recode_header[handle].title, title, 252);
 	_logger.recode_header[handle].title[1019] = '\0';
 
 	return handle;
@@ -314,15 +314,25 @@ sharaku_datalogger_set_string(sharaku_datalogger_handle handle, char *val)
 void
 sharaku_datalogger_commit(void)
 {
-	sharaku_usec_t us = sharaku_get_usec();
-	sharaku_datalogger_set_int32(0, us);
-	sharaku_logger_add(_logger.handle, (void*)_logger.recode);
+	if (_logger.recode && _logger.handle) {
+		sharaku_logger_add(_logger.handle, (void*)_logger.recode);
+		memset(_logger.recode, 0,
+			sizeof(struct sharaku_datalogger_recode) * _logger.index);
+	}
 }
 
 void
 sharaku_datalogger_flush(void)
 {
-	sharaku_logger_flush_to_file(_logger.handle, SHARAKU_DATALOGGER_FILENAME);
+	int32_t i;
+	FILE *fp;
+	fp = fopen(SHARAKU_DATALOGGER_FILENAME, "w+");
+	for (i = 0; i < _logger.index; i++) {
+		fprintf(fp, "%s,", _logger.recode_header[i].title);
+	}
+	fprintf(fp, "\n");
+	fclose(fp);
+	sharaku_logger_flush_to_file(_logger.handle, SHARAKU_DATALOGGER_FILENAME, "a+");
 }
 
 /******************************************************************************

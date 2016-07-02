@@ -86,7 +86,7 @@ extern struct sharaku_logger_handle* sharaku_logger_init(struct sharaku_logger_c
 extern void sharaku_logger_add(struct sharaku_logger_handle *hdl, void *recode);
 
 // 情報をファイルへflushする
-extern void sharaku_logger_flush_to_file(struct sharaku_logger_handle *hdl, const char *filename);
+extern void sharaku_logger_flush_to_file(struct sharaku_logger_handle *hdl, const char *filename, const char *mode);
 
 // loggerをreleaseする
 extern void sharaku_logger_release(struct sharaku_logger_handle *hdl);
