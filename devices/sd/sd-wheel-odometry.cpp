@@ -17,9 +17,13 @@
 #endif
 // 数学定義
 #ifndef M_PI_180
-#define M_PI_180	( M_PI / 180.0f)
+#define M_PI_180	(M_PI / 180.0f)
 #endif
-
+#ifndef M_180_PI
+#define M_180_PI	(180.0f / M_PI)
+#endif
+#define RAG2DEG(rag)	((rag) * M_180_PI)
+#define DEG2RAG(deg)	((deg) * M_PI_180)
 
 NAMESPACE_SHARAKU_BEGIN
 
@@ -64,8 +68,8 @@ sd_wheel_odometry::pre_update(const float & interval)
 						 / (float)_wheel_axle_length;
 
 	// 座標を加算
-	_pos.x	= _pos.x + deg_delta_L * cos(_rot.z + delta_theta / 2.0f);
-	_pos.y	= _pos.y + deg_delta_L * sin(_rot.z + delta_theta / 2.0f);
+	_pos.x	= _pos.x + deg_delta_L * cos(_rot.z + delta_theta);
+	_pos.y	= _pos.y + deg_delta_L * sin(_rot.z + delta_theta);
 
 	// 角度を更新
 	_theta += delta_theta;

@@ -16,6 +16,7 @@ include section
 #include <string.h>
 #include <sharaku/log.h>
 #include <sharaku/thread.h>
+#include <sharaku/utime.h>
 
 /******************************************************************************
 struct section
@@ -31,7 +32,7 @@ static values section
 static struct sharaku_logger_handle	*_dblog_handle = NULL;
 
 /******************************************************************************
-function (data logger)
+function (logger)
 ******************************************************************************/
 struct sharaku_logger_handle*
 sharaku_logger_init(struct sharaku_logger_create *cre_param)
@@ -168,6 +169,160 @@ void _sharaku_dblog_internal(const char* format, const char* function,
 	if (_dblog_handle) {
 		sharaku_logger_add(_dblog_handle, &log);
 	}
+}
+
+/******************************************************************************
+function (data logger)
+******************************************************************************/
+struct sharaku_datalogger_recode {
+	int32_t	i;
+	float	f;
+	char	c[4];
+};
+struct sharaku_datalogger_recode_header {
+	int32_t	type;
+	char	title[1020];
+};
+struct sharaku_datalogger_context
+{
+	int32_t					index;
+	int32_t					max_counts;
+	struct sharaku_datalogger_recode	*recode;
+	struct sharaku_datalogger_recode_header	*recode_header;
+	struct sharaku_logger_handle		*handle;
+};
+
+static struct sharaku_datalogger_context _logger = {0};
+
+void
+sharaku_datalogger_convert(char *buf, size_t bufsz, void *recode)
+{
+	struct sharaku_datalogger_recode *rcd = (struct sharaku_datalogger_recode*)recode;
+	uint32_t		sz;
+	int			i;
+
+	sz = 0;
+	for (i = 0; i < _logger.index && sz < bufsz; i++) {
+		switch (_logger.recode_header[i].type) {
+		case SHARAKU_DATALOGGER_TYPE_INT32:
+			sz += snprintf(buf, bufsz - sz, "%d,", rcd[i].i);
+			break;
+		case SHARAKU_DATALOGGER_TYPE_FLOAT:
+			sz += snprintf(buf, bufsz - sz, "%f,", rcd[i].f);
+			break;
+		case SHARAKU_DATALOGGER_TYPE_STR4:
+			sz += snprintf(buf, bufsz - sz, "%c%c%c%c,",
+					 rcd[i].c[0], rcd[i].c[1],
+					 rcd[i].c[2], rcd[i].c[3]);
+			break;
+		}
+	}
+	snprintf(buf, bufsz, "\n");
+}
+
+void
+sharaku_datalogger_initialize(void)
+{
+	struct sharaku_logger_create	create;
+
+	_logger.max_counts 	= SHARAKU_DATALOGGER_MAXCOUNT;
+	_logger.index		= 0;
+	_logger.max_counts	= 0;
+
+	sharaku_datalogger_create(SHARAKU_DATALOGGER_TYPE_INT32, "time(us)");
+	create.recode_sz	= sizeof(struct sharaku_datalogger_recode) * _logger.index;
+	create.count		= _logger.max_counts;
+	create.log_rotation	= 0;
+	create.cb_conv		= sharaku_datalogger_convert;
+
+	_logger.handle = sharaku_logger_init(&create);
+}
+
+sharaku_datalogger_handle
+sharaku_datalogger_create(int32_t t, char *title)
+{
+	int32_t	handle = _logger.index;
+	_logger.index ++;
+	// 初期化後であればログ領域を拡張する
+	if (_logger.max_counts != 0) {
+		struct sharaku_logger_create	create;
+
+		sharaku_logger_release(_logger.handle);
+		_logger.recode_header = malloc(sizeof(struct sharaku_datalogger_recode)
+						 * _logger.index);
+		_logger.recode = malloc(sizeof(struct sharaku_datalogger_recode)
+						 * _logger.index);
+
+		create.recode_sz	= sizeof(struct sharaku_datalogger_recode) * _logger.index;
+		create.count		= _logger.max_counts;
+		create.log_rotation	= 0;
+		create.cb_conv		= sharaku_datalogger_convert;
+
+		_logger.handle = sharaku_logger_init(&create);
+	}
+
+	// mod_loggerに対してログを登録する
+	_logger.recode_header[handle].type	= t;
+	strncpy(_logger.recode_header[handle].title, title, 1020);
+	_logger.recode_header[handle].title[1019] = '\0';
+
+	return handle;
+}
+
+void
+sharaku_datalogger_set_int32(sharaku_datalogger_handle handle, int32_t val)
+{
+	if (handle >= _logger.index) {
+		return;
+	}
+	if (_logger.recode_header[handle].type == SHARAKU_DATALOGGER_TYPE_INT32) {
+		_logger.recode[handle].i = val;
+	}
+}
+
+void
+sharaku_datalogger_set_float(sharaku_datalogger_handle handle, float val)
+{
+	if (handle >= _logger.index) {
+		return;
+	}
+	if (_logger.recode_header[handle].type == SHARAKU_DATALOGGER_TYPE_FLOAT) {
+		_logger.recode[handle].f = val;
+	}
+}
+
+void
+sharaku_datalogger_set_string(sharaku_datalogger_handle handle, char *val)
+{
+	int i;
+
+	if (handle >= _logger.index) {
+		return;
+	}
+	if (_logger.recode_header[handle].type == SHARAKU_DATALOGGER_TYPE_STR4) {
+		for (i = 0; i < 4; i++) {
+			if (*val != '\0') {
+				_logger.recode[handle].c[i] = *val;
+				val++;
+			} else {
+				_logger.recode[handle].c[i] = '\0';
+			}
+		}
+	}
+}
+
+void
+sharaku_datalogger_commit(void)
+{
+	sharaku_usec_t us = sharaku_get_usec();
+	sharaku_datalogger_set_int32(0, us);
+	sharaku_logger_add(_logger.handle, (void*)_logger.recode);
+}
+
+void
+sharaku_datalogger_flush(void)
+{
+	sharaku_logger_flush_to_file(_logger.handle, SHARAKU_DATALOGGER_FILENAME);
 }
 
 /******************************************************************************

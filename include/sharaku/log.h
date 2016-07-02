@@ -1,14 +1,9 @@
-﻿/*****************************************************************************/
-/*!
-@author	abe takafumi
-@par	Copyright
-2014 abe takafumi All Rights Reserved.
-@file	prof.h
-@brie	ログ起動
-	・traceログ
-	・データログ
-	対応プラットフォーム：Windows (C++), Linux (C/C++) ...
-******************************************************************************/
+﻿/*
+ * Copyright Abe Takafumi All Rights Reserved, 2014 - 2016
+ * Author Abe Takafumi
+ *
+ */
+
 #ifndef _SHARAKU_LOG_H_
 #define _SHARAKU_LOG_H_
 
@@ -40,6 +35,13 @@ enum {
 #define SHARAKU_DBLOG_FILENAME "./sharaku_db_log.log"
 #endif
 
+#ifndef SHARAKU_DATALOGGER_MAXCOUNT
+#define SHARAKU_DATALOGGER_MAXCOUNT 0x4000
+#endif
+#ifndef SHARAKU_DATALOGGER_FILENAME
+#define SHARAKU_DATALOGGER_FILENAME "./sharaku_dev_logger.csv"
+#endif
+
 #define SHARAKU_LOG_NUMtoSTR(x) _SHARAKU_LOG_NUMtoSTR(x)
 #define _SHARAKU_LOG_NUMtoSTR(x) #x
 
@@ -52,7 +54,7 @@ enum {
 	sharaku_dblog_internal(SHARAKU_LOG_LV_ERROR, str, a1, a2, a3, a4, a5, a6)
 
 /******************************************************************************
-data logger機能
+logger機能
 ******************************************************************************/
 struct sharaku_logger_handle;
 typedef void (*sharaku_logger_convert)(char *buf, size_t bufsz, void *recode);
@@ -117,6 +119,22 @@ extern void _sharaku_dblog_internal(const char* format, const char* function, in
 	if (SHARAKU_DBLOG_LEVEL <= lv)		\
 		_sharaku_dblog_internal(__FILE__"(" SHARAKU_LOG_NUMtoSTR(__LINE__) ")  %s(): "str"\n", __func__, a1, a2, a3, a4, a5, a6)
 #endif
+
+/******************************************************************************
+data logger機能
+******************************************************************************/
+#define SHARAKU_DATALOGGER_TYPE_INT32	1
+#define SHARAKU_DATALOGGER_TYPE_FLOAT	2
+#define SHARAKU_DATALOGGER_TYPE_STR4	3
+typedef int32_t	sharaku_datalogger_handle;
+
+extern void sharaku_datalogger_initialize(void);
+extern sharaku_datalogger_handle sharaku_datalogger_create(int32_t t, char *title);
+extern void sharaku_datalogger_set_int32(sharaku_datalogger_handle handle, int32_t val);
+extern void sharaku_datalogger_set_float(sharaku_datalogger_handle handle, float val);
+extern void sharaku_datalogger_set_string(sharaku_datalogger_handle handle, char *val);
+extern void sharaku_datalogger_commit(void);
+extern void sharaku_datalogger_flush(void);
 
 #if defined(__cplusplus)
 }

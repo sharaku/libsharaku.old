@@ -17,8 +17,13 @@
 #endif
 // 数学定義
 #ifndef M_PI_180
-#define M_PI_180	( M_PI / 180.0f)
+#define M_PI_180	(M_PI / 180.0f)
 #endif
+#ifndef M_180_PI
+#define M_180_PI	(180.0f / M_PI)
+#endif
+#define RAG2DEG(rag)	((rag) * M_180_PI)
+#define DEG2RAG(deg)	((deg) * M_PI_180)
 
 
 NAMESPACE_SHARAKU_BEGIN
@@ -32,16 +37,19 @@ sd_position_move::sd_position_move(int32_t wheel_length) {
 	_status			= STATUS_STOP;
 	_auto			= true;		// 自動速度調整ON
 	_proximity		= 700;		// 700mm (70cm)
-	_arrival		= 3;		// 5mm
-	_max_speed		= 1020;
+	_arrival		= 3;		// 3mm
+	_max_speed		= 1000;
 	_min_speed		= 80;
 	_proximity_deg		= 40;		// 40度
 	_arrival_deg		= 0;		// 0度
 	_max_speed_deg		= 400;
-	_min_speed_deg		= 50;
+	_min_speed_deg		= 80;
 	_steering		= 0;
 	_target_dist		= 0;
 	_target_dist_deg	= 0;
+	
+	_Kt			= 1.0f;
+	_KtD			= 0.0f;
 }
 
 void
@@ -200,126 +208,143 @@ sd_position_move::update_distance_deg_mode(const float &interval, int turn)
 }
 
 int32_t
-sd_position_move::set_position_sp(position3& pos, rotation3& rot)
+sd_position_move::set_position_sp(position3& pos)
 {
-#if 0
 	// ベジェ曲線を使用して指定位置まで進む。
-	// それに先立ち、ベジェ曲線の係数tを計算する。
-	// tは 0 ～ 1 の値であり、
-	//	係数 = 1/ (ポイント間の距離)
-	// となる。
-	// ポイント間の距離とは直線距離ではなく、ベジェ曲線の距離である。
-	// これを出すために、仮に0.1刻みでポイント計算をして距離を出す。
-	registor float	distance;
-	position3	t_pos;
-	_bezie.set_start_pos(pos);
-	_bezie.set_end_pos(pos);
-
-	float x1, x2, y1, y2;
-	x1 = _bezie.get_start_pos().x;
-	y1 = _bezie.get_start_pos().y;
-	for (float t = 0.1f; t <= 1.0f; t += 0.1f) {
-		// ベジェ曲線の位置を計算
-		t_pos = _bezie.get_position(t);
-		x2 = t_pos.x;
-		y2 = t_pos.y;
-		// 距離を加算する。
-		// 位置から距離への変換は、
-		//	sqrt((x1 - x2)^2 + (y1 - y2)^2)
-		// で計算できる。
-		distance += sqrt(powf(x1 - x2, 2.0f) + powf(y1 - y2, 2.0f));
-
-		// 次のループで差分距離を出すために、END位置をSTART位置とする。
-		x1 = x2;
-		y1 = y2;
-	}
-	_target_dist	= distance;
-	_Kt		= 0;
-#endif
-	// ベジェ曲線を使用して指定位置まで進む。
+	_target_pos = pos;
+	_old_diff[0] = 0xffffffff;
+	_old_diff[1] = 0xffffffff;
+	_old_diff[2] = 0xffffffff;
 	_mode = MODE_TARGET_POSITION;
+	_status = STATUS_MOVING;
 	return 0;
 }
 
 void
 sd_position_move::update_position_mode(const float &interval)
 {
-#if 0
-	int32_t	speed;
-	int32_t	steering;
-	int32_t	diff;
+	// 角度補正
+	// b = X2 - X1
+	// a = Y2 - Y1
+	// Θ1 = atan(b/a)
+	// Θ2 = 現在の角度
+	// Θt = Θ1x - Θ2
+	rotation3	rot = in_odo->get_rotation();
+	position3	pos = in_odo->get_position();
+	register float	a = _target_pos.x - pos.x;
+	register float	b = _target_pos.y - pos.y;
+	int32_t	diff = (int)sqrt(a * a + b * b);
+	register float	theta = RAG2DEG(acos(a / diff));
+	register float	theta_t = theta - rot.z;
+
+	register float	delta_v = _Kt * theta_t + _KtD * 1 / theta_t;
+
+	// 2度以下の場合、補正する方が誤差を生むので思い切って補正しない。
+	if (-2.0f < delta_v && delta_v < 2.0f) {
+		delta_v = 0.0f;
+	}
+	if (delta_v > 90.0f) {
+		delta_v = 90.0f;
+	} else if (delta_v < -90.0f) {
+		delta_v = -90.0f;
+	}
+	_steering = (int32_t)(delta_v);
 
 	// 残りの距離から速度と状態をとる
-	if (diff < 0) {
+#if 0
+	if (_status == STATUS_PROXIMITY &&
+	    _old_diff[0] < diff &&
+	    _old_diff[1] < _old_diff[0] &&
+	    _old_diff[2] < _old_diff[1]) {
+#else 
+	if (diff == _arrival) {
+#endif
 		// 目的地を通り越した
 		_status = STATUS_PASSING;
+#if 0
 		// Autoなら即停止する
 		if (_auto) {
 			goto stop;
 		}
+#else
+_mode = MODE_STOP;
+out_move->set_speed_sp((int32_t)0);
+out_move->set_steer_sp((int32_t)0);
+#endif
 	} else if (diff <= _arrival)  {
 		// 目的地に到着
 		_status = STATUS_ARRIVAL;
 		// Autoならここで停止する
+#if 0
 		if (_auto) {
 			goto stop;
 		}
+#else
+_mode = MODE_STOP;
+out_move->set_speed_sp((int32_t)0);
+out_move->set_steer_sp((int32_t)0);
+#endif
 	} else if (diff < _proximity) {
 		// 目的地に接近
 		_status = STATUS_PROXIMITY;
 		// Autoなら速度を緩める
+#if 0
 		if (_auto) {
 			goto slow_down;
 		}
+#else
+out_move->set_speed_sp((int32_t)100);
+out_move->set_steer_sp((int32_t)_steering);
+#endif
 	} else {
 		// 目的地へ移動中
 		_status = STATUS_MOVING;
+#if 0
 		if (_auto) {
 			goto moving;
 		}
+#else
+	if (delta_v > 45.0f) {
+		out_move->set_speed_sp((int32_t)100);
+	} else {
+		out_move->set_speed_sp((int32_t)400);
+	}
+	out_move->set_steer_sp((int32_t)_steering);
+#endif
 	}
 
- stop:
-	// 停止する
-	speed = 0;
-	steering = 0;
-	goto setting;
+//	out_move->set_steer_sp(delta_v);
+	goto out;
 
- moving:
-	// 指定のMax速度で移動する
-	speed = _max_speed;
-	goto steering_setting;
+stop:
+	out_move->set_speed_sp((int32_t)0);
+	out_move->set_steer_sp((int32_t)0);
+	_mode = MODE_STOP;
+	goto out;
 
- slow_down:
+slow_down:
 	// 線形で速度ダウンする
+	int32_t	speed;
 	speed = _max_speed
-		 - ((_max_speed - _min_speed)
-		 	 / _proximity * (_proximity - diff));
-	goto steering_setting;
+		 - ((_max_speed - _min_speed) / _proximity * (_proximity - diff));
+	out_move->set_speed_sp((int32_t)speed);
+	out_move->set_steer_sp((int32_t)_steering);
+	goto out;
 
- steering_setting:
-	// steeringはベジェ曲線を使用して移動させる
-	// tの増分は、距離によって変化するので、あらかじめ計算しておく。
-	//	tの増分 = (deg/sec * interval(s)) / 距離
-	// で計算できる。
-	// ベジェ曲線のtで計算した位置と現在の位置の差分から角度差分を決定し、。
-	// 旋回角度を算出する。
-	//	角度差分 = 
-	registor float add_t = ((float)speed * interval) / _target_dist;
-	_Kt += add_t;
-	position3	t_pos;
-	t_pos = _bezie.get_position(_Kt);
-	_old_pos = t_pos;
-	registor float rot = 0.0f;
+moving:
+	// 指定のMax速度で移動する
+	out_move->set_speed_sp((int32_t)_max_speed);
+	out_move->set_steer_sp((int32_t)_steering);
 
-	// 計算で求めた次のupdate時にいるべき位置へ移動できるように
-	// steeringと設定する。
-	steering = 0;
+out:
+	sharaku_db_trace("_target_pos.x=%d _target_pos.y=%d pos.x=%d  pos.y=%d  rot.z=%d",
+			 _target_pos.x, _target_pos.y, pos.x, pos.y, rot.z, 0);
+	sharaku_db_trace("diff=%d theta=%d theta_t=%d  delta_v=%d",
+			 diff, theta, theta_t, delta_v, 0, 0);
+	_old_diff[2] = _old_diff[1];
+	_old_diff[1] = _old_diff[0];
+	_old_diff[0] = diff;
 
- setting:
-	out_move->set_speed_sp(speed);
-	out_move->set_steer_sp(steering);
-#endif
 	return;
 }
 

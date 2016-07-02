@@ -29,6 +29,7 @@ class sd_position_move
 		STATUS_PASSING
 	};
 	enum mode {
+		MODE_STOP,
 		MODE_TARGET_DISTANCE,
 		MODE_TARGET_DISTANCE_DEG_RIGHT,
 		MODE_TARGET_DISTANCE_DEG_LEFT,
@@ -49,7 +50,7 @@ class sd_position_move
 	virtual mode get_mode(void) {
 		return _mode;
 	}
-	virtual status get_status(int32_t ms) {
+	virtual status get_status(void) {
 		return _status;
 	}
 
@@ -80,19 +81,19 @@ class sd_position_move
 		_min_speed = min_speed;
 		return _min_speed;
 	}
-	int32_t	get_proximity(int32_t proximity) {
+	int32_t	set_proximity(int32_t proximity) {
 		_proximity = proximity;
 		return _proximity;
 	}
-	int32_t	get_arrival(int32_t arrival) {
+	int32_t	set_arrival(int32_t arrival) {
 		_arrival = arrival;
 		return _arrival;
 	}
-	int32_t	get_proximity_deg(int32_t proximity) {
+	int32_t	set_proximity_deg(int32_t proximity) {
 		_proximity_deg = proximity;
 		return _proximity_deg;
 	}
-	int32_t	get_arrival_deg(int32_t arrival) {
+	int32_t	set_arrival_deg(int32_t arrival) {
 		_arrival_deg = arrival;
 		return _arrival_deg;
 	}
@@ -136,7 +137,7 @@ class sd_position_move
 		return _steering;
 	}
 	// 指定位置指定まで進んだら止まる
-	int32_t	set_position_sp(position3& pos, rotation3& rot);
+	int32_t	set_position_sp(position3& pos);
 	const position3& get_position_sp(void) {
 		return _target_pos;
 	}
@@ -165,7 +166,6 @@ class sd_position_move
 	int32_t			_arrival;	// 目的地とみなす距離
 	int32_t			_proximity_deg;	// 接近しているとみなす角度
 	int32_t			_arrival_deg;	// 目的地とみなす角度
-
 	int32_t			_target_dist;	// 指定距離進んだら止まるモード
 						// での指定距離
 	int32_t			_target_dist_deg; // 指定角度進んだら止まるモード
@@ -177,6 +177,10 @@ class sd_position_move
 	int32_t			_min_speed_deg;	// 自動最低速度
 	position3		_target_pos;
 	rotation3		_target_rot;
+
+	float			_Kt;
+	float			_KtD;
+	uint32_t		_old_diff[3];
 };
 
 NAMESPACE_SHARAKU_END
