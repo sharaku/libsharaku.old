@@ -67,8 +67,7 @@ void sd_linetrace::update(const float &interval)
 	int old_turn = (_target_line = LINETRACE_TARGET_IN_LINE) ?
 				_table_in[_now_edge] : _table_out[_now_edge];
 
-	// 現在の光の値を評価する。
-	// エッジの更新もこのタイミングで行う
+	// 現在の光の値を評価する。エッジの更新もこのタイミングで行う。
 	// エッジの更新は黒の時のみ行うそうでないと、黒の検索が破たんする。
 	if (color_check()) {
 		// もし、エッジ変更が必要な場合はエッジ変更する
@@ -108,7 +107,7 @@ void sd_linetrace::update(const float &interval)
 			 turn, dps, steering, 0, 0, 0);
 
 	// move_operationsに対して出力を行う
-	out_move->set_speed_sp(steering);
+	out_move->set_speed_sp(dps);
 	out_move->set_steer_sp(steering);
 
 	// 時間収集

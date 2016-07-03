@@ -171,12 +171,5 @@ sd_motors::pre_update(const float &interval)
 	sharaku_prof_add(&__prof_motors_processing, _time, time);
 	sharaku_db_trace("time=%d", (int32_t)(time - _time), 0, 0, 0, 0, 0);
 }
-#if 0
-void
-sd_motors::update(const float &interval)
-{
-	// PID制御を使用して左右のモータの速度を調整し、まっすぐ走るようにする。
-}
-#endif
 
 NAMESPACE_SHARAKU_END

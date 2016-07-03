@@ -40,6 +40,8 @@ class sd_wheel_odometry
 		_time			= 0;
 		_distance		= 0;
 		_theta			= 0.0f;
+		_pos(0, 0, 0);
+		_rot(0, 0, 0);
 	}
 	virtual ~sd_wheel_odometry() {}
 
