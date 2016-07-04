@@ -163,6 +163,7 @@ class sd_position_move
 	uint32_t		_move_onoff:1;
 	bool			_auto;		// 速度の自動調整ON/OFF
 	int32_t			_proximity;	// 接近しているとみなす距離
+	int32_t			_nearness;	// 目的地間近とみなす距離
 	int32_t			_arrival;	// 目的地とみなす距離
 	int32_t			_proximity_deg;	// 接近しているとみなす角度
 	int32_t			_arrival_deg;	// 目的地とみなす角度

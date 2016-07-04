@@ -37,6 +37,7 @@ sd_position_move::sd_position_move(int32_t wheel_length) {
 	_status			= STATUS_STOP;
 	_auto			= true;		// 自動速度調整ON
 	_proximity		= 700;		// 700mm (70cm)
+	_nearness		= 25;		// 25mm
 	_arrival		= 3;		// 3mm
 	_max_speed		= 1000;
 	_min_speed		= 80;
@@ -47,7 +48,7 @@ sd_position_move::sd_position_move(int32_t wheel_length) {
 	_steering		= 0;
 	_target_dist		= 0;
 	_target_dist_deg	= 0;
-	
+
 	_Kt			= 1.0f;
 	_KtD			= 0.0f;
 }
@@ -233,6 +234,7 @@ sd_position_move::update_position_mode(const float &interval)
 	position3	pos = in_odo->get_position();
 	register float	a = _target_pos.x - pos.x;
 	register float	b = _target_pos.y - pos.y;
+
 	int32_t	diff = (int)sqrt(a * a + b * b);
 	register float	theta = RAG2DEG(acos(a / diff));
 	register float	theta_t = theta - rot.z;
@@ -251,69 +253,56 @@ sd_position_move::update_position_mode(const float &interval)
 	_steering = (int32_t)(delta_v);
 
 	// 残りの距離から速度と状態をとる
-#if 0
 	if (_status == STATUS_PROXIMITY &&
 	    _old_diff[0] < diff &&
 	    _old_diff[1] < _old_diff[0] &&
 	    _old_diff[2] < _old_diff[1]) {
-#else 
-	if (diff == _arrival) {
-#endif
 		// 目的地を通り越した
 		_status = STATUS_PASSING;
-#if 0
 		// Autoなら即停止する
 		if (_auto) {
 			goto stop;
 		}
-#else
-_mode = MODE_STOP;
-out_move->set_speed_sp((int32_t)0);
-out_move->set_steer_sp((int32_t)0);
-#endif
-	} else if (diff <= _arrival)  {
-		// 目的地に到着
+	} else if (diff <= _nearness &&
+		   _old_diff[0] < diff &&
+		   _old_diff[1] < _old_diff[0]) {
+		// 目的地付近で連続的に遠ざかった場合、目的地に到着とみなす。
 		_status = STATUS_ARRIVAL;
-		// Autoならここで停止する
-#if 0
+		// Autoなら即停止する
 		if (_auto) {
 			goto stop;
 		}
-#else
-_mode = MODE_STOP;
-out_move->set_speed_sp((int32_t)0);
-out_move->set_steer_sp((int32_t)0);
-#endif
+	} else if (diff <= _nearness &&
+		   _steering > 80.0f)  {
+		// 目的地付近で旋回角が85以上の場合、目的地に到着とみなす。
+		_status = STATUS_ARRIVAL;
+		// Autoなら微速前進
+		if (_auto) {
+			goto stop;
+		}
+	} else if (diff <= _arrival)  {
+		// 目的地との距離が一定以上の場合は、到着とみなす。
+		_status = STATUS_ARRIVAL;
+		// Autoなら微速前進
+		if (_auto) {
+			goto stop;
+		}
 	} else if (diff < _proximity) {
 		// 目的地に接近
 		_status = STATUS_PROXIMITY;
 		// Autoなら速度を緩める
-#if 0
 		if (_auto) {
 			goto slow_down;
 		}
-#else
-out_move->set_speed_sp((int32_t)100);
-out_move->set_steer_sp((int32_t)_steering);
-#endif
 	} else {
 		// 目的地へ移動中
 		_status = STATUS_MOVING;
-#if 0
 		if (_auto) {
 			goto moving;
 		}
-#else
-	if (delta_v > 45.0f) {
-		out_move->set_speed_sp((int32_t)100);
-	} else {
-		out_move->set_speed_sp((int32_t)400);
-	}
-	out_move->set_steer_sp((int32_t)_steering);
-#endif
 	}
 
-//	out_move->set_steer_sp(delta_v);
+	out_move->set_steer_sp(delta_v);
 	goto out;
 
 stop:

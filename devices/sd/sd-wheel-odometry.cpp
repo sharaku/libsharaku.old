@@ -68,12 +68,12 @@ sd_wheel_odometry::pre_update(const float & interval)
 						 / (float)_wheel_axle_length;
 
 	// 座標を加算
-	_pos.x	= _pos.x + deg_delta_L * cos(_rot.z + delta_theta);
-	_pos.y	= _pos.y + deg_delta_L * sin(_rot.z + delta_theta);
+	_pos.x	= _pos.x + deg_delta_L * cos(DEG2RAG(_rot.z) + delta_theta);
+	_pos.y	= _pos.y + deg_delta_L * sin(DEG2RAG(_rot.z) + delta_theta);
 
 	// 角度を更新
 	_theta += delta_theta;
-	_rot.z = _theta * 180.0f / M_PI;
+	_rot.z = RAG2DEG(_theta);
 
 	// ジャイロから角度を取得する
 	if (in_gyro_x) {

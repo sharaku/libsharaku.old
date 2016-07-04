@@ -58,6 +58,8 @@ void ev3dev_tacho_motor::__update(void)
 			_speed_sp	= 0;
 			_position_sp	= 0;
 			_duty_cycle_sp	= 0;
+			ev3dev_lego_tacho_motor::position.update();
+			_position_base = ev3dev_lego_tacho_motor::position;
 		} else {
 			sharaku_db_trace("motor stop", 0, 0, 0, 0, 0, 0);
 			ev3dev_lego_tacho_motor::command = "stop";
@@ -181,7 +183,8 @@ void ev3dev_tacho_motor::__io_end(void)
 {
 	if (_motor_mode == MOTOR_MODE_STOP) {
 		// motor_ctrl_operations API
-		_position	= ev3dev_lego_tacho_motor::position;
+		int32_t pos = ev3dev_lego_tacho_motor::position;
+		_position	= pos - _position_base;
 		// speed_motor_operations API
 		_count_per_rot	= ev3dev_lego_tacho_motor::count_per_rot;
 		_speed		= ev3dev_lego_tacho_motor::speed;

@@ -39,7 +39,8 @@ class ev3dev_tacho_motor
 		_flag		= FLAG_RESET;
 		// motor_ctrl_operations API
 		_stop_mode	= STOPMODE_UNKNOWN;
-		_stop_mode_sp	= STOPMODE_UNKNOWN;
+		_stop_mode_sp	= STOPMODE_BRAKE;
+		_position_base	= 0;
 		_position	= 0;
 		// speed_motor_operations API
 		_count_per_rot	= 0;
@@ -178,6 +179,7 @@ class ev3dev_tacho_motor
 	// motor_ctrl_operations API
 	stop_mode		_stop_mode;
 	stop_mode		_stop_mode_sp;
+	int32_t			_position_base;
 	int32_t			_position;
 	// speed_motor_operations API
 	int32_t			_count_per_rot;
