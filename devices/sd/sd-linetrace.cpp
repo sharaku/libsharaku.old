@@ -37,6 +37,32 @@ static sharaku_prof_t	__prof_linetrace_processing;
 class section
 ******************************************************************************/
 
+sd_linetrace::sd_linetrace()
+{
+	sharaku_db_trace("start", 0, 0, 0, 0, 0, 0);
+
+	sharaku_prof_init(&__prof_linetrace_interval, "sd_linetrace::interval");
+	sharaku_prof_init(&__prof_linetrace_processing, "sd_linetrace::processing");
+	sharaku_prof_regist(&__prof_linetrace_interval);
+	sharaku_prof_regist(&__prof_linetrace_processing);
+
+	_time		= 0;
+	_trace_onoff	= 0;
+	_interval	= 0.0f;
+
+	_target_line	= LINETRACE_TARGET_IN_LINE;
+	_target_edge	= LINETRACE_EDGE_LEFT;
+	_now_edge	= LINETRACE_EDGE_LEFT;
+
+	_uncertain_time	= 0;
+	_color_white	= 60;
+	_color_black	= 0;
+	_dps		= 0;
+	_steering	= 0;
+	_tangle_in	= 30;
+	_tangle_out	= 30;
+}
+
 
 void sd_linetrace::update(const float &interval)
 {

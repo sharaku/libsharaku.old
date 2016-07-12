@@ -31,18 +31,7 @@ class sd_wheel_odometry
 	operator update_operations*() { return (update_operations*)this;}
 
  public:
-	sd_wheel_odometry(int32_t wheel_axle_length,
-		       int32_t wheel_length) {
-		_wheel_axle_length	= wheel_axle_length;
-		_wheel_length		= wheel_length;
-		_prev_count_r		= 0;
-		_prev_count_l		= 0;
-		_time			= 0;
-		_distance		= 0;
-		_theta			= 0.0f;
-		_pos(0, 0, 0);
-		_rot(0, 0, 0);
-	}
+	sd_wheel_odometry(int32_t wheel_axle_length, int32_t wheel_length);
 	virtual ~sd_wheel_odometry() {}
 
 	virtual const position3& get_position(void) {

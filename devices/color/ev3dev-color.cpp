@@ -15,6 +15,13 @@ NAMESPACE_SHARAKU_BEGIN
 int32_t ev3dev_color::connect(const char* port)
 {
 	sharaku_db_trace("start", 0, 0, 0, 0, 0, 0);
+
+	snprintf(_profname, 64, "ev3dev_color<%s", port);
+	char *work = strstr(_profname, "\n");
+	*work = '>';
+	sharaku_prof_init(&_prof, _profname);
+	sharaku_prof_regist(&_prof);
+
 	int32_t result = ev3dev_lego_sensor::connect(port);
 	if (result != 0) {
 		goto err;
@@ -38,6 +45,8 @@ int32_t ev3dev_color::connect(const char* port)
 // デバイスから情報を更新する
 void ev3dev_color::__update(void)
 {
+	_prof_time_start = sharaku_get_usec();
+
 	// モード切替がない場合、かつ現在のモードがEV3DEV_COLORMODE_CORRECTION
 	// ではない場合、モード切替をスキップする。
 	if (_mode != _mode_sp || _mode == EV3DEV_COLORMODE_CORRECTION) {
@@ -131,6 +140,9 @@ void ev3dev_color::__io_end(void)
 		sharaku_db_trace("unknown mode.", 0, 0, 0, 0, 0, 0);
 		break;
 	}
+
+	sharaku_usec_t time_end = sharaku_get_usec();
+	sharaku_prof_add(&_prof, _prof_time_start, time_end);
 }
 
 NAMESPACE_SHARAKU_END

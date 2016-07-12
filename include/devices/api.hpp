@@ -20,6 +20,18 @@
 NAMESPACE_SHARAKU_BEGIN
 
 //-----------------------------------------------------------------------------
+// device_update_operationsインタフェース
+
+class device_update_operations
+{
+ public:
+	virtual void	start_commit(void) = 0;
+	virtual void	start_update(void) = 0;
+	virtual int32_t	is_commit(void) = 0;
+	virtual int32_t	is_update(void) = 0;
+};
+
+//-----------------------------------------------------------------------------
 // updateインタフェース
 
 class update_operations
@@ -34,6 +46,7 @@ class update_operations
  public:
 	list_head	update_list;
 };
+
 
 //-----------------------------------------------------------------------------
 // 電流/電圧インタフェース

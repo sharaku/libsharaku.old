@@ -63,6 +63,10 @@ class ev3dev_ultrasonic
 	int32_t		_dist_in;
 	uint		_uint;
 	uint		_uint_sp;
+
+	sharaku_prof_t		_prof;
+	sharaku_usec_t		_prof_time_start;
+	char			_profname[64];
 };
 
 NAMESPACE_SHARAKU_END

@@ -85,6 +85,10 @@ class ev3dev_gyro
 	int32_t		_count;
 	float		_rate;
 	float		_angle;
+
+	sharaku_prof_t		_prof;
+	sharaku_usec_t		_prof_time_start;
+	char			_profname[64];
 };
 
 NAMESPACE_SHARAKU_END

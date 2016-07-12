@@ -78,6 +78,9 @@ class ev3dev_tacho_motor
 	operator duty_motor_operations*() {
 		return (duty_motor_operations *)this;
 	}
+	operator device_update_operations*() {
+		return (device_update_operations *)((ev3dev_lego_tacho_motor*)this);
+	}
 	int set_motor_mode(motor_mode mode) {
 		_motor_mode_sp = mode;
 		return 0;
@@ -147,7 +150,6 @@ class ev3dev_tacho_motor
 		return 0;
 	}
 
-
 	// duty_motor_operations API
 	virtual int32_t	get_duty_cycle(void) {
 		return _duty_cycle;
@@ -172,7 +174,6 @@ class ev3dev_tacho_motor
 		FLAG_RESET = 0x00000001,
 		FLAG_STOP = 0x00000002,
 	};
-
 	motor_mode		_motor_mode;
 	uint32_t		_flag;
 	motor_mode		_motor_mode_sp;
@@ -196,6 +197,10 @@ class ev3dev_tacho_motor
 	// duty_motor_operations API
 	int32_t			_duty_cycle;
 	int32_t			_duty_cycle_sp;
+
+	sharaku_prof_t		_prof;
+	sharaku_usec_t		_prof_time_start;
+	char			_profname[64];
 };
 
 NAMESPACE_SHARAKU_END

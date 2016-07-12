@@ -15,6 +15,13 @@ NAMESPACE_SHARAKU_BEGIN
 int32_t ev3dev_touch::connect(const char* port)
 {
 	sharaku_db_trace("start", 0, 0, 0, 0, 0, 0);
+
+	snprintf(_profname, 64, "ev3dev_touch<%s", port);
+	char *work = strstr(_profname, "\n");
+	*work = '>';
+	sharaku_prof_init(&_prof, _profname);
+	sharaku_prof_regist(&_prof);
+
 	int32_t result = ev3dev_lego_sensor::connect(port);
 	if (result != 0) {
 		goto err;
@@ -33,6 +40,8 @@ int32_t ev3dev_touch::connect(const char* port)
 // デバイスから情報を更新する
 void ev3dev_touch::__update(void)
 {
+	_prof_time_start = sharaku_get_usec();
+
 	set_read_flag(DEVICE_FILE_VALUE0);
 	sharaku_db_trace("update-flag get_read_flag=0x%08x get_write_flag=0x%08x",
 			 get_read_flag(), get_write_flag(), 0, 0, 0, 0);
@@ -64,6 +73,9 @@ void ev3dev_touch::__io_end(void)
 	}
 	sharaku_db_trace("_press=%u _push=%u _release=%u",
 			 _press, _push, _release, 0, 0, 0);
+
+	sharaku_usec_t time_end = sharaku_get_usec();
+	sharaku_prof_add(&_prof, _prof_time_start, time_end);
 }
 
 NAMESPACE_SHARAKU_END

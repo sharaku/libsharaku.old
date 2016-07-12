@@ -60,6 +60,10 @@ class ev3dev_touch
 	int32_t		_press;
 	int32_t		_push;
 	int32_t		_release;
+
+	sharaku_prof_t		_prof;
+	sharaku_usec_t		_prof_time_start;
+	char			_profname[64];
 };
 
 NAMESPACE_SHARAKU_END

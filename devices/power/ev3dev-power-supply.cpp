@@ -15,6 +15,11 @@ NAMESPACE_SHARAKU_BEGIN
 int32_t ev3dev_powersupply::connect(void)
 {
 	sharaku_db_trace("start", 0, 0, 0, 0, 0, 0);
+
+	snprintf(_profname, 64, "ev3dev_powersupply");
+	sharaku_prof_init(&_prof, _profname);
+	sharaku_prof_regist(&_prof);
+
 	int32_t result = ev3dev_lego_powersupply::connect();
 	if (result != 0) {
 		goto err;
@@ -40,6 +45,8 @@ int32_t ev3dev_powersupply::connect(void)
 // デバイスから情報を更新する
 void ev3dev_powersupply::__update(void)
 {
+	_prof_time_start = sharaku_get_usec();
+
 	set_read_flag(DEVICE_FILE_CURRENT_NOW);
 	set_read_flag(DEVICE_FILE_VOLTAGE_NOW);
 	sharaku_db_trace("update-flag get_read_flag=0x%08x get_write_flag=0x%08x",
@@ -56,6 +63,9 @@ void ev3dev_powersupply::__io_end(void)
 	_voltage_min = ev3dev_lego_powersupply::voltage_min_design / 1000;
 	sharaku_db_trace("current=%u _voltage=%u _voltage_max=%u _voltage_min=%u",
 			 _current, _voltage, _voltage_max, _voltage_min, 0, 0);
+
+	sharaku_usec_t time_end = sharaku_get_usec();
+	sharaku_prof_add(&_prof, _prof_time_start, time_end);
 }
 
 NAMESPACE_SHARAKU_END

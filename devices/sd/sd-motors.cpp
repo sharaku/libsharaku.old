@@ -27,6 +27,29 @@ NAMESPACE_SHARAKU_BEGIN
 static sharaku_prof_t	__prof_motors_interval;
 static sharaku_prof_t	__prof_motors_processing;
 
+sd_motors::sd_motors(int32_t wheel_axle_length, int32_t wheel_length)
+{
+	sharaku_db_trace("start", 0, 0, 0, 0, 0, 0);
+
+	sharaku_prof_init(&__prof_motors_interval, "sd_motors::interval");
+	sharaku_prof_init(&__prof_motors_processing, "sd_motors::processing");
+	sharaku_prof_regist(&__prof_motors_interval);
+	sharaku_prof_regist(&__prof_motors_processing);
+
+	_wheel_axle_length	= wheel_axle_length;
+	_wheel_length		= wheel_length;
+	_time		= 0;
+	_steer_sp	= 0;
+	_speed_sp	= 0;
+	_steer		= 0;
+	_speed		= 0;
+	_position	= 0;
+	_prev_sum	= 0;
+	_prev_deltas[0]	= 0;
+	_prev_deltas[1]	= 0;
+	_prev_deltas[2]	= 0;
+}
+
 // ステアリング角度を元にした制御
 int32_t
 sd_motors::set_speed_sp(int32_t dps)
@@ -170,6 +193,18 @@ sd_motors::pre_update(const float &interval)
 	time = sharaku_get_usec();
 	sharaku_prof_add(&__prof_motors_processing, _time, time);
 	sharaku_db_trace("time=%d", (int32_t)(time - _time), 0, 0, 0, 0, 0);
+}
+void
+sd_motors::post_update(const float &interval)
+{
+	if (out_device_update_l) {
+		out_device_update_l->start_update();
+		out_device_update_l->start_commit();
+	}
+	if (out_device_update_r) {
+		out_device_update_r->start_update();
+		out_device_update_r->start_commit();
+	}
 }
 
 NAMESPACE_SHARAKU_END

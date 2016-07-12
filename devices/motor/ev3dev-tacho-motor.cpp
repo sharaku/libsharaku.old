@@ -15,10 +15,25 @@ NAMESPACE_SHARAKU_BEGIN
 int32_t ev3dev_tacho_motor::connect(const char* port)
 {
 	sharaku_db_trace("start", 0, 0, 0, 0, 0, 0);
+
+	snprintf(_profname, 64, "ev3dev_tacho_motor<%s", port);
+	char *work = strstr(_profname, "\n");
+	*work = '>';
+	sharaku_prof_init(&_prof, _profname);
+	sharaku_prof_regist(&_prof);
+
 	int32_t result = ev3dev_lego_tacho_motor::connect(port);
 	if (result != 0) {
 		goto err;
 	}
+	// out
+	ev3dev_lego_tacho_motor::duty_cycle_sp.open();
+	ev3dev_lego_tacho_motor::speed_regulation.open();
+	ev3dev_lego_tacho_motor::speed_sp.open();
+	ev3dev_lego_tacho_motor::position_sp.open();
+	ev3dev_lego_tacho_motor::duty_cycle_sp.open();
+	ev3dev_lego_tacho_motor::stop_command.open();
+	// in
 	ev3dev_lego_tacho_motor::command.open();
 	ev3dev_lego_tacho_motor::speed.open();
 	ev3dev_lego_tacho_motor::duty_cycle.open();
@@ -35,6 +50,8 @@ int32_t ev3dev_tacho_motor::connect(const char* port)
 // デバイスから情報を更新する
 void ev3dev_tacho_motor::__update(void)
 {
+	_prof_time_start = sharaku_get_usec();
+
 	// STOPもしくはRESETの場合は、その処理を行う。
 	// それ以外でモード変化がある場合は変化させる。
 	if (_flag & (FLAG_RESET | FLAG_STOP)) {
@@ -224,6 +241,9 @@ void ev3dev_tacho_motor::__io_end(void)
 			break;
 		}
 	}
+
+	sharaku_usec_t time_end = sharaku_get_usec();
+	sharaku_prof_add(&_prof, _prof_time_start, time_end);
 }
 
 NAMESPACE_SHARAKU_END

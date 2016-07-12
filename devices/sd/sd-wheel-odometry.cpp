@@ -29,6 +29,25 @@ NAMESPACE_SHARAKU_BEGIN
 
 static sharaku_prof_t	__prof_odometory_interval;
 static sharaku_prof_t	__prof_odometory_processing;
+sd_wheel_odometry::sd_wheel_odometry(int32_t wheel_axle_length,int32_t wheel_length)
+{
+	sharaku_db_trace("start", 0, 0, 0, 0, 0, 0);
+
+	sharaku_prof_init(&__prof_odometory_interval, "sd_wheel_odometry::interval");
+	sharaku_prof_init(&__prof_odometory_processing, "sd_wheel_odometry::processing");
+	sharaku_prof_regist(&__prof_odometory_interval);
+	sharaku_prof_regist(&__prof_odometory_processing);
+
+	_wheel_axle_length	= wheel_axle_length;
+	_wheel_length		= wheel_length;
+	_prev_count_r		= 0;
+	_prev_count_l		= 0;
+	_time			= 0;
+	_distance		= 0;
+	_theta			= 0.0f;
+	_pos(0, 0, 0);
+	_rot(0, 0, 0);
+}
 
 void
 sd_wheel_odometry::pre_update(const float & interval)

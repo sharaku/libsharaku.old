@@ -72,7 +72,6 @@ __sharaku_prof_flashjob(struct sharaku_job *job)
 
 void sharaku_prof_initialize(void)
 {
-	INIT_LIST_HEAD(&__prof_list);
 	__prof_file = fopen(SHARAKU_PROF_FILENAME, "w+");
 	sharaku_init_job(&__prof_job);
 	sharaku_timer_message(&__prof_job, SHARAKU_PROF_FLASH_INTERVALE,

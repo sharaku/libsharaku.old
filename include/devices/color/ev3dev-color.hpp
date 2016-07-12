@@ -128,6 +128,10 @@ class ev3dev_color
 	int32_t			_blue;
 	ev3dev_colormode	_mode_sp;
 	ev3dev_colormode	_mode;
+
+	sharaku_prof_t		_prof;
+	sharaku_usec_t		_prof_time_start;
+	char			_profname[64];
 };
 
 NAMESPACE_SHARAKU_END

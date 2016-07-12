@@ -22,26 +22,14 @@ class sd_motors
 	// インターフェース接続
 	connection_interface<speed_motor_operations>	out_speed_motor_l;
 	connection_interface<speed_motor_operations>	out_speed_motor_r;
+	connection_interface<device_update_operations>	out_device_update_l;
+	connection_interface<device_update_operations>	out_device_update_r;
 
 	operator move_operations*() { return (move_operations*)this;}
 	operator update_operations*() { return (update_operations*)this;}
 
  public:
-	sd_motors(int32_t wheel_axle_length,
-		  int32_t wheel_length) {
-		_wheel_axle_length	= wheel_axle_length;
-		_wheel_length		= wheel_length;
-		_time		= 0;
-		_steer_sp	= 0;
-		_speed_sp	= 0;
-		_steer		= 0;
-		_speed		= 0;
-		_position	= 0;
-		_prev_sum	= 0;
-		_prev_deltas[0]	= 0;
-		_prev_deltas[1]	= 0;
-		_prev_deltas[2]	= 0;
-	}
+	sd_motors(int32_t wheel_axle_length, int32_t wheel_length);
 	virtual ~sd_motors() {
 	}
 
@@ -69,6 +57,7 @@ class sd_motors
 
 	// update_operations インタフェース
 	virtual void pre_update(const float &interval);
+	virtual void post_update(const float &interval);
 
  protected:
 	// 設定値

@@ -17,6 +17,7 @@ extern "C" {
 #include <string.h>
 #include <errno.h>
 #include <sharaku/task.h>
+#include <sharaku/thread.h>
 
 NAMESPACE_SHARAKU_BEGIN
 
@@ -309,21 +310,60 @@ class device_accessor_w
 // __io_submit		: io_submit処理。EAGAINを返す場合はもう一度実行する。
 // __endio		: io_end処理
 class linux_proc_device
+ : public device_update_operations
 {
  public:
 	linux_proc_device(uint32_t interval_ms) {
 		// 変数初期化
 		sharaku_init_job(&_job_interval);
 		sharaku_init_job(&_job_update);
+		sharaku_mutex_init(&_mutex_job_i);
 		_job = &_job_update;
+		_job_i = &_job_interval;
 		_interval_ms	= interval_ms;
 		_read_flags 	= 0;
 		_write_flags 	= 0;
 	}
+	virtual ~linux_proc_device() {
+		sharaku_mutex_destroy(&_mutex_job_i);
+	}
 	virtual int32_t start(void) {
-		sharaku_async_message(&_job_interval,
-				      linux_proc_device::update_device);
+		sharaku_mutex_lock(&_mutex_job_i);
+		if (_job_i) {
+			_job_i = NULL;
+			sharaku_async_message(&_job_interval,
+					      linux_proc_device::update_device);
+		}
+		sharaku_mutex_unlock(&_mutex_job_i);
 		return 0;
+	}
+	virtual void start_commit(void) {
+		sharaku_mutex_lock(&_mutex_job_i);
+		if (_job_i) {
+			_job_i = NULL;
+			sharaku_async_message(&_job_interval,
+					linux_proc_device::update_device);
+		}
+		sharaku_mutex_unlock(&_mutex_job_i);
+	}
+	virtual void start_update(void) {
+		sharaku_mutex_lock(&_mutex_job_i);
+		if (_job_i) {
+			_job_i = NULL;
+			sharaku_async_message(&_job_interval,
+					linux_proc_device::update_device);
+		}
+		sharaku_mutex_unlock(&_mutex_job_i);
+	}
+	virtual int32_t is_commit(void) {
+		int32_t ret;
+		ret = (_job) ? 1 : 0;
+		return ret;
+	}
+	virtual int32_t is_update(void) {
+		int32_t ret;
+		ret = (_job) ? 1 : 0;
+		return ret;
 	}
 	virtual int32_t stop(void) {
 		sharaku_cancel_message(&_job_update);
@@ -362,6 +402,8 @@ class linux_proc_device
 	sharaku_job		_job_interval;
 	sharaku_job		_job_update;
 	sharaku_job*		_job;
+	sharaku_job*		_job_i;
+	sharaku_mutex_t		_mutex_job_i;
 	uint32_t		_interval_ms;
 	uint32_t		_write_flags;
 	uint32_t		_read_flags;

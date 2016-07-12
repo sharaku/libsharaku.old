@@ -8,11 +8,13 @@ include configs/sharaku.config
 SHARAKU		:= ..
 INCLUDE_PATH	:= $(SHARAKU)/include
 ARFLAG		:= r
-CFLAGS    	:= -Wall -Wno-unused-function -g
 
 lib-includes   	:= -I$(INCLUDE_PATH)
 
+lib-defines	+= $(if $(CONFIG_PROFILE), -DSHARAKU_PROF_ENABLE)
+lib-defines	+= $(if $(CONFIG_PROFILE_CLEAR), -DSHARAKU_PROF_CLEAR_ENABLE)
 lib-defines	+= $(if $(CONFIG_O), -O$(CONFIG_O))
+lib-defines	+= -g
 lib-defines	+= -Wall
 lib-defines	+= -Wno-unused-function
 lib-defines	+= -Wno-unused-variable

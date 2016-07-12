@@ -18,10 +18,17 @@ void
 linux_proc_device::update_device(struct sharaku_job *job)
 {
 	linux_proc_device *_this = list_entry(job, linux_proc_device, _job_interval);
-	// 次をスケジュール
-	sharaku_timer_message(job,
-			      _this->_interval_ms,
-			      linux_proc_device::update_device);
+	if (_this->_interval_ms) {
+		// intervalが0以外の場合は、スケジュールする。
+		sharaku_timer_message(job,
+				      _this->_interval_ms,
+				      linux_proc_device::update_device);
+	} else {
+		sharaku_mutex_lock(&_this->_mutex_job_i);
+		// _job_intervalの使用が完了したら返却する
+		_this->_job_i = &_this->_job_interval;
+		sharaku_mutex_unlock(&_this->_mutex_job_i);
+	}
 
 	// updateの必要があればupdateする
 	if (_this->_job) {
@@ -30,6 +37,7 @@ linux_proc_device::update_device(struct sharaku_job *job)
 		io_submit(&_this->_job_update);
 	}
 }
+
 void
 linux_proc_device::io_submit(struct sharaku_job *job)
 {

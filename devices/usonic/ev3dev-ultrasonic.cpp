@@ -16,6 +16,13 @@ int32_t
 ev3dev_ultrasonic::connect(const char* port)
 {
 	sharaku_db_trace("start", 0, 0, 0, 0, 0, 0);
+
+	snprintf(_profname, 64, "ev3dev_ultrasonic<%s", port);
+	char *work = strstr(_profname, "\n");
+	*work = '>';
+	sharaku_prof_init(&_prof, _profname);
+	sharaku_prof_regist(&_prof);
+
 	int32_t result = ev3dev_lego_sensor::connect(port);
 	if (result != 0) {
 		goto err;
@@ -36,6 +43,8 @@ ev3dev_ultrasonic::connect(const char* port)
 // デバイスから情報を更新する
 void ev3dev_ultrasonic::__update(void)
 {
+	_prof_time_start = sharaku_get_usec();
+
 	if (_uint_sp != _uint) {
 		switch (_uint_sp) {
 		case USONIC_MM:
@@ -67,6 +76,9 @@ void ev3dev_ultrasonic::__io_end(void)
 		sharaku_db_trace("usonic in=%u.", _dist_in, 0, 0, 0, 0, 0);
 		break;
 	}
+
+	sharaku_usec_t time_end = sharaku_get_usec();
+	sharaku_prof_add(&_prof, _prof_time_start, time_end);
 }
 
 NAMESPACE_SHARAKU_END

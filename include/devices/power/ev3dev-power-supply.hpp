@@ -62,6 +62,10 @@ class ev3dev_powersupply
 	int32_t		_voltage;
 	int32_t		_voltage_max;
 	int32_t		_voltage_min;
+
+	sharaku_prof_t		_prof;
+	sharaku_usec_t		_prof_time_start;
+	char			_profname[64];
 };
 
 NAMESPACE_SHARAKU_END

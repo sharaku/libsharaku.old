@@ -30,7 +30,16 @@ NAMESPACE_SHARAKU_BEGIN
 
 static sharaku_prof_t	__prof_position_move_interval;
 static sharaku_prof_t	__prof_position_move_processing;
-sd_position_move::sd_position_move(int32_t wheel_length) {
+
+sd_position_move::sd_position_move(int32_t wheel_length)
+{
+	sharaku_db_trace("start", 0, 0, 0, 0, 0, 0);
+
+	sharaku_prof_init(&__prof_position_move_interval, "sd_position_move::interval");
+	sharaku_prof_init(&__prof_position_move_processing, "sd_position_move::processing");
+	sharaku_prof_regist(&__prof_position_move_interval);
+	sharaku_prof_regist(&__prof_position_move_processing);
+
 	_time			= 0;
 	_wheel_length		= wheel_length;
 	_mode			= MODE_TARGET_DISTANCE;
@@ -343,10 +352,10 @@ sd_position_move::update(const float &interval)
 	sharaku_db_trace("interval=%d", (int32_t)(interval * 1000.0f), 0, 0, 0, 0, 0);
 	// 時間収集(最初の1回は採取しない)
 	sharaku_usec_t time = sharaku_get_usec();
-	if (_time) {
-		sharaku_prof_add(&__prof_motors_interval,
-				 _time, time);
-	}
+//	if (_time) {
+//		sharaku_prof_add(&__prof_motors_interval,
+//				 _time, time);
+//	}
 	_time = time;
 
 	if (_move_onoff) {
