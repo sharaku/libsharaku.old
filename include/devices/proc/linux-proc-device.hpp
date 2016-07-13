@@ -355,12 +355,12 @@ class linux_proc_device
 		}
 		sharaku_mutex_unlock(&_mutex_job_i);
 	}
-	virtual int32_t is_commit(void) {
+	virtual int32_t is_commited(void) {
 		int32_t ret;
 		ret = (_job) ? 1 : 0;
 		return ret;
 	}
-	virtual int32_t is_update(void) {
+	virtual int32_t is_updated(void) {
 		int32_t ret;
 		ret = (_job) ? 1 : 0;
 		return ret;

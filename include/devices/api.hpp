@@ -27,8 +27,8 @@ class device_update_operations
  public:
 	virtual void	start_commit(void) = 0;
 	virtual void	start_update(void) = 0;
-	virtual int32_t	is_commit(void) = 0;
-	virtual int32_t	is_update(void) = 0;
+	virtual int32_t	is_commited(void) = 0;
+	virtual int32_t	is_updated(void) = 0;
 };
 
 //-----------------------------------------------------------------------------

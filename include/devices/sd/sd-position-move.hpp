@@ -10,6 +10,7 @@
 #include <stdint.h>
 #include <devices/api.hpp>
 #include <sharaku/task.h>
+#include <sharaku/pid.hpp>
 #include <sharaku/position.hpp>
 
 NAMESPACE_SHARAKU_BEGIN
@@ -97,6 +98,9 @@ class sd_position_move
 		_arrival_deg = arrival;
 		return _arrival_deg;
 	}
+	void	set_pod(float Kp, float Ki, float Kd) {
+		_pid.set_pid(Kp, Ki, Kd);
+	}
 
 	// -------------------------------------------------------------
 	// 各動作は排他関係であり、後勝ちである。
@@ -152,7 +156,7 @@ class sd_position_move
 	virtual void update_position_mode(const float &interval);
 
  private:
-	sd_position_move() {};
+	sd_position_move() : _pid(0.0f, 0.0f, 0.0f) {};
 
  private:
 	sharaku_usec_t		_time;		// 前回実行時の時間
@@ -179,9 +183,8 @@ class sd_position_move
 	position3		_target_pos;
 	rotation3		_target_rot;
 
-	float			_Kt;
-	float			_KtD;
 	uint32_t		_old_diff[3];
+	pid			_pid;
 };
 
 NAMESPACE_SHARAKU_END

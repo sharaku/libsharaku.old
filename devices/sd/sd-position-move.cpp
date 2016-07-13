@@ -32,6 +32,7 @@ static sharaku_prof_t	__prof_position_move_interval;
 static sharaku_prof_t	__prof_position_move_processing;
 
 sd_position_move::sd_position_move(int32_t wheel_length)
+ : _pid(1.50f, 0.0f, 0.0f)
 {
 	sharaku_db_trace("start", 0, 0, 0, 0, 0, 0);
 
@@ -57,9 +58,6 @@ sd_position_move::sd_position_move(int32_t wheel_length)
 	_steering		= 0;
 	_target_dist		= 0;
 	_target_dist_deg	= 0;
-
-	_Kt			= 1.0f;
-	_KtD			= 0.0f;
 }
 
 void
@@ -246,20 +244,16 @@ sd_position_move::update_position_mode(const float &interval)
 
 	int32_t	diff = (int)sqrt(a * a + b * b);
 	register float	theta = RAG2DEG(acos(a / diff));
-	register float	theta_t = theta - rot.z;
 
-	register float	delta_v = _Kt * theta_t + _KtD * 1 / theta_t;
+	// PIDを使用して補正を行う
+	_steering = _pid(interval, rot.z, theta);
+	_steering = (_steering < -90) ? -90 : _steering;
+	_steering = (_steering > 90) ? 90 : _steering;
 
 	// 2度以下の場合、補正する方が誤差を生むので思い切って補正しない。
-	if (-2.0f < delta_v && delta_v < 2.0f) {
-		delta_v = 0.0f;
+	if (-2 < _steering && _steering < 2) {
+		_steering = 0;
 	}
-	if (delta_v > 90.0f) {
-		delta_v = 90.0f;
-	} else if (delta_v < -90.0f) {
-		delta_v = -90.0f;
-	}
-	_steering = (int32_t)(delta_v);
 
 	// 残りの距離から速度と状態をとる
 	if (_status == STATUS_PROXIMITY &&
@@ -311,7 +305,7 @@ sd_position_move::update_position_mode(const float &interval)
 		}
 	}
 
-	out_move->set_steer_sp(delta_v);
+	out_move->set_steer_sp(_steering);
 	goto out;
 
 stop:
@@ -337,8 +331,8 @@ moving:
 out:
 	sharaku_db_trace("_target_pos.x=%d _target_pos.y=%d pos.x=%d  pos.y=%d  rot.z=%d",
 			 _target_pos.x, _target_pos.y, pos.x, pos.y, rot.z, 0);
-	sharaku_db_trace("diff=%d theta=%d theta_t=%d  delta_v=%d",
-			 diff, theta, theta_t, delta_v, 0, 0);
+	sharaku_db_trace("diff=%d theta=%d _steering=%d",
+			 diff, theta, _steering, 0, 0, 0);
 	_old_diff[2] = _old_diff[1];
 	_old_diff[1] = _old_diff[0];
 	_old_diff[0] = diff;
