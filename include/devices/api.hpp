@@ -234,9 +234,13 @@ class odmetry_operations
 		USONIC_MM,
 		USONIC_IN,
 	};
-	virtual const position3& get_position(void) = 0;
-	virtual const rotation3& get_rotation(void) = 0;
-	virtual const int32_t get_dist(void) = 0;
+	virtual const position3& get_position(void) {
+		static position3 pos; pos(0.0f, 0.0f, 0.0f); return pos;
+	}
+	virtual const rotation3& get_rotation(void) {
+		static rotation3 rot; rot(0.0f, 0.0f, 0.0f); return rot;
+	}
+	virtual const int32_t get_dist(void) {return -ENOTSUP;}
 	virtual int32_t reset(void) {return -ENOTSUP;}
 };
 
@@ -246,9 +250,13 @@ class position_move_operations
 {
  public:
 	virtual int32_t	set_position_sp(position3&) {return -ENOTSUP;}
-	virtual const position3& get_position_sp(void) = 0;
+	virtual const position3& get_position_sp(void) {
+		static position3 pos; pos(0.0f, 0.0f, 0.0f); return pos;
+	}
 	virtual int32_t	set_rotation_sp(rotation3&) {return -ENOTSUP;}
-	virtual const rotation3& get_rotation_sp(void) = 0;
+	virtual const rotation3& get_rotation_sp(void) {
+		static rotation3 rot; rot(0.0f, 0.0f, 0.0f); return rot;
+	}
 };
 
 //-----------------------------------------------------------------------------

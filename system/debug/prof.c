@@ -48,9 +48,9 @@ __sharaku_prof_flash(void)
 
 	fseek(__prof_file, 0, SEEK_SET);
 	list_for_each_entry(prof, &__prof_list, sharaku_prof_t, list) {
-		fprintf(__prof_file, "%s,%u,%u,%u,%u\n",
+		fprintf(__prof_file, "%s,%u,%u,%u,%u,%u\n",
 			prof->name, prof->count, prof->usec,
-			prof->min, prof->max);
+			(prof->count) ? prof->usec / prof->count : 0, prof->min, prof->max);
 
 #if defined(SHARAKU_PROF_CLEAR_ENABLE)
 		// 出力するごとにクリアする場合はこのコードを有効にする

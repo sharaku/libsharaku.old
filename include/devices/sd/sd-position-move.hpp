@@ -19,6 +19,7 @@ NAMESPACE_SHARAKU_BEGIN
 // 車輪の回転数から座標を計算するクラス
 class sd_position_move
  : public position_move_operations
+ , protected move_operations
  , protected update_operations
 {
  public:
@@ -69,37 +70,53 @@ class sd_position_move
 		_move_onoff = 0;
 	}
 	void	set_autospeed_on(void) {
-		_auto = true;
+		_auto = 1;
 	}
 	void	set_autospeed_off(void) {
-		_auto = false;
+		_auto = 0;
 	}
-	int32_t	set_max_speed(int32_t max_speed) {
+	void	set_limit_speed(int32_t min_speed, int32_t max_speed) {
+		_speed_sp = max_speed;
 		_max_speed = max_speed;
-		return _max_speed;
-	}
-	int32_t	set_min_speed(int32_t min_speed) {
 		_min_speed = min_speed;
-		return _min_speed;
+		_max_speed_deg = max_speed;
+		_min_speed_deg = min_speed;
 	}
-	int32_t	set_proximity(int32_t proximity) {
+	void	set_proximity_arrival(int32_t proximity,
+				      int32_t nearness,
+				      int32_t arrival) {
 		_proximity = proximity;
-		return _proximity;
-	}
-	int32_t	set_arrival(int32_t arrival) {
+		_nearness = nearness;
 		_arrival = arrival;
-		return _arrival;
 	}
-	int32_t	set_proximity_deg(int32_t proximity) {
+	void	set_proximity_arrival_deg(int32_t proximity, int32_t arrival) {
 		_proximity_deg = proximity;
-		return _proximity_deg;
-	}
-	int32_t	set_arrival_deg(int32_t arrival) {
 		_arrival_deg = arrival;
-		return _arrival_deg;
 	}
-	void	set_pod(float Kp, float Ki, float Kd) {
+	void	set_pid(float Kp, float Ki, float Kd) {
 		_pid.set_pid(Kp, Ki, Kd);
+	}
+
+	// -------------------------------------------------------------
+	// move_operations
+	// -------------------------------------------------------------
+	virtual int32_t	get_steer_sp(void) {
+		return _steer_sp;
+	}
+	virtual int32_t	get_speed_sp(void) {
+		return _speed_sp;
+	}
+	virtual int32_t	get_speed(void) {
+		return _speed;
+	}
+	int32_t	set_steer_sp(int32_t steer_deg) {
+		_steer_sp = steer_deg;
+		return 0;
+	}
+	int32_t	set_speed_sp(int32_t dps) {
+		_speed_sp = dps;
+		_max_speed = dps;
+		return 0;
 	}
 
 	// -------------------------------------------------------------
@@ -110,7 +127,7 @@ class sd_position_move
 	int32_t	set_trget_distance_sp(int32_t distance) {
 		sharaku_db_trace("distance=%d", distance, 0, 0, 0, 0, 0);
 		_mode = MODE_TARGET_DISTANCE;
-		_steering = 0;
+		_steer = 0;
 		_target_dist = in_odo->get_dist() + distance;
 		return _target_dist;
 	}
@@ -123,31 +140,27 @@ class sd_position_move
 	int32_t	set_trget_distance_deg_sp(int32_t rho, int32_t deg) {
 		sharaku_db_trace("rho=%d deg=%d", rho, deg, 0, 0, 0, 0);
 		if (!deg) {
-			return _steering;
+			return _steer;
 		}
 		
 		if (deg < 0) {
-			_steering = -1 * sharaku_rho2steering(rho, _wheel_length);
+			_steer = -1 * sharaku_rho2steering(rho, _wheel_length);
 			_mode = MODE_TARGET_DISTANCE_DEG_RIGHT;
 		} else {
-			_steering = sharaku_rho2steering(rho, _wheel_length);
+			_steer = sharaku_rho2steering(rho, _wheel_length);
 			_mode = MODE_TARGET_DISTANCE_DEG_LEFT;
 		}
 
 		_target_dist_deg += deg;
-		return _steering;
+		return _steer;
 	}
 	int32_t	get_trget_distance_deg_sp(void) {
-		return _steering;
+		return _steer;
 	}
 	// 指定位置指定まで進んだら止まる
 	int32_t	set_position_sp(position3& pos);
 	const position3& get_position_sp(void) {
 		return _target_pos;
-	}
-
-	const rotation3& get_rotation_sp(void) {
-		return _target_rot;
 	}
 	// update_operations インタフェース
 	virtual void update(const float &interval);
@@ -157,6 +170,27 @@ class sd_position_move
 
  private:
 	sd_position_move() : _pid(0.0f, 0.0f, 0.0f) {};
+	void _move_maxspeed(void) {
+		_speed = _max_speed;
+	}
+	void _move_slowdown(int32_t diff) {
+		_speed = _max_speed
+			 - ((_max_speed - _min_speed)
+			 	 / _proximity * (_proximity - diff));
+	}
+	void _move_maxspeed_deg(void) {
+		_speed = _max_speed_deg;
+	}
+	void _move_slowdown_deg(int32_t diff) {
+		_speed = _max_speed_deg
+			 - ((_max_speed_deg - _min_speed_deg)
+			 	 / _proximity_deg * (_proximity_deg - diff));
+	}
+	void _move_stop(void) {
+		_speed = 0;
+		_steer = 0;
+		_mode = MODE_STOP;
+	}
 
  private:
 	sharaku_usec_t		_time;		// 前回実行時の時間
@@ -164,24 +198,31 @@ class sd_position_move
 
 	mode			_mode;		// モード
 	status			_status;	// 状態
+
+	// 設定
 	uint32_t		_move_onoff:1;
-	bool			_auto;		// 速度の自動調整ON/OFF
+	uint32_t		_auto:1;	// 速度の自動調整ON/OFF
+	// 距離, 位置指定
 	int32_t			_proximity;	// 接近しているとみなす距離
 	int32_t			_nearness;	// 目的地間近とみなす距離
 	int32_t			_arrival;	// 目的地とみなす距離
-	int32_t			_proximity_deg;	// 接近しているとみなす角度
-	int32_t			_arrival_deg;	// 目的地とみなす角度
-	int32_t			_target_dist;	// 指定距離進んだら止まるモード
-						// での指定距離
-	int32_t			_target_dist_deg; // 指定角度進んだら止まるモード
-						// での指定角度
-	int32_t			_steering; 	// ステアリング値
 	int32_t			_max_speed;	// 自動最高速度
 	int32_t			_min_speed;	// 自動最低速度
+	int32_t			_target_dist;	// 指定距離進んだら止まるモード
+						// での指定距離
+	position3		_target_pos;
+	// 角度指定
+	int32_t			_proximity_deg;	// 接近しているとみなす角度
+	int32_t			_arrival_deg;	// 目的地とみなす角度
 	int32_t			_max_speed_deg;	// 自動最高速度
 	int32_t			_min_speed_deg;	// 自動最低速度
-	position3		_target_pos;
-	rotation3		_target_rot;
+	int32_t			_target_dist_deg; // 指定角度進んだら止まるモード
+						  // での指定角度
+	// 速度、角度設定
+	int32_t			_steer_sp;	// 指定されたステアリング値
+	int32_t			_speed_sp;	// 指定されたスピード値
+	float			_steer; 	// 現在のステアリング値
+	float			_speed; 	// 現在のスピード値
 
 	uint32_t		_old_diff[3];
 	pid			_pid;

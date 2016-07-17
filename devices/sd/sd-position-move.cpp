@@ -43,21 +43,34 @@ sd_position_move::sd_position_move(int32_t wheel_length)
 
 	_time			= 0;
 	_wheel_length		= wheel_length;
+
 	_mode			= MODE_TARGET_DISTANCE;
 	_status			= STATUS_STOP;
-	_auto			= true;		// 自動速度調整ON
+
+	_move_onoff		= 0;
+	_auto			= 1;		// 自動速度調整ON
+
 	_proximity		= 700;		// 700mm (70cm)
 	_nearness		= 25;		// 25mm
 	_arrival		= 3;		// 3mm
 	_max_speed		= 1000;
 	_min_speed		= 80;
+	_target_dist		= 0;
+	_target_pos(0.0f, 0.0f, 0.0f);
+
 	_proximity_deg		= 40;		// 40度
 	_arrival_deg		= 0;		// 0度
 	_max_speed_deg		= 400;
 	_min_speed_deg		= 80;
-	_steering		= 0;
-	_target_dist		= 0;
 	_target_dist_deg	= 0;
+
+	_steer_sp		= 0;
+	_speed_sp		= 0;
+	_steer			= 0;
+	_speed			= 0;
+	_old_diff[0] = 0xffffffff;
+	_old_diff[1] = 0xffffffff;
+	_old_diff[2] = 0xffffffff;
 }
 
 void
@@ -73,49 +86,23 @@ sd_position_move::update_distance_mode(const float &interval)
 		// 目的地を通り越した
 		_status = STATUS_PASSING;
 		// Autoなら即停止する
-		if (_auto) {
-			goto stop;
-		}
+		_move_stop();
 	} else if (diff <= _arrival)  {
 		// 目的地に到着
 		_status = STATUS_ARRIVAL;
 		// Autoならここで停止する
-		if (_auto) {
-			goto stop;
-		}
+		_move_stop();
 	} else if (diff < _proximity) {
 		// 目的地に接近
 		_status = STATUS_PROXIMITY;
 		// Autoなら速度を緩める
-		if (_auto) {
-			goto slow_down;
-		}
+		_move_slowdown(diff);
 	} else {
 		// 目的地へ移動中
 		_status = STATUS_MOVING;
-		if (_auto) {
-			goto moving;
-		}
+		_move_maxspeed();
 	}
 
- stop:
-	out_move->set_speed_sp((int32_t)0);
-	out_move->set_steer_sp((int32_t)0);
-	return;
-
- moving:
-	// 指定のMax速度で移動する
-	out_move->set_speed_sp((int32_t)_max_speed);
-	out_move->set_steer_sp((int32_t)_steering);
-	return;
-
- slow_down:
-	// 線形で速度ダウンする
-	int32_t	speed;
-	speed = _max_speed
-		 - ((_max_speed - _min_speed) / _proximity * (_proximity - diff));
-	out_move->set_speed_sp((int32_t)speed);
-	out_move->set_steer_sp((int32_t)_steering);
 	return;
 }
 
@@ -137,81 +124,45 @@ sd_position_move::update_distance_deg_mode(const float &interval, int turn)
 			// 目的地を通り越した
 			_status = STATUS_PASSING;
 			// Autoなら即停止する
-			if (_auto) {
-				goto stop;
-			}
+			_move_stop();
 		} else if (diff <= _arrival_deg)  {
 			// 目的地に到着
 			_status = STATUS_ARRIVAL;
 			// Autoならここで停止する
-			if (_auto) {
-				goto stop;
-			}
+			_move_stop();
 		} else if (diff < _proximity_deg) {
 			// 目的地に接近
 			_status = STATUS_PROXIMITY;
-			// Autoなら速度を緩める
-			if (_auto) {
-				goto slow_down;
-			}
+			// Autoなら速度を線形で速度ダウンする
+			_move_slowdown_deg(diff);
 		} else {
 			// 目的地へ移動中
 			_status = STATUS_MOVING;
-			if (_auto) {
-				goto moving;
-			}
+			_move_maxspeed_deg();
 		}
 	} else {
 		if (diff > 0) {
 			// 目的地を通り越した
 			_status = STATUS_PASSING;
 			// Autoなら即停止する
-			if (_auto) {
-				goto stop;
-			}
+			_move_stop();
 		} else if (diff >= -_arrival_deg)  {
 			// 目的地に到着
 			_status = STATUS_ARRIVAL;
 			// Autoならここで停止する
-			if (_auto) {
-				goto stop;
-			}
+			_move_stop();
 		} else if (diff >= -_proximity_deg) {
 			// 目的地に接近
 			_status = STATUS_PROXIMITY;
-			// Autoなら速度を緩める
-			if (_auto) {
-				diff = -diff;
-				goto slow_down;
-			}
+			// Autoなら速度を線形で速度ダウンする
+			_move_slowdown_deg(-diff);
 		} else {
 			// 目的地へ移動中
 			_status = STATUS_MOVING;
-			if (_auto) {
-				goto moving;
-			}
+			_move_maxspeed_deg();
 		}
 	}
 
- stop:
-	// 停止する
-	out_move->set_speed_sp((int32_t)0);
-	out_move->set_steer_sp((int32_t)0);
-	return;
-
- moving:
-	// 指定のMax速度で移動する
-	out_move->set_speed_sp((int32_t)_max_speed_deg);
-	out_move->set_steer_sp((int32_t)_steering);
-	return;
-
- slow_down:
-	// 線形で速度ダウンする
-	speed = _max_speed_deg
-		 - ((_max_speed_deg - _min_speed_deg)
-		 	 / _proximity_deg * (_proximity_deg - diff));
-	out_move->set_speed_sp((int32_t)speed);
-	out_move->set_steer_sp((int32_t)_steering);
 	return;
 }
 
@@ -246,13 +197,13 @@ sd_position_move::update_position_mode(const float &interval)
 	register float	theta = RAG2DEG(acos(a / diff));
 
 	// PIDを使用して補正を行う
-	_steering = _pid(interval, rot.z, theta);
-	_steering = (_steering < -90) ? -90 : _steering;
-	_steering = (_steering > 90) ? 90 : _steering;
+	_steer = _pid(interval, rot.z, theta);
+	_steer = (_steer < -90) ? -90 : _steer;
+	_steer = (_steer > 90) ? 90 : _steer;
 
 	// 2度以下の場合、補正する方が誤差を生むので思い切って補正しない。
-	if (-2 < _steering && _steering < 2) {
-		_steering = 0;
+	if (-2 < _steer && _steer < 2) {
+		_steer = 0;
 	}
 
 	// 残りの距離から速度と状態をとる
@@ -263,76 +214,39 @@ sd_position_move::update_position_mode(const float &interval)
 		// 目的地を通り越した
 		_status = STATUS_PASSING;
 		// Autoなら即停止する
-		if (_auto) {
-			goto stop;
-		}
+		_move_stop();
 	} else if (diff <= _nearness &&
 		   _old_diff[0] < diff &&
 		   _old_diff[1] < _old_diff[0]) {
 		// 目的地付近で連続的に遠ざかった場合、目的地に到着とみなす。
 		_status = STATUS_ARRIVAL;
 		// Autoなら即停止する
-		if (_auto) {
-			goto stop;
-		}
+		_move_stop();
 	} else if (diff <= _nearness &&
-		   _steering > 80.0f)  {
+		   _steer > 80.0f)  {
 		// 目的地付近で旋回角が85以上の場合、目的地に到着とみなす。
 		_status = STATUS_ARRIVAL;
 		// Autoなら微速前進
-		if (_auto) {
-			goto stop;
-		}
+		_move_stop();
 	} else if (diff <= _arrival)  {
 		// 目的地との距離が一定以上の場合は、到着とみなす。
 		_status = STATUS_ARRIVAL;
 		// Autoなら微速前進
-		if (_auto) {
-			goto stop;
-		}
+		_move_stop();
 	} else if (diff < _proximity) {
 		// 目的地に接近
 		_status = STATUS_PROXIMITY;
-		// Autoなら速度を緩める
-		if (_auto) {
-			goto slow_down;
-		}
+		// Autoなら速度を線形で速度ダウンする
+		_move_slowdown(diff);
 	} else {
 		// 目的地へ移動中
 		_status = STATUS_MOVING;
-		if (_auto) {
-			goto moving;
-		}
+		// 指定のMax速度で移動する
+		_move_maxspeed();
 	}
 
-	out_move->set_steer_sp(_steering);
-	goto out;
-
-stop:
-	out_move->set_speed_sp((int32_t)0);
-	out_move->set_steer_sp((int32_t)0);
-	_mode = MODE_STOP;
-	goto out;
-
-slow_down:
-	// 線形で速度ダウンする
-	int32_t	speed;
-	speed = _max_speed
-		 - ((_max_speed - _min_speed) / _proximity * (_proximity - diff));
-	out_move->set_speed_sp((int32_t)speed);
-	out_move->set_steer_sp((int32_t)_steering);
-	goto out;
-
-moving:
-	// 指定のMax速度で移動する
-	out_move->set_speed_sp((int32_t)_max_speed);
-	out_move->set_steer_sp((int32_t)_steering);
-
-out:
 	sharaku_db_trace("_target_pos.x=%d _target_pos.y=%d pos.x=%d  pos.y=%d  rot.z=%d",
 			 _target_pos.x, _target_pos.y, pos.x, pos.y, rot.z, 0);
-	sharaku_db_trace("diff=%d theta=%d _steering=%d",
-			 diff, theta, _steering, 0, 0, 0);
 	_old_diff[2] = _old_diff[1];
 	_old_diff[1] = _old_diff[0];
 	_old_diff[0] = diff;
@@ -367,7 +281,20 @@ sd_position_move::update(const float &interval)
 			update_position_mode(interval);
 			break;
 		}
+	} else {
+		_steer = _steer_sp;
+		_speed = _speed_sp;
 	}
+
+	// AUTO速度調整がOFFであれば速度は指定されたものにする。
+	if (!_auto) {
+		_speed = _speed_sp;
+	}
+
+	sharaku_db_trace("_speed=%d _steer=%d mode=%d mode=%d _auto=%d",
+			 _speed, _steer, _move_onoff, _auto, 0, 0);
+	out_move->set_speed_sp((int32_t)_speed);
+	out_move->set_steer_sp((int32_t)_steer);
 
 	// 時間収集
 	time = sharaku_get_usec();
