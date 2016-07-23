@@ -81,6 +81,7 @@ sd_position_move::update_distance_mode(const float &interval)
 	int32_t	diff = _target_dist - in_odo->get_dist();
 	sharaku_db_trace("diff=%d _arrival=%d _proximity=%d  _max_speed=%d  _min_speed=%d",
 			 diff, _arrival, _proximity, _max_speed, _min_speed, 0);
+	_rest_distance = diff;
 
 	if (diff < 0) {
 		// 目的地を通り越した
@@ -174,6 +175,7 @@ sd_position_move::set_position_sp(position3& pos)
 	_old_diff[0] = 0xffffffff;
 	_old_diff[1] = 0xffffffff;
 	_old_diff[2] = 0xffffffff;
+	_rest_distance = 0x7fffffff;
 	_mode = MODE_TARGET_POSITION;
 	_status = STATUS_MOVING;
 	return 0;
@@ -195,6 +197,7 @@ sd_position_move::update_position_mode(const float &interval)
 
 	int32_t	diff = (int)sqrt(a * a + b * b);
 	register float	theta = RAG2DEG(acos(a / diff));
+	_rest_distance = diff;
 
 	// PIDを使用して補正を行う
 	_steer = _pid(interval, rot.z, theta);

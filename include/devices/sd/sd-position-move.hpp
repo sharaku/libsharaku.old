@@ -58,10 +58,6 @@ class sd_position_move
 
 	// -------------------------------------------------------------
 	// 自動Speed調整の設定
-	// Param:	Kp, Ki, Kd	指定位置に対しての補正値
-	//				速度に対する最大旋回角度の関係
-	//				加速度
-	//				減速度
 	// -------------------------------------------------------------
 	void	move_on(void) {
 		_move_onoff = 1;
@@ -162,7 +158,13 @@ class sd_position_move
 	const position3& get_position_sp(void) {
 		return _target_pos;
 	}
+	int32_t	get_rest_distance(void) {
+		return _rest_distance;
+	}
+
+	// -------------------------------------------------------------
 	// update_operations インタフェース
+	// -------------------------------------------------------------
 	virtual void update(const float &interval);
 	virtual void update_distance_mode(const float &interval);
 	virtual void update_distance_deg_mode(const float &interval, int turn);
@@ -224,6 +226,7 @@ class sd_position_move
 	float			_steer; 	// 現在のステアリング値
 	float			_speed; 	// 現在のスピード値
 
+	float			_rest_distance; // 残り距離
 	uint32_t		_old_diff[3];
 	pid			_pid;
 };

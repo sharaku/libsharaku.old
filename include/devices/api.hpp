@@ -19,6 +19,35 @@
 
 NAMESPACE_SHARAKU_BEGIN
 
+// APIファイルを以下へ分ける
+//  -> update-api.hpp
+//  	-> class device_update_operations
+//  	-> class update_operations
+//  -> sensor-api.hpp
+//  	-> class powersupply_operations
+//  	-> class gyro_operations
+//  	-> class color_operations
+//  	-> class light_operations
+//  	-> class usonic_operations
+//  	-> class thermostat_operations
+//  	-> class touch_operations
+//  -> motor-api.hpp
+//  	-> class motor_ctrl_operations
+//  	-> class speed_motor_operations
+//  	-> class angle_motor_operations
+//  	-> class duty_motor_operations
+//  -> moving-api.hpp
+//  	-> class move_operations
+//  	-> class position_move_operations
+//  -> odmetry-api.hpp
+//  	-> class odmetry_operations
+//  -> map-api.hpp
+//  	-> class grid_map_operations
+//  	-> class vector_map_operations
+//  -> connection_interface.hpp
+//  	-> class connection_interface
+
+
 //-----------------------------------------------------------------------------
 // device_update_operationsインタフェース
 

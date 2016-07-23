@@ -1,11 +1,8 @@
-/*****************************************************************************/
-/*!
-@author	abe takafumi
-@par	Copyright
-2014-2016 abe takafumi All Rights Reserved.
-@file	
-@brief	
-******************************************************************************/
+/*
+ * Copyright Abe Takafumi All Rights Reserved, 2014-2016
+ * Author Abe Takafumi
+ *
+ */
 
 #ifndef SHARAKU_MODULES_MOD_UPDATE_H_
 #define SHARAKU_MODULES_MOD_UPDATE_H_
