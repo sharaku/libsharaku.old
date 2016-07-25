@@ -19,23 +19,28 @@ NAMESPACE_SHARAKU_BEGIN
 // タイヤ側3、モータ側1の場合、OUT_GEAR = 3, IN_GEAR = 1を指定します。
 // タイヤ側1、モータ側8の場合、OUT_GEAR = 1, IN_GEAR = 8を指定します。
 // ギアが偶数の場合で符号を反転させたい場合、OUT_GEAR側に-の値を指定してください。
+// モータの誤差補正を行う場合もGearRatioを使用する。
 
-template<int32_t OUT_GEAR, int32_t IN_GEAR>
+#define GEAR_RATIO(IN, OUT) ((float)OUT_GEAR / (float)IN_GEAR)
+
 class sd_gearratio_speed
  : virtual public speed_motor_operations
 {
  public:
 	// インターフェース接続(複数connect禁止)
 	connection_interface<speed_motor_operations>	out_motor;
-	const float 					gear_ratio;
 
 	operator speed_motor_operations* () {
 		return (speed_motor_operations*) this;
 	}
 
  public:
-	sd_gearratio_speed()
-	 : gear_ratio((float)OUT_GEAR / (float)IN_GEAR) {
+	sd_gearratio_speed() {
+		gear_ratio = 1.0f;
+	}
+
+	void set_gear_ratio(float ratio) {
+		gear_ratio = ratio;
 	}
 
 	int32_t	get_speed(void) {
@@ -109,24 +114,28 @@ class sd_gearratio_speed
 			return 0;
 		}
 	}
+private:
+	float gear_ratio;
 };
 
-template<int32_t OUT_GEAR, int32_t IN_GEAR>
 class sd_gearratio_angle
  : virtual public angle_motor_operations
 {
  public:
 	// インターフェース接続(複数connect禁止)
 	connection_interface<angle_motor_operations>	out_motor;
-	const float 					gear_ratio;
 
 	operator angle_motor_operations* () {
 		return (angle_motor_operations*) this;
 	}
 
  public:
-	sd_gearratio_angle()
-	 : gear_ratio((float)OUT_GEAR / (float)IN_GEAR) {
+	sd_gearratio_angle() {
+		gear_ratio = 1.0f;
+	}
+
+	void set_gear_ratio(float ratio) {
+		gear_ratio = ratio;
 	}
 
 	int32_t	get_position_sp(void) {
@@ -192,6 +201,8 @@ class sd_gearratio_angle
 			return 0;
 		}
 	}
+private:
+	float gear_ratio;
 };
 
 NAMESPACE_SHARAKU_END
