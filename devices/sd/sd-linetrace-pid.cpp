@@ -44,7 +44,7 @@ void sd_linetrace_pid::traveling_correction(int turn, int32_t &dps, int32_t &ste
 	steer_percent = (steer_percent > 100) ? 100 : steer_percent;
 
 	// steering値に変換する
-	if (add_steer > 0) {
+	if (steer_percent > 0) {
 		add_steer = (steer_percent * get_turn_angle_out()) / 100;
 	} else {
 		add_steer = (steer_percent * get_turn_angle_in()) / 100;
