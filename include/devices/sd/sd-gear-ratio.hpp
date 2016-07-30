@@ -37,10 +37,17 @@ class sd_gearratio_speed
  public:
 	sd_gearratio_speed() {
 		gear_ratio = 1.0f;
+		pos_ratio = 1.0f;
 	}
 
 	void set_gear_ratio(float ratio) {
 		gear_ratio = ratio;
+		pos_ratio = ratio;
+	}
+
+	void set_gear_ratio(float gear, float pos) {
+		gear_ratio = gear;
+		pos_ratio = pos;
 	}
 
 	int32_t	get_speed(void) {
@@ -82,10 +89,10 @@ class sd_gearratio_speed
 
 		}
 		// ギヤ比補正をかける
-		return (int32_t)((float)pos * gear_ratio);
+		return (int32_t)((float)pos * pos_ratio);
 	}
 	int32_t	set_position(int32_t pos) {
-		int32_t	result = (int32_t)((float)pos * gear_ratio);
+		int32_t	result = (int32_t)((float)pos * pos_ratio);
 		// ギヤ比補正をかける
 		if ((speed_motor_operations*)out_motor) {
 			return out_motor->set_position(result);
@@ -116,6 +123,7 @@ class sd_gearratio_speed
 	}
 private:
 	float gear_ratio;
+	float pos_ratio;
 };
 
 class sd_gearratio_angle
@@ -132,10 +140,17 @@ class sd_gearratio_angle
  public:
 	sd_gearratio_angle() {
 		gear_ratio = 1.0f;
+		pos_ratio = 1.0f;
 	}
 
 	void set_gear_ratio(float ratio) {
 		gear_ratio = ratio;
+		pos_ratio = ratio;
+	}
+
+	void set_gear_ratio(float gear, float pos) {
+		gear_ratio = gear;
+		pos_ratio = pos;
 	}
 
 	int32_t	get_position_sp(void) {
@@ -168,13 +183,13 @@ class sd_gearratio_angle
 			pos = out_motor->get_position();
 		}
 		// ギヤ比補正をかける
-		return (int32_t)((float)pos * gear_ratio);
+		return (int32_t)((float)pos * pos_ratio);
 	}
 	int32_t	set_position(int32_t pos) {
 
 		// ギヤ比補正をかける
 		if ((angle_motor_operations*)out_motor) {
-			int32_t	ratio_pos = (int32_t)((float)pos * gear_ratio);
+			int32_t	ratio_pos = (int32_t)((float)pos * pos_ratio);
 			return out_motor->set_position(ratio_pos);
 		} else {
 			return 0;
@@ -203,6 +218,7 @@ class sd_gearratio_angle
 	}
 private:
 	float gear_ratio;
+	float pos_ratio;
 };
 
 NAMESPACE_SHARAKU_END
