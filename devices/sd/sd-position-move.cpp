@@ -86,21 +86,25 @@ sd_position_move::update_distance_mode(const float &interval)
 	if (diff < 0) {
 		// 目的地を通り越した
 		_status = STATUS_PASSING;
+		_on_passing_event();
 		// Autoなら即停止する
 		_move_stop();
 	} else if (diff <= _arrival)  {
 		// 目的地に到着
 		_status = STATUS_ARRIVAL;
+		_on_arrival_event();
 		// Autoならここで停止する
 		_move_stop();
 	} else if (diff < _proximity) {
 		// 目的地に接近
 		_status = STATUS_PROXIMITY;
+		_on_proximity_event();
 		// Autoなら速度を緩める
 		_move_slowdown(diff);
 	} else {
 		// 目的地へ移動中
 		_status = STATUS_MOVING;
+		_on_move_event();
 		_move_maxspeed();
 	}
 
@@ -124,42 +128,50 @@ sd_position_move::update_distance_deg_mode(const float &interval, int turn)
 		if (diff < 0) {
 			// 目的地を通り越した
 			_status = STATUS_PASSING;
+			_on_passing_event();
 			// Autoなら即停止する
 			_move_stop();
 		} else if (diff <= _arrival_deg)  {
 			// 目的地に到着
 			_status = STATUS_ARRIVAL;
+			_on_arrival_event();
 			// Autoならここで停止する
 			_move_stop();
 		} else if (diff < _proximity_deg) {
 			// 目的地に接近
 			_status = STATUS_PROXIMITY;
+			_on_proximity_event();
 			// Autoなら速度を線形で速度ダウンする
 			_move_slowdown_deg(diff);
 		} else {
 			// 目的地へ移動中
 			_status = STATUS_MOVING;
+			_on_move_event();
 			_move_maxspeed_deg();
 		}
 	} else {
 		if (diff > 0) {
 			// 目的地を通り越した
 			_status = STATUS_PASSING;
+			_on_passing_event();
 			// Autoなら即停止する
 			_move_stop();
 		} else if (diff >= -_arrival_deg)  {
 			// 目的地に到着
 			_status = STATUS_ARRIVAL;
+			_on_arrival_event();
 			// Autoならここで停止する
 			_move_stop();
 		} else if (diff >= -_proximity_deg) {
 			// 目的地に接近
 			_status = STATUS_PROXIMITY;
+			_on_proximity_event();
 			// Autoなら速度を線形で速度ダウンする
 			_move_slowdown_deg(-diff);
 		} else {
 			// 目的地へ移動中
 			_status = STATUS_MOVING;
+			_on_move_event();
 			_move_maxspeed_deg();
 		}
 	}
@@ -216,6 +228,7 @@ sd_position_move::update_position_mode(const float &interval)
 	    _old_diff[2] < _old_diff[1]) {
 		// 目的地を通り越した
 		_status = STATUS_PASSING;
+		_on_passing_event();
 		// Autoなら即停止する
 		_move_stop();
 	} else if (diff <= _nearness &&
@@ -223,27 +236,32 @@ sd_position_move::update_position_mode(const float &interval)
 		   _old_diff[1] < _old_diff[0]) {
 		// 目的地付近で連続的に遠ざかった場合、目的地に到着とみなす。
 		_status = STATUS_ARRIVAL;
+		_on_arrival_event();
 		// Autoなら即停止する
 		_move_stop();
 	} else if (diff <= _nearness &&
 		   _steer > 80.0f)  {
 		// 目的地付近で旋回角が85以上の場合、目的地に到着とみなす。
 		_status = STATUS_ARRIVAL;
+		_on_arrival_event();
 		// Autoなら微速前進
 		_move_stop();
 	} else if (diff <= _arrival)  {
-		// 目的地との距離が一定以上の場合は、到着とみなす。
+		// 目的地との距離が一定値いないの場合は、到着とみなす。
 		_status = STATUS_ARRIVAL;
+		_on_arrival_event();
 		// Autoなら微速前進
 		_move_stop();
 	} else if (diff < _proximity) {
 		// 目的地に接近
 		_status = STATUS_PROXIMITY;
+		_on_proximity_event();
 		// Autoなら速度を線形で速度ダウンする
 		_move_slowdown(diff);
 	} else {
 		// 目的地へ移動中
 		_status = STATUS_MOVING;
+		_on_move_event();
 		// 指定のMax速度で移動する
 		_move_maxspeed();
 	}

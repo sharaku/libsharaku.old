@@ -59,37 +59,37 @@ class sd_position_move
 	// -------------------------------------------------------------
 	// 自動Speed調整の設定
 	// -------------------------------------------------------------
-	void	move_on(void) {
+	virtual void move_on(void) {
 		_move_onoff = 1;
 	}
-	void	move_off(void) {
+	virtual void move_off(void) {
 		_move_onoff = 0;
 	}
-	void	set_autospeed_on(void) {
+	virtual void set_autospeed_on(void) {
 		_auto = 1;
 	}
-	void	set_autospeed_off(void) {
+	virtual void set_autospeed_off(void) {
 		_auto = 0;
 	}
-	void	set_limit_speed(int32_t min_speed, int32_t max_speed) {
+	virtual void set_limit_speed(int32_t min_speed, int32_t max_speed) {
 		_speed_sp = max_speed;
 		_max_speed = max_speed;
 		_min_speed = min_speed;
 		_max_speed_deg = max_speed;
 		_min_speed_deg = min_speed;
 	}
-	void	set_proximity_arrival(int32_t proximity,
+	virtual void set_proximity_arrival(int32_t proximity,
 				      int32_t nearness,
 				      int32_t arrival) {
 		_proximity = proximity;
 		_nearness = nearness;
 		_arrival = arrival;
 	}
-	void	set_proximity_arrival_deg(int32_t proximity, int32_t arrival) {
+	virtual void set_proximity_arrival_deg(int32_t proximity, int32_t arrival) {
 		_proximity_deg = proximity;
 		_arrival_deg = arrival;
 	}
-	void	set_pid(float Kp, float Ki, float Kd) {
+	virtual void set_pid(float Kp, float Ki, float Kd) {
 		_pid.set_pid(Kp, Ki, Kd);
 	}
 
@@ -105,11 +105,11 @@ class sd_position_move
 	virtual int32_t	get_speed(void) {
 		return _speed;
 	}
-	int32_t	set_steer_sp(int32_t steer_deg) {
+	virtual int32_t	set_steer_sp(int32_t steer_deg) {
 		_steer_sp = steer_deg;
 		return 0;
 	}
-	int32_t	set_speed_sp(int32_t dps) {
+	virtual int32_t	set_speed_sp(int32_t dps) {
 		_speed_sp = dps;
 		_max_speed = dps;
 		return 0;
@@ -120,20 +120,20 @@ class sd_position_move
 	// -------------------------------------------------------------
 
 	// 指定距離進んだら止まる
-	int32_t	set_trget_distance_sp(int32_t distance) {
+	virtual int32_t	set_trget_distance_sp(int32_t distance) {
 		sharaku_db_trace("distance=%d", distance, 0, 0, 0, 0, 0);
 		_mode = MODE_TARGET_DISTANCE;
 		_steer = 0;
 		_target_dist = in_odo->get_dist() + distance;
 		return _target_dist;
 	}
-	int32_t	get_trget_distance_sp(void) {
+	virtual int32_t	get_trget_distance_sp(void) {
 		return _target_dist;
 	}
 
 	// 指定角度進んだら止まる
 	// rho(半径)をsteeringへ変換。degを距離にする。
-	int32_t	set_trget_distance_deg_sp(int32_t rho, int32_t deg) {
+	virtual int32_t	set_trget_distance_deg_sp(int32_t rho, int32_t deg) {
 		sharaku_db_trace("rho=%d deg=%d", rho, deg, 0, 0, 0, 0);
 		if (!deg) {
 			return _steer;
@@ -150,15 +150,15 @@ class sd_position_move
 		_target_dist_deg += deg;
 		return _steer;
 	}
-	int32_t	get_trget_distance_deg_sp(void) {
+	virtual int32_t	get_trget_distance_deg_sp(void) {
 		return _steer;
 	}
 	// 指定位置指定まで進んだら止まる
-	int32_t	set_position_sp(position3& pos);
-	const position3& get_position_sp(void) {
+	virtual int32_t	set_position_sp(position3& pos);
+	virtual const position3& get_position_sp(void) {
 		return _target_pos;
 	}
-	int32_t	get_rest_distance(void) {
+	virtual int32_t	get_rest_distance(void) {
 		return _rest_distance;
 	}
 
@@ -170,28 +170,39 @@ class sd_position_move
 	virtual void update_distance_deg_mode(const float &interval, int turn);
 	virtual void update_position_mode(const float &interval);
 
+ protected:
+	// -------------------------------------------------------------
+	// イベント通知
+	// -------------------------------------------------------------
+	virtual void _on_stop_event(void) {}
+	virtual void _on_move_event(void) {}
+	virtual void _on_proximity_event(void) {}
+	virtual void _on_arrival_event(void) {}
+	virtual void _on_passing_event(void) {}
+
  private:
 	sd_position_move() : _pid(0.0f, 0.0f, 0.0f) {};
-	void _move_maxspeed(void) {
+	virtual void _move_maxspeed(void) {
 		_speed = _max_speed;
 	}
-	void _move_slowdown(int32_t diff) {
+	virtual void _move_slowdown(int32_t diff) {
 		_speed = _max_speed
 			 - ((_max_speed - _min_speed)
 			 	 / _proximity * (_proximity - diff));
 	}
-	void _move_maxspeed_deg(void) {
+	virtual void _move_maxspeed_deg(void) {
 		_speed = _max_speed_deg;
 	}
-	void _move_slowdown_deg(int32_t diff) {
+	virtual void _move_slowdown_deg(int32_t diff) {
 		_speed = _max_speed_deg
 			 - ((_max_speed_deg - _min_speed_deg)
 			 	 / _proximity_deg * (_proximity_deg - diff));
 	}
-	void _move_stop(void) {
+	virtual void _move_stop(void) {
 		_speed = 0;
 		_steer = 0;
 		_mode = MODE_STOP;
+		_on_stop_event();
 	}
 
  private:
