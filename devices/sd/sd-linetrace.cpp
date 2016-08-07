@@ -195,9 +195,11 @@ sd_linetrace::get_correction_color(int32_t color) {
 	if (diff_light < 0) {
 		// 黒の範囲である。かつ、設定値よりも黒の値が小さい場合、
 		// 計算上-100%以上の値が出るため、補正する
-		if (diff_light < (target_light - get_color_black())) {
+		if (diff_light < (get_color_black() - target_light)) {
 			result = -100;
 		} else {
+			// (get_color_black() - target_light) ～ 0の値を
+			// -100 ～ 0の値へ変換する
 			result = (diff_light * 100)
 					/ (target_light - get_color_black());
 		}
@@ -207,6 +209,8 @@ sd_linetrace::get_correction_color(int32_t color) {
 		if (diff_light < (get_color_white() - target_light)) {
 			result = 100;
 		} else {
+			// 0 ～ (get_color_white() - target_light)の値を
+			// 0 ～ +100の値へ変換する
 			result = (diff_light * 100)
 					 / (get_color_white() - target_light);
 		}

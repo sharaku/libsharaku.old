@@ -150,11 +150,13 @@ class sd_linetrace
 	virtual void traveling_correction(int turn, int32_t &power, int32_t &steering);
 	// 黒と白の境目を取得する
 	virtual int32_t	get_neutral_color(void) {
-		return (_color_black + _color_white) / 2;
+		// デフォルトでは、黒 ～ 白の中間点を白黒分岐点とする。
+		return ((_color_black + _color_white) / 2) + _color_black;
 	};
 	// 光の差分を値を取得する
 	virtual int32_t	get_diff_color(int32_t color) {
-		return get_neutral_color() - color;
+		// 中間値を0として-100 ～ +100で応答する。
+		return color - get_neutral_color();
 	};
 	// 補正をかけた光値を0 ～ 100の間で取得する
 	virtual int32_t	get_correction_color(int32_t color);
