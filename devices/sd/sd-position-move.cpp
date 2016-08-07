@@ -182,7 +182,6 @@ sd_position_move::update_distance_deg_mode(const float &interval, int turn)
 int32_t
 sd_position_move::set_position_sp(position3& pos)
 {
-	// ベジェ曲線を使用して指定位置まで進む。
 	_target_pos = pos;
 	_old_diff[0] = 0xffffffff;
 	_old_diff[1] = 0xffffffff;

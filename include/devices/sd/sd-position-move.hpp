@@ -123,6 +123,7 @@ class sd_position_move
 	virtual int32_t	set_trget_distance_sp(int32_t distance) {
 		sharaku_db_trace("distance=%d", distance, 0, 0, 0, 0, 0);
 		_mode = MODE_TARGET_DISTANCE;
+		_status = STATUS_MOVING;
 		_steer = 0;
 		_target_dist = in_odo->get_dist() + distance;
 		return _target_dist;
@@ -135,6 +136,7 @@ class sd_position_move
 	// rho(半径)をsteeringへ変換。degを距離にする。
 	virtual int32_t	set_trget_distance_deg_sp(int32_t rho, int32_t deg) {
 		sharaku_db_trace("rho=%d deg=%d", rho, deg, 0, 0, 0, 0);
+		_status = STATUS_MOVING;
 		if (!deg) {
 			return _steer;
 		}
