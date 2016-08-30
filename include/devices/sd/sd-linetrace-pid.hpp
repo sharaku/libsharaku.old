@@ -25,13 +25,20 @@ class sd_linetrace_pid
 	 : _pid(Kp, Ki, Kd), _lowpass(1.0f) {}
 	virtual void set_trace_pid(float Kp, float Ki, float Kd) {
 		_pid.set_pid(Kp, Ki, Kd);
-		_pid.clear();
 	}
-	virtual void SetLowpass(float q) {
+	virtual void set_lowpass(float q) {
 		_lowpass.set(q);
 	}
 	virtual void clear_pid(void) {
 		_pid.clear();
+	}
+	virtual void get_trace_pid(float &Kp, float &Ki, float &Kd) {
+		Kp = _pid.get_Kp();
+		Ki = _pid.get_Ki();
+		Kd = _pid.get_Kd();
+	}
+	virtual float get_lowpass(void) {
+		return _lowpass.get_q();
 	}
 
  protected:

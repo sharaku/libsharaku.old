@@ -30,6 +30,10 @@ class low_pass_filter
 		_x = (x * _q) + (_x * (1 - _q));
 		return *this;
 	}
+
+ public:
+	float get_q(void) { return _q; }
+
  protected:
 	float	_x;
 	float	_q;

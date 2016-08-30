@@ -50,6 +50,10 @@ class pid
 
 		return u;
 	}
+ public:
+	float get_Kp(void) { return _Kp; }
+	float get_Ki(void) { return _Ki; }
+	float get_Kd(void) { return _Kd; }
  protected:
 	float	_Kp;
 	float	_Ki;
