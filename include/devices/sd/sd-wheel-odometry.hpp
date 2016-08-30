@@ -37,11 +37,23 @@ class sd_wheel_odometry
 	virtual const position3& get_position(void) {
 		return _pos;
 	}
+	virtual int32_t set_position(const position3& pos) {
+		_pos = pos;
+		return 0;
+	}
 	virtual const rotation3& get_rotation(void) {
 		return _rot;
 	}
+	virtual int32_t set_rotation(const rotation3& rot) {
+		_rot = rot;
+		return 0;
+	}
 	virtual const int32_t get_dist(void) {
 		return (int32_t)_distance;
+	}
+	virtual int32_t set_dist(int32_t dist) {
+		_distance = (float)dist;
+		return 0;
 	}
 	virtual int32_t reset(void) {
  		// 単位はmmです。

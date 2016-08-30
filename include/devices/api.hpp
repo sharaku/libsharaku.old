@@ -266,10 +266,13 @@ class odmetry_operations
 	virtual const position3& get_position(void) {
 		static position3 pos; pos(0.0f, 0.0f, 0.0f); return pos;
 	}
+	virtual int32_t set_position(const position3& pos) {return -ENOTSUP;}
 	virtual const rotation3& get_rotation(void) {
 		static rotation3 rot; rot(0.0f, 0.0f, 0.0f); return rot;
 	}
+	virtual int32_t set_rotation(const rotation3& rot) {return -ENOTSUP;}
 	virtual const int32_t get_dist(void) {return -ENOTSUP;}
+	virtual int32_t set_dist(int32_t dist) {return -ENOTSUP;}
 	virtual int32_t reset(void) {return -ENOTSUP;}
 };
 
