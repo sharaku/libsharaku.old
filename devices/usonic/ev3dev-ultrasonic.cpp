@@ -68,7 +68,7 @@ void ev3dev_ultrasonic::__io_end(void)
 {
 	switch (_uint) {
 	case USONIC_MM:
-		_dist_mm = ev3dev_lego_sensor::value0 * 10;
+		_dist_mm = ev3dev_lego_sensor::value0;
 		sharaku_db_trace("usonic mm=%u.", _dist_mm, 0, 0, 0, 0, 0);
 		break;
 	case USONIC_IN:
