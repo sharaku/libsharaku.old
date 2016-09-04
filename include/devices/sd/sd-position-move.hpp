@@ -60,6 +60,7 @@ class sd_position_move
 	// 自動Speed調整の設定
 	// -------------------------------------------------------------
 	virtual void move_on(void) {
+		_mode = MODE_STOP;
 		_move_onoff = 1;
 	}
 	virtual void move_off(void) {
@@ -120,6 +121,7 @@ class sd_position_move
 	// -------------------------------------------------------------
 
 	// 指定距離進んだら止まる
+	// 距離は現在の距離からの相対位置
 	virtual int32_t	set_trget_distance_sp(int32_t distance) {
 		sharaku_db_trace("distance=%d", distance, 0, 0, 0, 0, 0);
 		_mode = MODE_TARGET_DISTANCE;
@@ -133,7 +135,7 @@ class sd_position_move
 	}
 
 	// 指定角度進んだら止まる
-	// rho(半径)をsteeringへ変換。degを距離にする。
+	// 角度は現在の角度からの相対角度
 	virtual int32_t	set_trget_distance_deg_sp(int32_t rho, int32_t deg) {
 		sharaku_db_trace("rho=%d deg=%d", rho, deg, 0, 0, 0, 0);
 		_status = STATUS_MOVING;
@@ -149,12 +151,14 @@ class sd_position_move
 			_mode = MODE_TARGET_DISTANCE_DEG_LEFT;
 		}
 
-		_target_dist_deg += deg;
+		const rotation3 rot = in_odo->get_rotation();
+		_target_dist_deg = rot.z + deg;
 		return _steer;
 	}
 	virtual int32_t	get_trget_distance_deg_sp(void) {
 		return _steer;
 	}
+
 	// 指定位置指定まで進んだら止まる
 	virtual int32_t	set_position_sp(position3& pos);
 	virtual const position3& get_position_sp(void) {
