@@ -43,10 +43,18 @@ class ev3dev_touch
 		return _press;
 	}
 	int32_t is_push(void) {
-		return _push;
+		// 一度回収したら、状態をクリアする。
+		// これを行わないと、APIを使う側で1を取り出せない
+		int32_t ret = _push;
+		_push = 0;
+		return ret;
 	}
 	int32_t is_release(void) {
-		return _release;
+		// 一度回収したら、状態をクリアする。
+		// これを行わないと、APIを使う側で1を取り出せない
+		int32_t ret = _release;
+		_release = 0;
+		return ret;
 	}
 
  public:

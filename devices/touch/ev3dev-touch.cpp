@@ -52,25 +52,21 @@ void ev3dev_touch::__update(void)
 void ev3dev_touch::__io_end(void)
 {
 	int32_t touch = ev3dev_lego_sensor::value0;
-
-	// 情報の組み立てを行う
-	_press	= touch;
 	
 	if (_press != touch) {
 		// 変化があった。
 		if (touch != 0) {
 			_push		= 1;
-			_release	= 0;
 		}
 		if (touch == 0) {
-			_push		= 0;
 			_release	= 1;
 		}
 	} else {
-		// 変化がなかった。
-		_push		= 0;
-		_release	= 0;
+		// 変化がなかった場合、クリアはしない。
 	}
+
+	// 情報の組み立てを行う
+	_press	= touch;
 	sharaku_db_trace("_press=%u _push=%u _release=%u",
 			 _press, _push, _release, 0, 0, 0);
 
