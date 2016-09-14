@@ -4,7 +4,7 @@
 @par	Copyright
 2014-2015 abe takafumi All Rights Reserved.
 @file	
-@brief	2‚Â‚Ìƒ‚[ƒ^‚ğg—p‚µ‚Ä“|—§‚ğ‚³‚¹‚é
+@brief	2ã¤ã®ãƒ¢ãƒ¼ã‚¿ã‚’ä½¿ç”¨ã—ã¦å€’ç«‹ã‚’ã•ã›ã‚‹
 ******************************************************************************/
 
 #include <stdlib.h>
@@ -69,14 +69,14 @@ sd_balancer::sd_balancer(float wheel_length, float max_speed)
 IMove
 ******************************************************************************/
 
-// power = -200 ` 200 (+-200‚ÍˆÀ’è‚µ‚È‚¢)
+// power = -200 ï½ 200 (+-200ã¯å®‰å®šã—ãªã„)
 int32_t sd_balancer::set_speed_sp(int32_t speed)
 {
 	_speed = speed;
 	register float	power = speed2duty(speed, _max_speed);
 
-	// ‚È‚º‚©•„†‚ª‹tB
-	// ToDo: ‚È‚º‹t‚È‚Ì‚©B
+	// ãªãœã‹ç¬¦å·ãŒé€†ã€‚
+	// ToDo: ãªãœé€†ãªã®ã‹ã€‚
 	sharaku_db_trace("_motorControlDrive = (%d * 2) * CONTROL_SPEED / 200.0", power, 0, 0, 0, 0, 0);
 	_motorControlDrive = (-1 * power * CONTROL_SPEED) / (100.0 * 2);
 
@@ -94,7 +94,7 @@ void sd_balancer::update(const float &interval)
 {
 	sharaku_db_trace("interval=%d", (int32_t)(interval * 1000.0f), 0, 0, 0, 0, 0);
 
-	// ŠÔûW(Å‰‚Ì1‰ñ‚ÍÌæ‚µ‚È‚¢)
+	// æ™‚é–“åé›†(æœ€åˆã®1å›ã¯æ¡å–ã—ãªã„)
 	sharaku_usec_t time = sharaku_get_usec();
 	if (_time) {
 	}
@@ -110,11 +110,11 @@ void sd_balancer::update(const float &interval)
 		goto balanser_off;
 	}
 
-	// ‘¬“x‚ğ‰ÁZ
+	// é€Ÿåº¦ã‚’åŠ ç®—
 	_motorPos += (float)_motorControlDrive * interval;
 	sharaku_db_trace("_motorPos(%d) += %d * %d", (int32_t)_motorPos, _motorControlDrive, interval * 1000.0f, 0, 0, 0);
 
-	// ©•ª‚Å“®‚©‚µ‚½•ª‚ğˆø‚­
+	// è‡ªåˆ†ã§å‹•ã‹ã—ãŸåˆ†ã‚’å¼•ã
 	motors_pos = motors_pos - (int32_t)_motorPos;
 
 	sharaku_db_trace("gyro_speed = %d, gyro_angle = %d", gyro_speed, gyro_angle, 0, 0, 0, 0);
@@ -134,13 +134,13 @@ void sd_balancer::update(const float &interval)
 	out_move->set_speed_sp((int32_t)(duty2speed(power, _max_speed)));
 	out_move->set_steer_sp(_steering);
 
-	// ŠÔûW
+	// æ™‚é–“åé›†
 	time = sharaku_get_usec();
 	sharaku_db_trace("time=%d", (int32_t)(time - _time), 0, 0, 0, 0, 0);
 	return;
 
  balanser_off:
-	// ƒoƒ‰ƒ“ƒTOFF‚Ìê‡‚Íw’è‚³‚ê‚Ä‚¢‚éSpeed/Steer‚ğ‚»‚Ì‚Ü‚ÜƒXƒ‹[‚·‚é
+	// ãƒãƒ©ãƒ³ã‚µOFFã®å ´åˆã¯æŒ‡å®šã•ã‚Œã¦ã„ã‚‹Speed/Steerã‚’ãã®ã¾ã¾ã‚¹ãƒ«ãƒ¼ã™ã‚‹
 	out_move->set_speed_sp(_speed);
 	out_move->set_steer_sp(_steering);
 	return;
