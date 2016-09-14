@@ -9,7 +9,7 @@
 
 #include <stdint.h>
 #include <sharaku/log.h>
-#include <devices/api.hpp>
+#include <devices/sensor-api.hpp>
 #include <devices/proc/ev3dev-proc-device.hpp>
 
 NAMESPACE_SHARAKU_BEGIN

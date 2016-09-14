@@ -8,7 +8,12 @@
 #define _SHARAKU_DEVICES_SD_MOTORS_H_
 
 #include <stdint.h>
-#include <devices/api.hpp>
+#include <sharaku/utime.h>
+#include <sharaku/pid.hpp>
+#include <devices/update-api.hpp>
+#include <devices/moving-api.hpp>
+#include <devices/motor-api.hpp>
+#include <devices/connection_interface.hpp>
 
 NAMESPACE_SHARAKU_BEGIN
 
@@ -31,6 +36,18 @@ class sd_motors
  public:
 	sd_motors(int32_t wheel_axle_length, int32_t wheel_length);
 	virtual ~sd_motors() {
+	}
+
+	// 左右モータの補正を有効にする。
+	// 有効にすると反応速度は一瞬遅れるが電圧やモータ特性に左右されなくなる。
+	// 無効にすると反応速度は速いが、電圧やモータ特性に左右される。
+	virtual void auto_correction_on(void) {
+		_auto_correction = 1;
+		_pos_l_motor = 0;
+		_pos_r_motor = 0;
+	}
+	virtual void auto_correction_off(void) {
+		_auto_correction = 0;
 	}
 
 	// move_operations インタフェース
@@ -65,7 +82,9 @@ class sd_motors
 	int32_t			_wheel_length;
 
  private:
-	sd_motors() {}
+	sd_motors()
+	 : _pid_l_motor(1.0f, 0.0f, 0.0f)
+	 , _pid_r_motor(1.0f, 0.0f, 0.0f){}
 	void differential(int32_t steering);
 
 	sharaku_usec_t		_time;		// 前回実行時の時間
@@ -75,6 +94,7 @@ class sd_motors
 	float			_steer;
 	float			_speed;
 	int32_t			_position;
+	int32_t			_auto_correction;
 
 	// 内部計算用中間値
 	int32_t			_prev_sum;
@@ -82,6 +102,14 @@ class sd_motors
 	float			_vL;
 	float			_vR;
 	float			_rho;
+
+	// 左右モータ補正
+	pid			_pid_l_motor;
+	int32_t			_pos_l_motor;
+	int32_t			_dps_l_motor;
+	pid			_pid_r_motor;
+	int32_t			_pos_r_motor;
+	int32_t			_dps_r_motor;
 };
 
 NAMESPACE_SHARAKU_END

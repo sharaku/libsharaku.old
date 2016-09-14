@@ -16,8 +16,10 @@ extern "C" {
 #include <unistd.h>
 #include <string.h>
 #include <errno.h>
+#include <sharaku/types.h>
 #include <sharaku/task.h>
 #include <sharaku/thread.h>
+#include <devices/update-api.hpp>
 
 NAMESPACE_SHARAKU_BEGIN
 

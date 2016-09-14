@@ -8,7 +8,7 @@
 #define SHARAKU_DEVICES_MOTOR_DPS2DUTY_MOTOR_H_
 
 #include <stdint.h>
-#include <devices/api.hpp>
+#include <devices/motor-api.hpp>
 
 NAMESPACE_SHARAKU_BEGIN
 

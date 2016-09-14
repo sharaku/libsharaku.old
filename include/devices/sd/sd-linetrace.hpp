@@ -8,7 +8,11 @@
 #define SHARAKU_UV_MODULES_LINETRACE_H_
 
 #include <stdint.h>
-#include <devices/api.hpp>
+#include <sharaku/utime.h>
+#include <devices/update-api.hpp>
+#include <devices/moving-api.hpp>
+#include <devices/sensor-api.hpp>
+#include <devices/connection_interface.hpp>
 
 NAMESPACE_SHARAKU_BEGIN
 

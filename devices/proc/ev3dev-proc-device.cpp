@@ -9,7 +9,6 @@
 #include <errno.h>
 #include <sharaku/log.h>
 #include <sharaku/prof.h>
-#include <devices/api.hpp>
 #include <devices/proc/ev3dev-proc-device.hpp>
 
 NAMESPACE_SHARAKU_BEGIN

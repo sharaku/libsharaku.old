@@ -10,7 +10,7 @@
 #include <stdint.h>
 #include <sharaku/task.h>
 #include <sharaku/list.h>
-#include <devices/api.hpp>
+#include <devices/update-api.hpp>
 
 NAMESPACE_SHARAKU_BEGIN
 

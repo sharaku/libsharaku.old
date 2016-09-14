@@ -8,7 +8,7 @@
 #define _SHARAKU_DEVICES_NULL_COLOR_H_
 
 #include <stdint.h>
-#include <devices/api.hpp>
+#include <devices/sensor-api.hpp>
 
 NAMESPACE_SHARAKU_BEGIN
 

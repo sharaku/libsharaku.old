@@ -8,7 +8,7 @@
 #define _SHARAKU_DEVICES_COLOR_EV3DEV_COLOR_H_
 
 #include <stdint.h>
-#include <devices/api.hpp>
+#include <devices/sensor-api.hpp>
 #include <devices/proc/ev3dev-proc-device.hpp>
 
 NAMESPACE_SHARAKU_BEGIN

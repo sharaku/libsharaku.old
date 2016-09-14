@@ -8,7 +8,11 @@
 #define SHARAKU_DEVICES_BALANCER_H_
 
 #include <stdint.h>
-#include <devices/api.hpp>
+#include <sharaku/utime.h>
+#include <devices/update-api.hpp>
+#include <devices/moving-api.hpp>
+#include <devices/sensor-api.hpp>
+#include <devices/connection_interface.hpp>
 
 NAMESPACE_SHARAKU_BEGIN
 
@@ -20,7 +24,7 @@ class sd_balancer
  public:
 	sd_balancer(float wheel_length, float max_speed);
 
-	// ƒCƒ“ƒ^[ƒtƒF[ƒXÚ‘±
+	// ã‚¤ãƒ³ã‚¿ãƒ¼ãƒ•ã‚§ãƒ¼ã‚¹æ¥ç¶š
 	connection_interface<move_operations>	out_move;
 	connection_interface<gyro_operations>	in_gyro;
 
@@ -28,23 +32,23 @@ class sd_balancer
 	operator update_operations*() { return (update_operations*)this;}
 
  public:
-	// İ’è’l
-	float		gain_gyroangle;	///< Šp“xGain
-	float		gain_gyrospeed;	///< Šp‘¬“xGain
-	float		gain_pos;	///< ‹——£Gain
-	float		gain_drive;	///< ‘–sGain
-	float		gain_speed;	///< ‘¬“xGain
-	float		wheel_ratio;	///< Ô—ÖŒW”
+	// è¨­å®šå€¤
+	float		gain_gyroangle;	///< è§’åº¦Gain
+	float		gain_gyrospeed;	///< è§’é€Ÿåº¦Gain
+	float		gain_pos;	///< è·é›¢Gain
+	float		gain_drive;	///< èµ°è¡ŒGain
+	float		gain_speed;	///< é€Ÿåº¦Gain
+	float		wheel_ratio;	///< è»Šè¼ªä¿‚æ•°
 
  public:
-	// sm_move_op ƒCƒ“ƒ^ƒtƒF[ƒX
+	// sm_move_op ã‚¤ãƒ³ã‚¿ãƒ•ã‚§ãƒ¼ã‚¹
 	virtual void balancer_on(void) {
 		_onoff = true;
 	}
 	virtual void balancer_off(void) {
 		_onoff = false;
 	}
-	// sm_move_op ƒCƒ“ƒ^ƒtƒF[ƒX
+	// sm_move_op ã‚¤ãƒ³ã‚¿ãƒ•ã‚§ãƒ¼ã‚¹
 	virtual int32_t	get_steer_sp(void) {
 		return out_move->get_steer_sp();
 	}
@@ -63,13 +67,13 @@ class sd_balancer
 		return out_move->get_position();
 	}
 
-	// update_operations ƒCƒ“ƒ^ƒtƒF[ƒX
+	// update_operations ã‚¤ãƒ³ã‚¿ãƒ•ã‚§ãƒ¼ã‚¹
 	virtual void update(const float &interval);
 
  private:
 	sd_balancer() {}
-	sharaku_usec_t		_time;		// ‘O‰ñÀs‚ÌŠÔ
-	bool			_onoff;		// ‹@”\On/Off
+	sharaku_usec_t		_time;		// å‰å›å®Ÿè¡Œæ™‚ã®æ™‚é–“
+	bool			_onoff;		// æ©Ÿèƒ½On/Off
 
  private:
 	int32_t			_speed;

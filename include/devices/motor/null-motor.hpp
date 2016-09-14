@@ -8,7 +8,7 @@
 #define _SHARAKU_DEVICES_NULL_MOTOR_H_
 
 #include <stdint.h>
-#include <devices/api.hpp>
+#include <devices/motor-api.hpp>
 
 NAMESPACE_SHARAKU_BEGIN
 

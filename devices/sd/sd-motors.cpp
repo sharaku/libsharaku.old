@@ -28,6 +28,7 @@ static sharaku_prof_t	__prof_motors_interval;
 static sharaku_prof_t	__prof_motors_processing;
 
 sd_motors::sd_motors(int32_t wheel_axle_length, int32_t wheel_length)
+ : _pid_l_motor(1.05f, 0.01f, 0.0f), _pid_r_motor(1.05f, 0.01f, 0.0f)
 {
 	sharaku_db_trace("start", 0, 0, 0, 0, 0, 0);
 
@@ -38,33 +39,34 @@ sd_motors::sd_motors(int32_t wheel_axle_length, int32_t wheel_length)
 
 	_wheel_axle_length	= wheel_axle_length;
 	_wheel_length		= wheel_length;
-	_time		= 0;
-	_steer_sp	= 0;
-	_speed_sp	= 0;
-	_steer		= 0;
-	_speed		= 0;
-	_position	= 0;
-	_prev_sum	= 0;
-	_prev_deltas[0]	= 0;
-	_prev_deltas[1]	= 0;
-	_prev_deltas[2]	= 0;
+	_time			= 0;
+	_steer_sp		= 0;
+	_speed_sp		= 0;
+	_steer			= 0;
+	_speed			= 0;
+	_position		= 0;
+	_auto_correction	= 0;
+	_prev_sum		= 0;
+	_prev_deltas[0]		= 0;
+	_prev_deltas[1]		= 0;
+	_prev_deltas[2]		= 0;
+
+	// 左右モータ補正
+	_pid_l_motor.clear();
+	_pos_l_motor		= 0;
+	_dps_l_motor		= 0;
+	_pid_r_motor.clear();
+	_pos_r_motor		= 0;
+	_dps_r_motor		= 0;
 }
 
 // ステアリング角度を元にした制御
 int32_t
 sd_motors::set_speed_sp(int32_t dps)
 {
-	float power_left	= ((float)dps) * _vL;
-	float power_right	= ((float)dps) * _vR;
-
-	// モータへの設定
 	_speed_sp = _speed = dps;
-
-	out_speed_motor_l->set_speed_sp(power_left);
-	out_speed_motor_r->set_speed_sp(power_right);
-	sharaku_db_trace("dps=%d steer=%d power_left=%d power_right=%d",
-			 _speed_sp, _steer_sp, power_left, power_right, 0, 0);
-
+	_dps_l_motor	= (int32_t)(((float)dps) * _vL);
+	_dps_r_motor	= (int32_t)(((float)dps) * _vR);
 	return 0;
 }
 
@@ -75,15 +77,8 @@ sd_motors::set_steer_sp(int32_t steer_deg)
 {
 	differential(steer_deg);
 	_steer_sp = _steer = steer_deg;
-
-	float power_left	= ((float)_speed_sp) * _vL;
-	float power_right	= ((float)_speed_sp) * _vR;
-
-	out_speed_motor_l->set_speed_sp(power_left);
-	out_speed_motor_r->set_speed_sp(power_right);
-	sharaku_db_trace("dps=%d steer=%d power_left=%d power_right=%d",
-			 _speed_sp, _steer_sp, power_left, power_right, 0, 0);
-
+	_dps_l_motor	= (int32_t)(((float)_speed_sp) * _vL);
+	_dps_r_motor	= (int32_t)(((float)_speed_sp) * _vR);
 	return 0;
 }
 
@@ -198,6 +193,35 @@ sd_motors::pre_update(const float &interval)
 void
 sd_motors::post_update(const float &interval)
 {
+	// 両輪の状態を取得し、位置と速度を算出する
+	register int32_t	left_pos	= out_speed_motor_l->get_position();
+	register int32_t	right_pos	= out_speed_motor_r->get_position();
+
+	// 現在の位置との差分で速度を補正する。
+	// 差分を速度に反映することでモータの個体差、電圧による速度差を吸収する。
+	_pos_l_motor		+= _dps_l_motor * interval;
+	_pos_r_motor		+= _dps_r_motor * interval;
+	if (_auto_correction) {
+		float power_left_per	= _pid_l_motor(interval, left_pos, _pos_l_motor);
+		float power_right_per	= _pid_l_motor(interval, right_pos, _pos_r_motor);
+		power_left_per	= power_left_per < 0 ? 0.0 : power_left_per > 200 ? 2.0 : power_left_per / 100.0f;
+		power_right_per	= power_right_per < 0 ? 0.0 : power_right_per > 200 ? 2.0 : power_right_per / 100.0f;
+		float power_left	= (float)_dps_l_motor * power_left_per;
+		float power_right	= (float)_dps_r_motor * power_right_per;
+		out_speed_motor_l->set_speed_sp(power_left);
+		out_speed_motor_r->set_speed_sp(power_right);
+		sharaku_db_trace("power_left=%d power_right=%d _pos_l_motor=%d _pos_r_motor=%d left_pos=%d right_pos=%d",
+				power_left_per * 100, power_right_per * 100,
+				_pos_l_motor, _pos_r_motor,
+				left_pos, right_pos);
+	} else {
+		out_speed_motor_l->set_speed_sp(_dps_l_motor);
+		out_speed_motor_r->set_speed_sp(_dps_r_motor);
+		sharaku_db_trace("_pos_l_motor=%d _pos_r_motor=%d left_pos=%d right_pos=%d",
+				_pos_l_motor, _pos_r_motor,
+				left_pos, right_pos, 0, 0);
+	}
+
 	if (out_device_update_l && out_device_update_r) {
 		if(out_device_update_l->is_commited() &&
 		   out_device_update_l->is_updated() &&

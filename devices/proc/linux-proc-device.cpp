@@ -8,7 +8,7 @@
 #include <string.h>
 #include <sharaku/log.h>
 #include <sharaku/prof.h>
-#include <devices/api.hpp>
+#include <sharaku/types.h>
 #include <devices/proc/linux-proc-device.hpp>
 
 NAMESPACE_SHARAKU_BEGIN

@@ -8,7 +8,7 @@
 #define _SHARAKU_DEVICES_NULL_ODOMETRY_H_
 
 #include <stdint.h>
-#include <devices/api.hpp>
+#include <devices/odmetry-api.hpp>
 
 NAMESPACE_SHARAKU_BEGIN
 

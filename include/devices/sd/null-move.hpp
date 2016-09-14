@@ -8,7 +8,7 @@
 #define _SHARAKU_DEVICES_NULL_MOVE_H_
 
 #include <stdint.h>
-#include <devices/api.hpp>
+#include <devices/moving-api.hpp>
 
 NAMESPACE_SHARAKU_BEGIN
 
