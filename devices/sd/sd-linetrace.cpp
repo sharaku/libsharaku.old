@@ -96,25 +96,9 @@ void sd_linetrace::update(const float &interval)
 	// 現在の光の値を評価する。エッジの更新もこのタイミングで行う。
 	// エッジの更新は黒の時のみ行うそうでないと、黒の検索が破たんする。
 	if (color_check()) {
-		// もし、エッジ変更が必要な場合はエッジ変更する
-		if (_now_edge != _target_edge) {
-			_now_edge	= _target_edge;
-		}
-
-		// ラインを目指しており、かつ現在ライン上である場合、
-		// ターゲットをラインから外れるように設定する
-		if (_target_line == LINETRACE_TARGET_IN_LINE) {
-			_target_line	= LINETRACE_TARGET_OUT_LINE;
-			_uncertain_time = 0;
-		}
+		on_black_event();
 	} else {
-		// ラインから外れるように動作しており、かつ白を検知した場合は
-		// ラインを目指すように設定
-		if (_target_line == LINETRACE_TARGET_OUT_LINE) {
-			// 今非ラインを目指していた
-			_target_line	= LINETRACE_TARGET_IN_LINE;
-			_uncertain_time = 0;
-		}
+		on_white_event();
 	}
 	sharaku_db_trace("_target_line=%d _now_edge=%d",
 			 _target_line, _now_edge, 0, 0, 0, 0);
@@ -156,6 +140,37 @@ sd_linetrace::color_check(void)
 		return false;
 	}
 }
+
+
+void
+sd_linetrace::on_black_event(void)
+{
+	// もし、エッジ変更が必要な場合はエッジ変更する
+	if (_now_edge != _target_edge) {
+		_now_edge	= _target_edge;
+	}
+
+	// ラインを目指しており、かつ現在ライン上である場合、
+	// ターゲットをラインから外れるように設定する
+	if (_target_line == LINETRACE_TARGET_IN_LINE) {
+		_target_line	= LINETRACE_TARGET_OUT_LINE;
+		_uncertain_time = 0;
+	}
+}
+
+
+void
+sd_linetrace::on_white_event(void)
+{
+	// ラインから外れるように動作しており、かつ白を検知した場合は
+	// ラインを目指すように設定
+	if (_target_line == LINETRACE_TARGET_OUT_LINE) {
+		// 今非ラインを目指していた
+		_target_line	= LINETRACE_TARGET_IN_LINE;
+		_uncertain_time = 0;
+	}
+}
+
 
 // 単純なライントレース
 void

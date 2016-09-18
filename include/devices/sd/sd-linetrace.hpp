@@ -146,6 +146,12 @@ class sd_linetrace
 	virtual void update(const float &interval);
 
  protected:
+	// 周期的に黒の場合に呼び出される。
+	virtual void on_black_event(void);
+	// 周期的に白の場合に呼び出される。
+	virtual void on_white_event(void);
+
+ protected:
 	// 黒であればtrueを白であればfalseを返す
 	virtual bool color_check(void);
 	// ターン方向が変わったときに呼ばれる
