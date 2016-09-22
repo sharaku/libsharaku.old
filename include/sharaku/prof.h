@@ -27,7 +27,7 @@
 
 typedef struct sharaku_prof {
 	struct list_head	list;
-	char			*name;
+	const char		*name;
 	sharaku_usec_t		count;
 	sharaku_usec_t		usec;
 	sharaku_usec_t		min;
@@ -41,7 +41,7 @@ extern "C" {
 #endif
 
 static void
-sharaku_prof_init(sharaku_prof_t *prof, char *name)
+sharaku_prof_init(sharaku_prof_t *prof, const char *name)
 {
 	INIT_LIST_HEAD(&prof->list);
 	prof->name = name;
