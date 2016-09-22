@@ -15,32 +15,22 @@ NAMESPACE_SHARAKU_BEGIN
 
 class ev3dev_color
  : protected ev3dev_lego_sensor
- , public color_operations
- , public light_operations {
+ , public color_operations {
  private:
 	ev3dev_color() : ev3dev_lego_sensor(1) {}
 
  public:
-	enum ev3dev_colormode {
-		EV3DEV_COLORMODE_UNKNOWN,	// 無効
-		EV3DEV_COLORMODE_COLOR,		// 簡易カラーモード
-		EV3DEV_COLORMODE_REFLECTED,	// 反射光モード
-		EV3DEV_COLORMODE_AMBIENT,	// 環境光モード
-		EV3DEV_COLORMODE_CORRECTION,	// 反射光 - 環境光モード
-		EV3DEV_COLORMODE_FULLCOLOR,	// フルカラーモード
-	};
-	ev3dev_color(const char *port, int interval_ms, ev3dev_colormode mode)
+	ev3dev_color(const char *port, int interval_ms, color_operations::mode mode)
 	 : ev3dev_lego_sensor(interval_ms) {
 		__correction	= 0;
 		_reflected	= 0;
 		_ambient	= 0;
 		_correction	= 0;
-		_color		= COLOR_NONE;
 		_red		= 0;
 		_green		= 0;
 		_blue		= 0;
-		_mode_sp	= EV3DEV_COLORMODE_UNKNOWN;
-		_mode		= EV3DEV_COLORMODE_UNKNOWN;
+		_mode_sp	= color_operations::MODE_UNKNOWN;
+		_mode		= color_operations::MODE_UNKNOWN;
 		set_mode(mode);
 
 		connect(port);
@@ -52,58 +42,42 @@ class ev3dev_color
 	operator color_operations*() {
 		return (color_operations *)this;
 	}
-	operator light_operations*() {
-		return (light_operations *)this;
-	}
 
  public:
-	light_operations::mode	get_mode(void) {
-		switch (_mode) {
-		case EV3DEV_COLORMODE_COLOR:
-			return light_operations::MODE_COLOR;
-		case EV3DEV_COLORMODE_REFLECTED:
-			return light_operations::MODE_REFLECTED;
-		case EV3DEV_COLORMODE_AMBIENT:
-			return light_operations::MODE_AMBIENT;
-		case EV3DEV_COLORMODE_CORRECTION:
-			return light_operations::MODE_CORRECTION;
-		default:
-			return light_operations::MODE_UNKNOWN;
-		}
+	color_operations::mode	get_mode(void) {
+		return _mode;
 	}
-	int32_t	set_mode(ev3dev_colormode m) {
+	int32_t	set_mode(color_operations::mode m) {
 		return _mode_sp = m;
 	}
 	int32_t	get_value(void) {
 		switch (_mode) {
-		case EV3DEV_COLORMODE_COLOR:
-			return _color;
-		case EV3DEV_COLORMODE_REFLECTED:
+		case color_operations::MODE_REFLECTED:
 			return _reflected;
-		case EV3DEV_COLORMODE_AMBIENT:
+		case color_operations::MODE_AMBIENT:
 			return _ambient;
-		case EV3DEV_COLORMODE_CORRECTION:
+		case color_operations::MODE_CORRECTION:
 			return _correction;
 		default:
 			return -ENOTSUP;
 		}
 	}
 	int32_t	get_red(void) {
-		if (_mode != EV3DEV_COLORMODE_FULLCOLOR) {
+		if (_mode != color_operations::MODE_FULLCOLOR) {
 			return -ENOTSUP;
 		} else {
 			return _red;
 		}
 	}
 	int32_t	get_green(void) {
-		if (_mode != EV3DEV_COLORMODE_FULLCOLOR) {
+		if (_mode != color_operations::MODE_FULLCOLOR) {
 			return -ENOTSUP;
 		} else {
 			return _green;
 		}
 	}
 	int32_t	get_blue(void) {
-		if (_mode != EV3DEV_COLORMODE_FULLCOLOR) {
+		if (_mode != color_operations::MODE_FULLCOLOR) {
 			return -ENOTSUP;
 		} else {
 			return _blue;
@@ -122,12 +96,11 @@ class ev3dev_color
 	int32_t			_reflected;
 	int32_t			_ambient;
 	int32_t			_correction;
-	int32_t			_color;
 	int32_t			_red;
 	int32_t			_green;
 	int32_t			_blue;
-	ev3dev_colormode	_mode_sp;
-	ev3dev_colormode	_mode;
+	color_operations::mode	_mode_sp;
+	color_operations::mode	_mode;
 
 	sharaku_prof_t		_prof;
 	sharaku_usec_t		_prof_time_start;

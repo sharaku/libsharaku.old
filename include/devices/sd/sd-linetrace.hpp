@@ -40,7 +40,7 @@ class sd_linetrace
 
 	// インターフェース接続
 	connection_interface<move_operations>	out_move;
-	connection_interface<light_operations>	in_photo;
+	connection_interface<color_operations>	in_photo;
 
 	operator move_operations*() { return (move_operations*)this;}
 	operator update_operations*() { return (update_operations*)this;}

@@ -42,36 +42,19 @@ class gyro_operations
 class color_operations
 {
  public:
+	enum mode {
+		MODE_UNKNOWN,		// 不明
+		MODE_REFLECTED,		// 反射光モード
+		MODE_AMBIENT,		// 環境光モード
+		MODE_CORRECTION,	// 反射光 - 環境光モード
+		MODE_FULLCOLOR		// 簡易カラーモード
+	};
+	virtual int32_t	set_mode(mode m) {return -ENOTSUP;}
+	virtual mode	get_mode(void) {return MODE_UNKNOWN;}
+	virtual int32_t	get_value(void) {return -ENOTSUP;}
 	virtual int32_t	get_red(void) {return -ENOTSUP;}
 	virtual int32_t	get_green(void) {return -ENOTSUP;}
 	virtual int32_t	get_blue(void) {return -ENOTSUP;}
-};
-
-//-----------------------------------------------------------------------------
-// 光センサインタフェース
-
-class light_operations
-{
- public:
-	enum color {
-		COLOR_NONE,
-		COLOR_BLACK,
-		COLOR_BLUE,
-		COLOR_GREEN,
-		COLOR_YELLOW,
-		COLOR_RED,
-		COLOR_WHITE,
-		COLOR_BROWN,
-	};
-	enum mode {
-		MODE_UNKNOWN,		// 不明
-		MODE_COLOR,		// 簡易カラーモード
-		MODE_REFLECTED,		// 反射光モード
-		MODE_AMBIENT,		// 環境光モード
-		MODE_CORRECTION		// 反射光 - 環境光モード
-	};
-	virtual mode	get_mode(void) {return MODE_UNKNOWN;}
-	virtual int32_t	get_value(void) {return -ENOTSUP;}
 };
 
 //-----------------------------------------------------------------------------

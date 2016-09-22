@@ -32,8 +32,8 @@ int32_t ev3dev_color::connect(const char* port)
 	ev3dev_lego_sensor::value2.open();
 	ev3dev_lego_sensor::mode = "COL-REFLECT";
 	set_write_flag(DEVICE_FILE_MODE);
-	_mode = EV3DEV_COLORMODE_REFLECTED;
-	_mode_sp = EV3DEV_COLORMODE_REFLECTED;
+	_mode = color_operations::MODE_REFLECTED;
+	_mode_sp = color_operations::MODE_REFLECTED;
 	sharaku_db_trace("end(0)", 0, 0, 0, 0, 0, 0);
 	return 0;
 
@@ -47,21 +47,18 @@ void ev3dev_color::__update(void)
 {
 	_prof_time_start = sharaku_get_usec();
 
-	// モード切替がない場合、かつ現在のモードがEV3DEV_COLORMODE_CORRECTION
+	// モード切替がない場合、かつ現在のモードがcolor_operations::MODE_CORRECTION
 	// ではない場合、モード切替をスキップする。
-	if (_mode != _mode_sp || _mode == EV3DEV_COLORMODE_CORRECTION) {
+	if (_mode != _mode_sp || _mode == color_operations::MODE_CORRECTION) {
 		_mode = _mode_sp;
 		switch (_mode) {
-		case EV3DEV_COLORMODE_COLOR:
-			ev3dev_lego_sensor::mode = "COL-COLOR";
-			break;
-		case EV3DEV_COLORMODE_REFLECTED:
+		case color_operations::MODE_REFLECTED:
 			ev3dev_lego_sensor::mode = "COL-REFLECT";
 			break;
-		case EV3DEV_COLORMODE_AMBIENT:
+		case color_operations::MODE_AMBIENT:
 			ev3dev_lego_sensor::mode = "COL-AMBIENT";
 			break;
-		case EV3DEV_COLORMODE_CORRECTION:
+		case color_operations::MODE_CORRECTION:
 			if (__correction) {
 				ev3dev_lego_sensor::mode = "COL-REFLECT";
 				__correction = 0;
@@ -70,7 +67,7 @@ void ev3dev_color::__update(void)
 				__correction = 1;
 			}
 			break;
-		case EV3DEV_COLORMODE_FULLCOLOR:
+		case color_operations::MODE_FULLCOLOR:
 			ev3dev_lego_sensor::mode = "RGB-RAW";
 			break;
 		default:
@@ -81,13 +78,12 @@ void ev3dev_color::__update(void)
 
 	// モードを書き込む
 	switch (_mode) {
-	case EV3DEV_COLORMODE_COLOR:
-	case EV3DEV_COLORMODE_REFLECTED:
-	case EV3DEV_COLORMODE_AMBIENT:
-	case EV3DEV_COLORMODE_CORRECTION:
+	case color_operations::MODE_REFLECTED:
+	case color_operations::MODE_AMBIENT:
+	case color_operations::MODE_CORRECTION:
 		set_read_flag(DEVICE_FILE_VALUE0);
 		break;
-	case EV3DEV_COLORMODE_FULLCOLOR:
+	case color_operations::MODE_FULLCOLOR:
 		set_read_flag(DEVICE_FILE_VALUE0);
 		set_read_flag(DEVICE_FILE_VALUE1);
 		set_read_flag(DEVICE_FILE_VALUE2);
@@ -105,21 +101,17 @@ void ev3dev_color::__io_end(void)
 {
 	// モードによって次のフェーズ、
 	switch (_mode) {
-	case EV3DEV_COLORMODE_COLOR:
-		_color = ev3dev_lego_sensor::value0;
-		sharaku_db_trace("COLOR color=%d", _color, 0, 0, 0, 0, 0);
-		break;
-	case EV3DEV_COLORMODE_REFLECTED:
+	case color_operations::MODE_REFLECTED:
 		_reflected = ev3dev_lego_sensor::value0;
-		sharaku_db_trace("EV3DEV_COLORMODE_REFLECTED reflected=%d",
+		sharaku_db_trace("color_operations::MODE_REFLECTED reflected=%d",
 				 _reflected, 0, 0, 0, 0, 0);
 		break;
-	case EV3DEV_COLORMODE_AMBIENT:
+	case color_operations::MODE_AMBIENT:
 		_ambient = ev3dev_lego_sensor::value0;
 		sharaku_db_trace("AMBIENT ambient=%d",
 				 _ambient, 0, 0, 0, 0, 0);
 		break;
-	case EV3DEV_COLORMODE_CORRECTION:
+	case color_operations::MODE_CORRECTION:
 		if (__correction) {
 			_reflected = ev3dev_lego_sensor::value0;
 		} else {
@@ -129,7 +121,7 @@ void ev3dev_color::__io_end(void)
 				 _reflected, _ambient, 0, 0, 0, 0);
 		_correction = _reflected - _ambient;
 		break;
-	case EV3DEV_COLORMODE_FULLCOLOR:
+	case color_operations::MODE_FULLCOLOR:
 		_red	= ev3dev_lego_sensor::value0;
 		_green	= ev3dev_lego_sensor::value1;
 		_blue	= ev3dev_lego_sensor::value2;
