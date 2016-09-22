@@ -124,7 +124,7 @@ class ev3dev_tacho_motor
 	virtual int32_t	get_count_per_rot(void) {
 		return _count_per_rot;
 	}
-	virtual int32_t	set_speed_pid(int kp,int ki, int kd) {
+	virtual int32_t	set_speed_pid(float kp, float ki, float kd) {
 		_speed_pid_kd = kd;
 		_speed_pid_ki = ki;
 		_speed_pid_kp = kp;
@@ -143,7 +143,7 @@ class ev3dev_tacho_motor
 		_position_sp = _position + r;
 		return _position_sp;
 	}
-	virtual int32_t	set_hold_pid(int kp,int ki, int kd) {
+	virtual int32_t	set_hold_pid(float kp, float ki, float kd) {
 		_hold_pid_kd = kd;
 		_hold_pid_ki = ki;
 		_hold_pid_kp = kp;

@@ -62,7 +62,7 @@ class dps2duty_motor
 		return (out_motor->get_duty_cycle_sp() * MAX_DPS) / 100;
 	}
 	virtual int32_t	get_count_per_rot(void) {return -ENOTSUP;}
-	virtual int32_t	set_speed_pid(int kp,int ki, int kd) {return -ENOTSUP;}
+	virtual int32_t	set_speed_pid(float kp, float ki, float kd) {return -ENOTSUP;}
 
 	// duty_motor_operations API
 	virtual int32_t	get_duty_cycle(void) {

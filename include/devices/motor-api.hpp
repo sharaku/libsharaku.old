@@ -43,7 +43,7 @@ class speed_motor_operations
 	virtual int32_t	set_speed_sp(int32_t dps) {return -ENOTSUP;}
 	virtual int32_t	get_speed_sp(void) {return -ENOTSUP;}
 	virtual int32_t	get_count_per_rot(void) {return -ENOTSUP;}
-	virtual int32_t	set_speed_pid(float kp,float ki, float kd) {return -ENOTSUP;}
+	virtual int32_t	set_speed_pid(float kp, float ki, float kd) {return -ENOTSUP;}
 };
 
 //-----------------------------------------------------------------------------
@@ -56,7 +56,7 @@ class angle_motor_operations
 	virtual int32_t	get_position_sp(void) {return -ENOTSUP;}
 	virtual int32_t	set_position_sp(int32_t r) {return -ENOTSUP;}
 	virtual int32_t	add_position_sp(int32_t r) {return -ENOTSUP;}
-	virtual int32_t	set_hold_pid(float kp,float ki, float kd) {return -ENOTSUP;}
+	virtual int32_t	set_hold_pid(float kp, float ki, float kd) {return -ENOTSUP;}
 };
 
 //-----------------------------------------------------------------------------
