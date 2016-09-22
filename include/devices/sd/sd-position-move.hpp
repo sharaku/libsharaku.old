@@ -248,7 +248,7 @@ class sd_position_move
 	float			_speed; 	// 現在のスピード値
 
 	float			_rest_distance; // 残り距離
-	uint32_t		_old_diff[3];
+	int32_t			_old_diff[3];
 	pid			_pid;
 };
 

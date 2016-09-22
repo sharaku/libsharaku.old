@@ -185,6 +185,8 @@ void ev3dev_tacho_motor::__update(void)
 	case STOPMODE_HOLD:
 		ev3dev_lego_tacho_motor::stop_command="hold";
 		break;
+	default:
+		break;
 	}
 	if (_stop_mode != _stop_mode_sp) {
 		set_write_flag(DEVICE_FILE_WRITE_STOP_COMMAND);

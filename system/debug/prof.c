@@ -1,12 +1,9 @@
-﻿/*****************************************************************************/
-/*!
-@author	abe takafumi
-@par	Copyright
-2014 abe takafumi All Rights Reserved.
-@file	prof.c
-@brie	統計情報収集機能
-	対応プラットフォーム：Windows (C++), Linux (C/C++) ...
-******************************************************************************/
+﻿/*
+ * Copyright Abe Takafumi All Rights Reserved, 2014
+ * Author Abe Takafumi
+ *
+ */
+
 #if defined(SHARAKU_PROF_ENABLE)
 
 /******************************************************************************

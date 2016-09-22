@@ -300,6 +300,8 @@ sd_position_move::update(const float &interval)
 		case MODE_TARGET_POSITION:
 			update_position_mode(interval);
 			break;
+		default:
+			break;
 		}
 	} else {
 		_steer = _steer_sp;

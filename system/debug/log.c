@@ -1,12 +1,8 @@
-﻿/*****************************************************************************/
-/*!
-@author	abe takafumi
-@par	Copyright
-2014 abe takafumi All Rights Reserved.
-@file	prof.c
-@brie	統計情報収集機能
-	対応プラットフォーム：Windows (C++), Linux (C/C++) ...
-******************************************************************************/
+﻿/*
+ * Copyright Abe Takafumi All Rights Reserved, 2014-2016
+ * Author Abe Takafumi
+ *
+ */
 
 /******************************************************************************
 include section
@@ -183,8 +179,7 @@ struct sharaku_datalogger_recode_header {
 	int32_t	type;
 	char	title[252];
 };
-struct sharaku_datalogger_context
-{
+struct sharaku_datalogger_context {
 	int32_t					index;
 	int32_t					max_counts;
 	struct sharaku_datalogger_recode	*recode;
@@ -263,8 +258,7 @@ sharaku_datalogger_create(int32_t t, char *title)
 
 	// mod_loggerに対してログを登録する
 	_logger.recode_header[handle].type	= t;
-	strncpy(_logger.recode_header[handle].title, title, 252);
-	_logger.recode_header[handle].title[1019] = '\0';
+	strncpy(_logger.recode_header[handle].title, title, sizeof(_logger.recode_header[handle].title));
 
 	return handle;
 }
