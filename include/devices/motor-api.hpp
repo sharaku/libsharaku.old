@@ -18,9 +18,9 @@ class motor_ctrl_operations
 {
  public:
 	enum stop_mode {
-		STOPMODE_COAST,	// 電力をカットし、自然に止まる（惰性）
-		STOPMODE_BRAKE,	// ブレーキをかけつつ、ゆっくり止まる
-		STOPMODE_HOLD,	// 現在の位置を維持しようとする
+		STOPMODE_COAST,		// 電力をカットし、自然に止まる（惰性）
+		STOPMODE_BRAKE,		// ブレーキをかけつつ、ゆっくり止まる
+		STOPMODE_HOLD,		// 現在の位置を維持しようとする
 		STOPMODE_UNKNOWN,	// ????
 	};
 
