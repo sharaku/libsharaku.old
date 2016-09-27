@@ -9,6 +9,7 @@
 
 #include <stdint.h>
 #include <devices/motor-api.hpp>
+#include <devices/connection_interface.hpp>
 
 NAMESPACE_SHARAKU_BEGIN
 
