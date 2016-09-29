@@ -2,13 +2,40 @@
 
 lib-platform	= linux
 
-all:
-	$(MAKE) -C system/ lib-target=libsharaku-sys.a lib-platform=$(lib-platform)
-	$(MAKE) -C devices/ lib-target=libsharaku-dev.a lib-platform=$(lib-platform)
-	$(MAKE) -C modules/ lib-target=libsharaku-mod.a lib-platform=$(lib-platform)
+all: arm x86
+
+arm:
+	$(MAKE) -C system/ clean lib-target=libsharaku-sys.arm.a 
+	$(MAKE) -C devices/ clean lib-target=libsharaku-dev.arm.a
+	$(MAKE) -C modules/ clean lib-target=libsharaku-mod.arm.a
+	$(MAKE) -C system/ lib-target=libsharaku-sys.arm.a lib-platform=$(lib-platform) CC=arm-linux-gnueabi-gcc CXX=arm-linux-gnueabi-g++
+	$(MAKE) -C devices/ lib-target=libsharaku-dev.arm.a lib-platform=$(lib-platform) CC=arm-linux-gnueabi-gcc CXX=arm-linux-gnueabi-g++
+	$(MAKE) -C modules/ lib-target=libsharaku-mod.arm.a lib-platform=$(lib-platform) CC=arm-linux-gnueabi-gcc CXX=arm-linux-gnueabi-g++
+
+x86:
+	$(MAKE) -C system/ clean lib-target=libsharaku-sys.x86.a 
+	$(MAKE) -C devices/ clean lib-target=libsharaku-dev.x86.a
+	$(MAKE) -C modules/ clean lib-target=libsharaku-mod.x86.a
+	$(MAKE) -C system/ lib-target=libsharaku-sys.x86.a lib-platform=$(lib-platform) CC=gcc CXX=gcc
+	$(MAKE) -C devices/ lib-target=libsharaku-dev.x86.a lib-platform=$(lib-platform) CC=gcc CXX=gcc
+	$(MAKE) -C modules/ lib-target=libsharaku-mod.x86.a lib-platform=$(lib-platform) CC=gcc CXX=gcc
+
+x86-testing:
+	$(MAKE) -C system/ clean lib-target=libsharaku-sys.x86.testing.a 
+	$(MAKE) -C devices/ clean lib-target=libsharaku-dev.x86.testing.a
+	$(MAKE) -C modules/ clean lib-target=libsharaku-mod.x86.testing.a
+	$(MAKE) -C system/ lib-target=libsharaku-sys.x86.testing.a lib-platform=$(lib-platform) CFLAGS=--coverage test-build=true CC=gcc CXX=gcc
+	$(MAKE) -C devices/ lib-target=libsharaku-dev.x86.testing.a lib-platform=$(lib-platform) CFLAGS=--coverage test-build=true CC=gcc CXX=gcc
+	$(MAKE) -C modules/ lib-target=libsharaku-mod.x86.testing.a lib-platform=$(lib-platform) CFLAGS=--coverage test-build=true CC=gcc CXX=gcc
 
 clean:
-	$(MAKE) -C system/ clean lib-target=libsharaku-sys.a 
-	$(MAKE) -C devices/ clean lib-target=libsharaku-dev.a
-	$(MAKE) -C modules/ clean lib-target=libsharaku-mod.a
+	$(MAKE) -C system/ clean lib-target=libsharaku-sys.x86.a 
+	$(MAKE) -C devices/ clean lib-target=libsharaku-dev.x86.a
+	$(MAKE) -C modules/ clean lib-target=libsharaku-mod.x86.a
+	$(MAKE) -C system/ clean lib-target=libsharaku-sys.arm.a 
+	$(MAKE) -C devices/ clean lib-target=libsharaku-dev.arm.a
+	$(MAKE) -C modules/ clean lib-target=libsharaku-mod.arm.a
+	$(MAKE) -C system/ clean lib-target=libsharaku-sys.x86.testing.a 
+	$(MAKE) -C devices/ clean lib-target=libsharaku-dev.x86.testing.a
+	$(MAKE) -C modules/ clean lib-target=libsharaku-mod.x86.testing.a
 

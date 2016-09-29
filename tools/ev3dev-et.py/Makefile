@@ -11,9 +11,9 @@ CC		:= arm-linux-gnueabi-gcc
 CXX		:= arm-linux-gnueabi-g++
 
 # libsharaku‚Ìƒ‰ƒCƒuƒ‰ƒŠ
-lib-flags	+= -L$(SHARAKU)/devices/ -lsharaku-dev
-lib-flags	+= -L$(SHARAKU)/modules/ -lsharaku-mod
-lib-flags	+= -L$(SHARAKU)/system/ -lsharaku-sys
+lib-flags	+= -L$(SHARAKU)/devices/ -lsharaku-dev.arm
+lib-flags	+= -L$(SHARAKU)/modules/ -lsharaku-mod.arm
+lib-flags	+= -L$(SHARAKU)/system/ -lsharaku-sys.arm
 lib-flags	+= -lpthread
 lib-flags	+= -lboost_python
 lib-flags	+= -lpython2.7

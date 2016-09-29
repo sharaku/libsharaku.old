@@ -7,14 +7,15 @@ include configs/sharaku.config
 
 SHARAKU		:= ..
 ARFLAG		:= r
-CFLAGS    	:= -Wall -Wno-unused-function -g
 
 lib-includes   	+= $(SHARAKU)/include
 
 lib-defines	+= $(if $(filter y,$(CONFIG_PROFILE)), SHARAKU_PROF_ENABLE)
 lib-defines	+= $(if $(filter y,$(CONFIG_PROFILE_CLEAR)), SHARAKU_PROF_CLEAR_ENABLE)
 lib-flags	+= $(if $(CONFIG_O), -O$(CONFIG_O))
+lib-flags	+= -g
 lib-flags	+= -Wall
+lib-flags	+= -Wextra
 lib-flags	+= -Wno-unused-function
 
 cc-opt		+= $(CFLAGS)

@@ -1,4 +1,16 @@
 #!/bin/sh
 
 mkdir -p result
-sh ./build-targets/build.ev3dev.sh 2> result/result-build.ev3dev.txt
+make -C ../../ clear
+
+# libsharaku builds
+make -C ../../ x86 2> result/result-build.x86.txt
+make -C ../../ arm 2> result/result-build.arm.txt
+
+# testing builds
+make -C ../../ x86-testing 2> result/result-build.x86-testing.txt
+
+# ev3dev tools builds
+make -C ../ev3dev-et.py clean
+make -C ../ev3dev-et.py CC=arm-linux-gnueabi-gcc CXX=arm-linux-gnueabi-g++
+
