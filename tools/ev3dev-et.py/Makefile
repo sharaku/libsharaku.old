@@ -26,8 +26,8 @@ obj-includes   	+= -I/usr/arm-linux-gnueabi/include/python2.7
 obj-defines	+= -Wall -g -O -Wno-unused-function
 obj-defines	+= -Wno-unused-variable
 
-src-hackev	+= EV3Way.cpp
-src-ev3way	+= HackEV.cpp
+src-hackev	+= HackEV.cpp
+src-ev3way	+= EV3Way.cpp
 
 obj-hackev	:= $(src-hackev:.cpp=.o)
 obj-ev3way	:= $(src-ev3way:.cpp=.o)
@@ -44,7 +44,7 @@ $(obj-hackev-target): $(notdir $(obj-hackev))
 	@echo "$(lib-target) make success"
 
 $(obj-ev3way-target): $(notdir $(obj-ev3way))
-	$(CXX) $(notdir $(obj)) -o $(obj-ev3way-target) $(lib-flags)
+	$(CXX) $(notdir $(obj-ev3way)) -o $(obj-ev3way-target) $(lib-flags)
 	@echo "$(lib-target) make success"
 
 clean:

@@ -217,8 +217,8 @@ sd_motors::post_update(const float &interval)
 	} else {
 		out_speed_motor_l->set_speed_sp(_dps_l_motor);
 		out_speed_motor_r->set_speed_sp(_dps_r_motor);
-		sharaku_db_trace("_pos_l_motor=%d _pos_r_motor=%d left_pos=%d right_pos=%d",
-				_pos_l_motor, _pos_r_motor,
+		sharaku_db_trace("_dps_l_motor=%d _dps_r_motor=%d left_pos=%d right_pos=%d",
+				_dps_l_motor, _dps_r_motor,
 				left_pos, right_pos, 0, 0);
 	}
 

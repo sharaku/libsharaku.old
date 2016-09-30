@@ -42,6 +42,16 @@ class ev3way_balancer
 	virtual ~ev3way_balancer() {
 	}
 
+	// sm_move_op インタフェース
+	virtual void set_max_dps(int32_t dps) {
+		_max_dps = dps;
+	}
+	virtual void balancer_on(void) {
+		_onoff = true;
+	}
+	virtual void balancer_off(void) {
+		_onoff = false;
+	}
 	// move_operations インタフェース
 	virtual int32_t	get_steer_sp(void) {
 		return _steer_sp;
@@ -70,7 +80,9 @@ class ev3way_balancer
  private:
 
 	sharaku_usec_t		_time;		// 前回実行時の時間
+	bool			_onoff;		// 機能On/Off
 
+	int32_t			_max_dps;
 	int32_t			_steer_sp;
 	int32_t			_speed_sp;
 	float			_steer;

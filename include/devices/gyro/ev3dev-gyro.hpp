@@ -52,8 +52,12 @@ class ev3dev_gyro
 		return _sign_sp = s;
 	}
 	// gyro_operations API
+	virtual int32_t	set_zero_angle(int32_t angle) {
+		_zero_angle = angle;
+		return _zero_angle;
+	}
 	virtual int32_t	get_angle(void) {
-		return _angle - _base_angle;
+		return _angle - _base_angle - _zero_angle;
 	}
 	virtual int32_t	get_rate(void) {
 		return _rate;
@@ -73,6 +77,7 @@ class ev3dev_gyro
 
  private:
 	sharaku_usec_t	_start_time;
+	int32_t		_zero_angle;
 	int32_t		_base_angle;
 	int32_t		_sign;
 	int32_t		_sign_sp;

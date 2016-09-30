@@ -17,6 +17,7 @@ NAMESPACE_SHARAKU_BEGIN
 
 ev3way_balancer::ev3way_balancer()
 {
+	_max_dps = 1000;
 	sharaku_db_trace("balance_init", 0, 0, 0, 0, 0, 0);
 	balance_init(); /* 倒立振子API初期化 */
 }
@@ -40,13 +41,20 @@ void ev3way_balancer::update(const float &interval)
 	sharaku_db_trace("interval=%u left_pos=%d right_pos=%d delta=%d _speed=%d _position=%d",
 			 interval * 1000000, left_pos, right_pos, delta, _speed, _position);
 
+	if (!_onoff) {
+		// offの場合はスルーする
+		pwm_L = (_speed_sp * 100) / _max_dps;
+		pwm_L = (_steer_sp * 100) / _max_dps;
+		goto balanser_off;
+	}
+
 	// 情報を更新
 	_prev_sum	= pos_sum;
 	_prev_deltas[2] = _prev_deltas[1];
 	_prev_deltas[1] = _prev_deltas[0];
 	_prev_deltas[0] = delta;
 
-	gyro = -1 * in_gyro->get_angle();
+	gyro = in_gyro->get_angle();
 	volt = in_power->get_voltage();
 	sharaku_db_trace("_speed_sp=%d _steer_sp=%d gyro=%d left_pos=%d right_pos=%d volt=%d",
 			 _speed_sp, _steer_sp, gyro, left_pos, right_pos, volt);
@@ -59,11 +67,12 @@ void ev3way_balancer::update(const float &interval)
 			(float)volt,
 			(signed char*)&pwm_L,
 			(signed char*)&pwm_R,
-			interval);
+			interval / 1000000.0f);
 
+balanser_off:
 	sharaku_db_trace("pwm_L=%d pwm_R=%d", pwm_L, pwm_R, 0, 0, 0, 0);
-	out_duty_motor_l->set_duty_cycle_sp(-1 * pwm_L);
-	out_duty_motor_r->set_duty_cycle_sp(-1 * pwm_R);
+	out_duty_motor_l->set_duty_cycle_sp(pwm_L);
+	out_duty_motor_r->set_duty_cycle_sp(pwm_R);
 }
 
 NAMESPACE_SHARAKU_END
