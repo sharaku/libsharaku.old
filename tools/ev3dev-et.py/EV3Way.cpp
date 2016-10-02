@@ -27,30 +27,30 @@ static EV3way			_ev3way;
 
 //////////////////////////////////////////////////////////////////////////
 // ---------------------------------------------------------------------
-// ƒƒCƒ“§Œä
+// ãƒ¡ã‚¤ãƒ³åˆ¶å¾¡
 // ---------------------------------------------------------------------
 static void job_init(struct sharaku_job *job)
 {
-	// EV3way‚ğŠJn‚·‚é
+	// EV3wayã‚’é–‹å§‹ã™ã‚‹
 	_ev3way.start();
 }
 
 static void job_exit_end(struct sharaku_job *job)
 {
-	// I—¹‚·‚éB
-	// ‚±‚ê‚É‚æ‚èAsharaku_entry‚ªI—¹‚·‚éB
+	// çµ‚äº†ã™ã‚‹ã€‚
+	// ã“ã‚Œã«ã‚ˆã‚Šã€sharaku_entryãŒçµ‚äº†ã™ã‚‹ã€‚
 	sharaku_exit_message(0);
 }
 
 static void job_exit(struct sharaku_job *job)
 {
-	// EV3way‚ğI—¹‚·‚é
+	// EV3wayã‚’çµ‚äº†ã™ã‚‹
 	_ev3way.stop();
 
-	// ƒXƒPƒWƒ…[ƒ‹‚³‚ê‚Ä‚¢‚éjob‚ğƒLƒƒƒ“ƒZƒ‹‚·‚é
+	// ã‚¹ã‚±ã‚¸ãƒ¥ãƒ¼ãƒ«ã•ã‚Œã¦ã„ã‚‹jobã‚’ã‚­ãƒ£ãƒ³ã‚»ãƒ«ã™ã‚‹
 	sharaku_cancel_message(&_job_init);
 
-	// I—¹‚·‚é‚Ü‚Å100ms‘Ò‚ÂB‚»‚ÌŠÔ‚Éƒ‚[ƒ^“™‚ğI—¹‚³‚¹‚é
+	// çµ‚äº†ã™ã‚‹ã¾ã§100mså¾…ã¤ã€‚ãã®é–“ã«ãƒ¢ãƒ¼ã‚¿ç­‰ã‚’çµ‚äº†ã•ã›ã‚‹
 	sharaku_timer_message(&_job_exit, 100, job_exit_end);
 }
 
@@ -99,7 +99,7 @@ namespace Gyro {
 
 static int32_t SetZeroAngle(int32_t angle)
 {
-	return _ev3way.gyro.set_zero_angle(angle);
+	return _ev3way.gyro.set_offset(angle);
 }
 
 static int32_t GetAngle(void)
@@ -215,9 +215,9 @@ static int32_t WaitDegree(void)
 	const struct timespec sleep_time = {0, 100000};
 	int32_t count = 0;
 
-	// w’èˆÊ’u‚É—ˆ‚é‚Ü‚Å‘Ò‚ÂB
-	// “®ìãAw’èˆÊ’u‚É—ˆ‚é‚Í‚¸‚Å‚ ‚é‚ªAƒpƒ[•s‘«‚âáŠQ•¨‚Éˆø‚Á‚©‚©‚Á‚Ä
-	// –Ú•W‚É“’B‚Å‚«‚È‚¢‰Â”\«‚ª‚ ‚éB
+	// æŒ‡å®šä½ç½®ã«æ¥ã‚‹ã¾ã§å¾…ã¤ã€‚
+	// å‹•ä½œä¸Šã€æŒ‡å®šä½ç½®ã«æ¥ã‚‹ã¯ãšã§ã‚ã‚‹ãŒã€ãƒ‘ãƒ¯ãƒ¼ä¸è¶³ã‚„éšœå®³ç‰©ã«å¼•ã£ã‹ã‹ã£ã¦
+	// ç›®æ¨™ã«åˆ°é”ã§ããªã„å¯èƒ½æ€§ãŒã‚ã‚‹ã€‚
 	for (;;) {
 		now_deg = GetDegree();
 		if (now_deg == _target_deg) {
@@ -387,18 +387,18 @@ static int32_t SetParam(float Kp, float Ki, float Kd, float q, int in_angle, int
 {
 	float lt_q = _ev3way.linetrace.get_lowpass();
 	if (lt_q != q) {
-		// XV‚ª‚ ‚éê‡‚Ì‚İİ’è‚·‚éB
+		// æ›´æ–°ãŒã‚ã‚‹å ´åˆã®ã¿è¨­å®šã™ã‚‹ã€‚
 		_ev3way.linetrace.set_lowpass(q);
 	}
 	float lt_Kp, lt_Ki, lt_Kd;
 	_ev3way.linetrace.get_trace_pid(lt_Kp, lt_Ki, lt_Kd);
 	if (lt_Kp != Kp || lt_Ki != Ki || lt_Kd != Kd) {
-		// XV‚ª‚ ‚éê‡‚Ì‚İİ’è‚·‚éB
-		// ƒŠƒZƒbƒg‚Ì•K—v‚ª‚ ‚ê‚ÎƒŠƒZƒbƒg‚·‚é
+		// æ›´æ–°ãŒã‚ã‚‹å ´åˆã®ã¿è¨­å®šã™ã‚‹ã€‚
+		// ãƒªã‚»ãƒƒãƒˆã®å¿…è¦ãŒã‚ã‚Œã°ãƒªã‚»ãƒƒãƒˆã™ã‚‹
 		_ev3way.linetrace.set_trace_pid(Kp, Ki, Kd);
 		_ev3way.linetrace.clear_pid();
 	}
-	// ù‰ñŠp“x‚¾‚¯‚Íí‚ÉXV‚·‚éB
+	// æ—‹å›è§’åº¦ã ã‘ã¯å¸¸ã«æ›´æ–°ã™ã‚‹ã€‚
 	_ev3way.linetrace.set_turn_angle(in_angle, out_angle);
 	return 0;
 }
@@ -565,15 +565,15 @@ static int32_t Reset(void)
 
 //////////////////////////////////////////////////////////////////////////
 // ---------------------------------------------------------------------
-// ƒZƒ“ƒT[
+// ã‚»ãƒ³ã‚µãƒ¼
 // ---------------------------------------------------------------------
 void export_submodule_gyro() {
 	using namespace boost::python;
 
 	object module(handle<>(borrowed(PyImport_AddModule("EV3Way.Gyro"))));
-	// from mainmodule import gyro ‚ğg‚¦‚é‚æ‚¤‚É‚·‚é
+	// from mainmodule import gyro ã‚’ä½¿ãˆã‚‹ã‚ˆã†ã«ã™ã‚‹
 	scope().attr("Gyro") = module;
-	// ƒXƒR[ƒv‚ğİ’è
+	// ã‚¹ã‚³ãƒ¼ãƒ—ã‚’è¨­å®š
 	scope gyro_scope = module;
 
 	def("SetZeroAngle", Gyro::SetZeroAngle);
@@ -586,9 +586,9 @@ void export_submodule_color() {
 	using namespace boost::python;
 
 	object module(handle<>(borrowed(PyImport_AddModule("EV3Way.Color"))));
-	// from mainmodule import color ‚ğg‚¦‚é‚æ‚¤‚É‚·‚é
+	// from mainmodule import color ã‚’ä½¿ãˆã‚‹ã‚ˆã†ã«ã™ã‚‹
 	scope().attr("Color") = module;
-	// ƒXƒR[ƒv‚ğİ’è
+	// ã‚¹ã‚³ãƒ¼ãƒ—ã‚’è¨­å®š
 	scope gyro_scope = module;
 
 	def("SetMode", Color::SetMode);
@@ -602,9 +602,9 @@ void export_submodule_usonic() {
 	using namespace boost::python;
 
 	object module(handle<>(borrowed(PyImport_AddModule("EV3Way.USonic"))));
-	// from mainmodule import usonic ‚ğg‚¦‚é‚æ‚¤‚É‚·‚é
+	// from mainmodule import usonic ã‚’ä½¿ãˆã‚‹ã‚ˆã†ã«ã™ã‚‹
 	scope().attr("USonic") = module;
-	// ƒXƒR[ƒv‚ğİ’è
+	// ã‚¹ã‚³ãƒ¼ãƒ—ã‚’è¨­å®š
 	scope gyro_scope = module;
 
 	def("GetMM", USonic::GetMM);
@@ -615,9 +615,9 @@ void export_submodule_touch() {
 	using namespace boost::python;
 
 	object module(handle<>(borrowed(PyImport_AddModule("EV3Way.Touch"))));
-	// from mainmodule import usonic ‚ğg‚¦‚é‚æ‚¤‚É‚·‚é
+	// from mainmodule import usonic ã‚’ä½¿ãˆã‚‹ã‚ˆã†ã«ã™ã‚‹
 	scope().attr("Touch") = module;
-	// ƒXƒR[ƒv‚ğİ’è
+	// ã‚¹ã‚³ãƒ¼ãƒ—ã‚’è¨­å®š
 	scope gyro_scope = module;
 
 	def("IsPress", Touch::IsPress);
@@ -626,15 +626,15 @@ void export_submodule_touch() {
 }
 
 // ---------------------------------------------------------------------
-// ƒZƒ“ƒT[î•ñ
+// ã‚»ãƒ³ã‚µãƒ¼æƒ…å ±
 // ---------------------------------------------------------------------
 void export_submodule_tail() {
 	using namespace boost::python;
 
 	object module(handle<>(borrowed(PyImport_AddModule("EV3Way.Tail"))));
-	// from mainmodule import usonic ‚ğg‚¦‚é‚æ‚¤‚É‚·‚é
+	// from mainmodule import usonic ã‚’ä½¿ãˆã‚‹ã‚ˆã†ã«ã™ã‚‹
 	scope().attr("Tail") = module;
-	// ƒXƒR[ƒv‚ğİ’è
+	// ã‚¹ã‚³ãƒ¼ãƒ—ã‚’è¨­å®š
 	scope gyro_scope = module;
 
 	def("GetDegree", Tail::GetDegree);
@@ -644,15 +644,15 @@ void export_submodule_tail() {
 
 
 // ---------------------------------------------------------------------
-// ƒ‚ƒWƒ…[ƒ‹
+// ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«
 // ---------------------------------------------------------------------
 void export_submodule_motors() {
 	using namespace boost::python;
 
 	object module(handle<>(borrowed(PyImport_AddModule("EV3Way.Motors"))));
-	// from mainmodule import odo ‚ğg‚¦‚é‚æ‚¤‚É‚·‚é
+	// from mainmodule import odo ã‚’ä½¿ãˆã‚‹ã‚ˆã†ã«ã™ã‚‹
 	scope().attr("Motors") = module;
-	// ƒXƒR[ƒv‚ğİ’è
+	// ã‚¹ã‚³ãƒ¼ãƒ—ã‚’è¨­å®š
 	scope odo_scope = module;
 
 	def("SetFwdSpeed", Motors::SetFwdSpeed);
@@ -666,9 +666,9 @@ void export_submodule_odo() {
 	using namespace boost::python;
 
 	object module(handle<>(borrowed(PyImport_AddModule("EV3Way.Odo"))));
-	// from mainmodule import odo ‚ğg‚¦‚é‚æ‚¤‚É‚·‚é
+	// from mainmodule import odo ã‚’ä½¿ãˆã‚‹ã‚ˆã†ã«ã™ã‚‹
 	scope().attr("Odo") = module;
-	// ƒXƒR[ƒv‚ğİ’è
+	// ã‚¹ã‚³ãƒ¼ãƒ—ã‚’è¨­å®š
 	scope odo_scope = module;
 
 	def("GetDistance", Odo::GetDistance);
@@ -684,9 +684,9 @@ void export_submodule_linetrace() {
 	using namespace boost::python;
 
 	object module(handle<>(borrowed(PyImport_AddModule("EV3Way.Linetrace"))));
-	// from mainmodule import linetrace ‚ğg‚¦‚é‚æ‚¤‚É‚·‚é
+	// from mainmodule import linetrace ã‚’ä½¿ãˆã‚‹ã‚ˆã†ã«ã™ã‚‹
 	scope().attr("Linetrace") = module;
-	// ƒXƒR[ƒv‚ğİ’è
+	// ã‚¹ã‚³ãƒ¼ãƒ—ã‚’è¨­å®š
 	scope linetrace_scope = module;
 
 	def("CalibrationWhite", Linetrace::CalibrationWhite);
@@ -701,9 +701,9 @@ void export_submodule_targetmove() {
 	using namespace boost::python;
 
 	object module(handle<>(borrowed(PyImport_AddModule("EV3Way.TargetMove"))));
-	// from mainmodule import linetrace ‚ğg‚¦‚é‚æ‚¤‚É‚·‚é
+	// from mainmodule import linetrace ã‚’ä½¿ãˆã‚‹ã‚ˆã†ã«ã™ã‚‹
 	scope().attr("TargetMove") = module;
-	// ƒXƒR[ƒv‚ğİ’è
+	// ã‚¹ã‚³ãƒ¼ãƒ—ã‚’è¨­å®š
 	scope linetrace_scope = module;
 
 	def("SetOnOff", &TargetMove::SetOnOff);
@@ -723,9 +723,9 @@ void export_submodule_baranser() {
 	using namespace boost::python;
 
 	object module(handle<>(borrowed(PyImport_AddModule("EV3Way.Baranser"))));
-	// from mainmodule import linetrace ‚ğg‚¦‚é‚æ‚¤‚É‚·‚é
+	// from mainmodule import linetrace ã‚’ä½¿ãˆã‚‹ã‚ˆã†ã«ã™ã‚‹
 	scope().attr("Baranser") = module;
-	// ƒXƒR[ƒv‚ğİ’è
+	// ã‚¹ã‚³ãƒ¼ãƒ—ã‚’è¨­å®š
 	scope linetrace_scope = module;
 
 	def("SetOnOff", Baranser::SetOnOff);
@@ -733,7 +733,7 @@ void export_submodule_baranser() {
 }
 
 // ---------------------------------------------------------------------
-// ƒ‚ƒWƒ…[ƒ‹’è‹`
+// ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«å®šç¾©
 // ---------------------------------------------------------------------
 BOOST_PYTHON_MODULE(EV3Way)
 {

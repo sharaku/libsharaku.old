@@ -54,20 +54,17 @@ void ev3way_balancer::update(const float &interval)
 	_prev_deltas[1] = _prev_deltas[0];
 	_prev_deltas[0] = delta;
 
-	gyro = in_gyro->get_angle();
-	volt = in_power->get_voltage();
 	sharaku_db_trace("_speed_sp=%d _steer_sp=%d gyro=%d left_pos=%d right_pos=%d volt=%d",
 			 _speed_sp, _steer_sp, gyro, left_pos, right_pos, volt);
 	balance_control((float)_speed_sp,
 			(float)_steer_sp,
-			(float)gyro,
+			(float)in_gyro->get_rate(),
 			(float)0,
-			(float)left_pos,
-			(float)right_pos,
-			(float)volt,
+			(float)out_duty_motor_l->get_position(),
+			(float)out_duty_motor_r->get_position(),
+			(float)in_power->get_voltage(),
 			(signed char*)&pwm_L,
-			(signed char*)&pwm_R,
-			interval / 1000000.0f);
+			(signed char*)&pwm_R);
 
 balanser_off:
 	sharaku_db_trace("pwm_L=%d pwm_R=%d", pwm_L, pwm_R, 0, 0, 0, 0);

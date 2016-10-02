@@ -173,7 +173,7 @@ static float ud_thetadot_cmd_lpf;   /* 左右車輪の目標平均回転角速�
 void balance_control(float args_cmd_forward, float args_cmd_turn, float
                      args_gyro, float args_gyro_offset, float
                      args_theta_m_l, float args_theta_m_r, float
-                     args_battery, signed char *ret_pwm_l, signed char *ret_pwm_r, float interval)
+                     args_battery, signed char *ret_pwm_l, signed char *ret_pwm_r)
 {
   {
     float tmp_theta;

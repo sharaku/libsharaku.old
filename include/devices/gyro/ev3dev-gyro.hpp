@@ -23,6 +23,7 @@ class ev3dev_gyro
 	ev3dev_gyro(const char *port, int interval_ms)
 	 : ev3dev_lego_sensor(interval_ms) {
 		_base_angle	= 0;
+		_0_offset	= 0;
 		_sign		= 1;
 		_sign_sp	= 1;
 		_offset		= 0;
@@ -52,12 +53,12 @@ class ev3dev_gyro
 		return _sign_sp = s;
 	}
 	// gyro_operations API
-	virtual int32_t	set_zero_angle(int32_t angle) {
-		_zero_angle = angle;
-		return _zero_angle;
+	virtual int32_t	set_offset(int32_t offset) {
+		_0_offset = offset;
+		return _0_offset;
 	}
 	virtual int32_t	get_angle(void) {
-		return _angle - _base_angle - _zero_angle;
+		return _angle - _base_angle - _0_offset;
 	}
 	virtual int32_t	get_rate(void) {
 		return _rate;
@@ -77,7 +78,7 @@ class ev3dev_gyro
 
  private:
 	sharaku_usec_t	_start_time;
-	int32_t		_zero_angle;
+	int32_t		_0_offset;
 	int32_t		_base_angle;
 	int32_t		_sign;
 	int32_t		_sign_sp;

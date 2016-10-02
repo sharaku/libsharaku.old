@@ -99,7 +99,7 @@ namespace Gyro {
 
 static int32_t SetZeroAngle(int32_t angle)
 {
-	return _hackev.gyro.set_zero_angle(angle);
+	return _hackev.gyro.set_offset(angle);
 }
 
 static int32_t GetAngle(void)
