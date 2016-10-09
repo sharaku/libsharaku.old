@@ -1,14 +1,15 @@
 
 all: check build deproy
 
-build:
-	sh build.sh
-
 check:
-	sh static_check.sh
+	sh 01-static_check.sh
+
+build:
+	sh 02-build.sh
 
 deproy:
-	sh deproy.sh
+	sh 03-deproy.sh
 
 clean:
 	@rm -fr result
+	@rm -fr src
