@@ -413,11 +413,13 @@ namespace Linetrace {
 static int32_t CalibrationWhite(uint32_t value)
 {
 	_hackev.linetrace.set_white(value);
+	return 0;
 }
 
 static int32_t CalibrationBlack(uint32_t value)
 {
 	_hackev.linetrace.set_black(value);
+	return 0;
 }
 
 static int32_t SetOnOff(bool onoff)
