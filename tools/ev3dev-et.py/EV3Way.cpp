@@ -559,7 +559,8 @@ static int32_t SetOnOff(bool onoff)
 
 static int32_t Reset(void)
 {
-	return ENOTSUP;
+	_ev3way.balancer.reset();
+	return 0;
 }
 
 };

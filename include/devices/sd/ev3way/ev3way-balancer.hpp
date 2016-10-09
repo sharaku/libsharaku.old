@@ -37,6 +37,9 @@ class ev3way_balancer
 	operator move_operations*() { return (move_operations*)this;}
 	operator update_operations*() { return (update_operations*)this;}
 
+	// reset
+	virtual int32_t	reset(void);
+
  public:
 	ev3way_balancer();
 	virtual ~ev3way_balancer() {

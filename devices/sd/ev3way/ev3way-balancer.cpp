@@ -19,7 +19,15 @@ ev3way_balancer::ev3way_balancer()
 {
 	_max_dps = 1000;
 	sharaku_db_trace("balance_init", 0, 0, 0, 0, 0, 0);
+	reset();
+}
+
+int32_t
+ev3way_balancer::reset(void)
+{
+	sharaku_db_trace("reset", 0, 0, 0, 0, 0, 0);
 	balance_init(); /* “|—§UqAPI‰Šú‰» */
+	return 0;
 }
 
 void ev3way_balancer::update(const float &interval)
