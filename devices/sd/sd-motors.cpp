@@ -151,8 +151,8 @@ sd_motors::differential(int32_t steering)
 /******************************************************************************
 IUpdate API
 ******************************************************************************/
-void
-sd_motors::pre_update(const float &interval)
+int32_t
+sd_motors::pre_update(const float &interval, uint32_t retry_cnt)
 {
 	sharaku_db_trace("interval=%d", (int32_t)(interval * 1000.0f), 0, 0, 0, 0, 0);
 
@@ -188,10 +188,12 @@ sd_motors::pre_update(const float &interval)
 	time = sharaku_get_usec();
 	sharaku_prof_add(&__prof_motors_processing, _time, time);
 	sharaku_db_trace("time=%d", (int32_t)(time - _time), 0, 0, 0, 0, 0);
+
+	return 0;
 }
 
-void
-sd_motors::post_update(const float &interval)
+int32_t
+sd_motors::post_update(const float &interval, uint32_t retry_cnt)
 {
 	// 両輪の状態を取得し、位置と速度を算出する
 	register int32_t	left_pos	= out_speed_motor_l->get_position();
@@ -235,6 +237,8 @@ sd_motors::post_update(const float &interval)
 			out_device_update_r->start_commit();
 		}
 	}
+
+	return 0;
 }
 
 NAMESPACE_SHARAKU_END

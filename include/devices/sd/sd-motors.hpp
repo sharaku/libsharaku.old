@@ -73,8 +73,8 @@ class sd_motors
 	}
 
 	// update_operations インタフェース
-	virtual void pre_update(const float &interval);
-	virtual void post_update(const float &interval);
+	virtual int32_t pre_update(const float &interval, uint32_t retry_cnt);
+	virtual int32_t post_update(const float &interval, uint32_t retry_cnt);
 
  protected:
 	// 設定値

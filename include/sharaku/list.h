@@ -2,7 +2,7 @@
 /*!
 @author	abe takafumi
 @file	list.h
-@brief	linux kernelのlist.hを汎用で使用できるように移植
+@brief	linux kernelのlist.hを参考に各プラットフォームで使用できるように作成
 	対応プラットフォーム：Windows (C++), Linux (C/C++) ...
 ******************************************************************************/
 #ifndef _SHARAKU_LIST_H

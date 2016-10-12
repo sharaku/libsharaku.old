@@ -143,7 +143,7 @@ class sd_linetrace
 	}
 
 	// update_operations インタフェース
-	virtual void update(const float &interval);
+	virtual int32_t update(const float &interval, uint32_t retry_cnt);
 
  protected:
 	// 周期的に黒の場合に呼び出される。

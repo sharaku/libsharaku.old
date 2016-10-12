@@ -34,41 +34,47 @@ update_group::register_update(update_operations* update)
 	sharaku_db_trace("", 0, 0, 0, 0, 0, 0);
 	list_add(&update->update_list, &_update_list);
 }
-void
-update_group::pre_update(const float &interval)
+int32_t
+update_group::pre_update(const float &interval, uint32_t retry_cnt)
 {
 	update_operations	*update;
 
 	sharaku_db_trace("start", 0, 0, 0, 0, 0, 0);
 	list_for_each_entry(update, &_update_list, update_operations, update_list) {
-		update->pre_update(interval);
+		update->pre_update(interval, retry_cnt);
 		sharaku_db_trace("update->pre_update", 0, 0, 0, 0, 0, 0);
 	}
 	sharaku_db_trace("end", 0, 0, 0, 0, 0, 0);
+
+	return 0;
 }
 
-void
-update_group::update(const float &interval)
+int32_t
+update_group::update(const float &interval, uint32_t retry_cnt)
 {
 	update_operations	*update;
 	sharaku_db_trace("start", 0, 0, 0, 0, 0, 0);
 	list_for_each_entry(update, &_update_list, update_operations, update_list) {
-		update->update(interval);
+		update->update(interval, retry_cnt);
 		sharaku_db_trace("update->update", 0, 0, 0, 0, 0, 0);
 	}
 	sharaku_db_trace("end", 0, 0, 0, 0, 0, 0);
+
+	return 0;
 }
 
-void
-update_group::post_update(const float &interval)
+int32_t
+update_group::post_update(const float &interval, uint32_t retry_cnt)
 {
 	update_operations	*update;
 	sharaku_db_trace("start", 0, 0, 0, 0, 0, 0);
 	list_for_each_entry(update, &_update_list, update_operations, update_list) {
-		update->post_update(interval);
+		update->post_update(interval, retry_cnt);
 		sharaku_db_trace("update->post_update", 0, 0, 0, 0, 0, 0);
 	}
 	sharaku_db_trace("end", 0, 0, 0, 0, 0, 0);
+
+	return 0;
 }
 
 
@@ -177,19 +183,19 @@ mod_update::mod_update_cycle(struct sharaku_job* job)
 					/ (float)device->_update_count / 1000000.0f;
 
 	// pre_updateを実行する
-	device->pre_update(interval);
+	device->pre_update(interval, 0);
 	time_pre_update_end = sharaku_get_usec();
 	sharaku_prof_add(&__prof_update_pre_update_processing,
 					time_cycle_start, time_pre_update_end);
 
 	// updateを実行する
-	device->update(interval);
+	device->update(interval, 0);
 	time_update_end = sharaku_get_usec();
 	sharaku_prof_add(&__prof_update_update_processing,
 					time_pre_update_end, time_update_end);
 
 	// post_updateを実行する
-	device->post_update(interval);
+	device->post_update(interval, 0);
 	time_post_update_end = sharaku_get_usec();
 	sharaku_prof_add(&__prof_update_post_update_processing,
 					time_update_end, time_post_update_end);

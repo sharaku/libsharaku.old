@@ -71,7 +71,7 @@ class sd_wheel_odometry
 	}
 
 	// update_operations インタフェース
-	virtual void pre_update(const float &interval);
+	virtual int32_t pre_update(const float &interval, uint32_t retry_cnt);
 
  private:
 	sd_wheel_odometry() {}

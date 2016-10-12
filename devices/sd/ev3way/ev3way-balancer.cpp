@@ -30,7 +30,7 @@ ev3way_balancer::reset(void)
 	return 0;
 }
 
-void ev3way_balancer::update(const float &interval)
+int32_t ev3way_balancer::update(const float &interval, uint32_t retry_cnt)
 {
 	signed char pwm_L, pwm_R; /* 左右モータPWM出力 */
 	int gyro, volt;
@@ -78,6 +78,8 @@ balanser_off:
 	sharaku_db_trace("pwm_L=%d pwm_R=%d", pwm_L, pwm_R, 0, 0, 0, 0);
 	out_duty_motor_l->set_duty_cycle_sp(pwm_L);
 	out_duty_motor_r->set_duty_cycle_sp(pwm_R);
+
+	return 0;
 }
 
 NAMESPACE_SHARAKU_END

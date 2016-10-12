@@ -35,9 +35,9 @@ class update_operations
 	update_operations() {
 		INIT_LIST_HEAD(&update_list);
 	}
-	virtual void	pre_update(const float &interval) {}
-	virtual void	update(const float &interval) {}
-	virtual void	post_update(const float &interval) {}
+	virtual int32_t	pre_update(const float &interval, uint32_t retry_cnt) { return 0; }
+	virtual int32_t	update(const float &interval, uint32_t retry_cnt) { return 0; }
+	virtual int32_t	post_update(const float &interval, uint32_t retry_cnt) { return 0; }
  public:
 	list_head	update_list;
 };

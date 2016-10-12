@@ -49,8 +49,8 @@ sd_wheel_odometry::sd_wheel_odometry(int32_t wheel_axle_length,int32_t wheel_len
 	_rot(0, 0, 0);
 }
 
-void
-sd_wheel_odometry::pre_update(const float & interval)
+int32_t
+sd_wheel_odometry::pre_update(const float & interval, uint32_t retry_cnt)
 {
 	sharaku_db_trace("interval=%d", (int32_t)(interval * 1000.0f), 0, 0, 0, 0, 0);
 
@@ -115,6 +115,8 @@ sd_wheel_odometry::pre_update(const float & interval)
 	time = sharaku_get_usec();
 	sharaku_prof_add(&__prof_odometory_processing, _time, time);
 	sharaku_db_trace("time=%d", (int32_t)(time - _time), 0, 0, 0, 0, 0);
+
+	return 0;
 }
 
 NAMESPACE_SHARAKU_END

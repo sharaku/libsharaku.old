@@ -175,7 +175,7 @@ class sd_position_move
 	// -------------------------------------------------------------
 	// update_operations インタフェース
 	// -------------------------------------------------------------
-	virtual void update(const float &interval);
+	virtual int32_t update(const float &interval, uint32_t retry_cnt);
 	virtual void update_distance_mode(const float &interval);
 	virtual void update_distance_deg_mode(const float &interval, int turn);
 	virtual void update_position_mode(const float &interval);

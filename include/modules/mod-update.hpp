@@ -26,9 +26,9 @@ class update_group
 	// Updateの登録
 	void register_update(update_operations* update);
 
-	virtual void	pre_update(const float &interval);
-	virtual void	update(const float &interval);
-	virtual void	post_update(const float &interval);
+	virtual int32_t pre_update(const float &interval, uint32_t retry_cnt);
+	virtual int32_t update(const float &interval, uint32_t retry_cnt);
+	virtual int32_t post_update(const float &interval, uint32_t retry_cnt);
 
  private:
 	list_head		_update_list;

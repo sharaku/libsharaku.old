@@ -64,7 +64,7 @@ sd_linetrace::sd_linetrace()
 }
 
 
-void sd_linetrace::update(const float &interval)
+int32_t sd_linetrace::update(const float &interval, uint32_t retry_cnt)
 {
 	sharaku_db_trace("interval=%d", (int32_t)(interval * 1000.0f), 0, 0, 0, 0, 0);
 
@@ -82,7 +82,7 @@ void sd_linetrace::update(const float &interval)
 	sharaku_db_trace("", 0, 0, 0, 0, 0, 0);
 
 	if (!_trace_onoff) {
-		return;
+		return 0;
 	}
 
 	// 不確定時間を加算する
@@ -123,6 +123,8 @@ void sd_linetrace::update(const float &interval)
 	// 時間収集
 	time = sharaku_get_usec();
 	sharaku_prof_add(&__prof_linetrace_processing, _time, time);
+
+	return 0;
 }
 
 

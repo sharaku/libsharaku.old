@@ -78,7 +78,7 @@ class ev3way_balancer
 	}
 
 	// update_operations インタフェース
-	virtual void update(const float &interval);
+	virtual int32_t update(const float &interval, uint32_t retry_cnt);
 
  private:
 

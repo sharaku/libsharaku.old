@@ -90,7 +90,7 @@ int32_t sd_balancer::set_steer_sp(int32_t steer)
 }
 
 
-void sd_balancer::update(const float &interval)
+int32_t sd_balancer::update(const float &interval, uint32_t retry_cnt)
 {
 	sharaku_db_trace("interval=%d", (int32_t)(interval * 1000.0f), 0, 0, 0, 0, 0);
 
@@ -137,13 +137,15 @@ void sd_balancer::update(const float &interval)
 	// 時間収集
 	time = sharaku_get_usec();
 	sharaku_db_trace("time=%d", (int32_t)(time - _time), 0, 0, 0, 0, 0);
-	return;
+
+	return 0;
 
  balanser_off:
 	// バランサOFFの場合は指定されているSpeed/Steerをそのままスルーする
 	out_move->set_speed_sp(_speed);
 	out_move->set_steer_sp(_steering);
-	return;
+
+	return 0;
 }
 
 NAMESPACE_SHARAKU_END
