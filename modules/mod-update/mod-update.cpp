@@ -9,6 +9,7 @@
 #include <sharaku/types.h>
 #include <sharaku/prof.h>
 #include <sharaku/log.h>
+#include <sharaku/list.h>
 #include <sharaku/module.h>
 #include <modules/mod-update.hpp>
 
@@ -28,61 +29,14 @@ sharaku_prof_t	__prof_update_post_update_processing;
 /******************************************************************************
 class section
 ******************************************************************************/
-void
-update_group::register_update(update_operations* update)
-{
-	sharaku_db_trace("", 0, 0, 0, 0, 0, 0);
-	list_add(&update->update_list, &_update_list);
-}
-int32_t
-update_group::pre_update(const float &interval, uint32_t retry_cnt)
-{
-	update_operations	*update;
-
-	sharaku_db_trace("start", 0, 0, 0, 0, 0, 0);
-	list_for_each_entry(update, &_update_list, update_operations, update_list) {
-		update->pre_update(interval, retry_cnt);
-		sharaku_db_trace("update->pre_update", 0, 0, 0, 0, 0, 0);
-	}
-	sharaku_db_trace("end", 0, 0, 0, 0, 0, 0);
-
-	return 0;
-}
-
-int32_t
-update_group::update(const float &interval, uint32_t retry_cnt)
-{
-	update_operations	*update;
-	sharaku_db_trace("start", 0, 0, 0, 0, 0, 0);
-	list_for_each_entry(update, &_update_list, update_operations, update_list) {
-		update->update(interval, retry_cnt);
-		sharaku_db_trace("update->update", 0, 0, 0, 0, 0, 0);
-	}
-	sharaku_db_trace("end", 0, 0, 0, 0, 0, 0);
-
-	return 0;
-}
-
-int32_t
-update_group::post_update(const float &interval, uint32_t retry_cnt)
-{
-	update_operations	*update;
-	sharaku_db_trace("start", 0, 0, 0, 0, 0, 0);
-	list_for_each_entry(update, &_update_list, update_operations, update_list) {
-		update->post_update(interval, retry_cnt);
-		sharaku_db_trace("update->post_update", 0, 0, 0, 0, 0, 0);
-	}
-	sharaku_db_trace("end", 0, 0, 0, 0, 0, 0);
-
-	return 0;
-}
-
 
 /******************************************************************************
 mod_update
 ******************************************************************************/
 mod_update::mod_update(uint32_t interval)
 {
+	_job_update_i = &_job_update_interval;
+
 	_time			= 0;
 	_update_count		= 0;
 	_update_start_time	= 0;
@@ -91,7 +45,8 @@ mod_update::mod_update(uint32_t interval)
 	_interval_ms		= interval;
 	_is_stop		= 1;
 	sharaku_init_job(&_job_update);
-	INIT_LIST_HEAD(&_cycle_function);
+	sharaku_init_job(&_job_update_interval);
+	INIT_LIST_HEAD(&_update_list);
 }
 mod_update::mod_update() {
 	_time			= 0;
@@ -102,7 +57,14 @@ mod_update::mod_update() {
 	_interval_ms		= 0;
 	_is_stop		= 1;
 	sharaku_init_job(&_job_update);
-	INIT_LIST_HEAD(&_cycle_function);
+	INIT_LIST_HEAD(&_update_list);
+}
+
+void
+mod_update::register_update(update_operations* update)
+{
+	sharaku_db_trace("", 0, 0, 0, 0, 0, 0);
+	list_add(&update->update_list, &_update_list);
 }
 
 void
@@ -145,64 +107,293 @@ mod_update_init(void)
 	sharaku_prof_regist(&__prof_update_post_update_processing);
 }
 
+// -------------------------------------------------------------------------
 void
 mod_update::mod_update_cycle(struct sharaku_job* job)
 {
-	sharaku_usec_t		time_cycle_start;
-	sharaku_usec_t		time_pre_update_end;
-	sharaku_usec_t		time_update_end;
-	sharaku_usec_t		time_post_update_end;
-	mod_update		*device;
-	device = (mod_update*)list_entry(job, mod_update, _job_update);
+	mod_update *_mod_update = (mod_update*)list_entry(job, mod_update, _job_update);
+	uint32_t interval = 0;
 
-	sharaku_usec_t time = sharaku_get_usec();
-	// 停止指示がある場合は停止する
-	if (device->_is_stop) {
+	// 前のスケジュールが完了していない場合は、非同期で本関数を呼び出す。
+	if (!_mod_update->_job_update_i) {
+		sharaku_db_trace("update busy", 0, 0, 0, 0, 0, 0);
+		sharaku_async_message(job, mod_update_cycle);
 		return;
 	}
 
-	sharaku_db_trace("update interval=%u", (time - device->_update_time), 0, 0, 0, 0, 0);
+	_mod_update->_update_cycle_start = sharaku_get_usec();
+	// 時間収集(最初の1回は採取しない)
+	if (_mod_update->_update_time) {
+		sharaku_prof_add(&__prof_update_interval,
+				 _mod_update->_update_time,
+				 _mod_update->_update_cycle_start);
+		interval = _mod_update->_update_cycle_start - _mod_update->_update_time;
+	}
+	_mod_update->_update_time = _mod_update->_update_cycle_start;
+
+	// 平均インターバルを計算する
+	_mod_update->_update_count ++;
+	_mod_update->_interval	= (float)(_mod_update->_update_cycle_start - _mod_update->_update_start_time)
+					/ (float)_mod_update->_update_count / 1000000.0f;
+
+
+	sharaku_usec_t time = sharaku_get_usec();
+	// 停止指示がある場合は停止する
+	if (_mod_update->_is_stop) {
+		return;
+	}
+
+	sharaku_db_trace("update start: update interval=%dus, avg interval=%dus",
+			 (uint32_t)interval, (uint32_t)(_mod_update->_interval * 1000000), 0, 0, 0, 0);
 
 	// スケジュールする。
 	// 最初にスケジュールすることで誤差を少なくする
 	// 本関数が終了するまでここでスケジュールした関数は起動しないため
 	// このタイミングで起動しても問題ない
-	sharaku_timer_message(job, device->_interval_ms, mod_update_cycle);
+	sharaku_timer_message(job, _mod_update->_interval_ms, mod_update_cycle);
+	_mod_update->_job_update_i = NULL;
+	mod_pre_update_begin(&_mod_update->_job_update_interval);
+}
 
-	time_cycle_start = sharaku_get_usec();
-	// 時間収集(最初の1回は採取しない)
-	if (device->_update_time) {
-		sharaku_prof_add(&__prof_update_interval,
-					 device->_update_time, time_cycle_start);
+// -------------------------------------------------------------------------
+// pre_updateを処理する
+void
+mod_update::mod_pre_update_begin(struct sharaku_job* job)
+{
+	sharaku_db_trace("", 0, 0, 0, 0, 0, 0);
+	mod_update *_mod_update = (mod_update*)list_entry(job, mod_update, _job_update_interval);
+	_mod_update->_time_start = sharaku_get_usec();
+	_mod_update->_update = list_first_entry(&_mod_update->_update_list,
+						update_operations, update_list);
+	mod_pre_update(job);
+}
+
+void
+mod_update::mod_pre_update(struct sharaku_job* job)
+{
+	mod_update *_mod_update = (mod_update*)list_entry(job, mod_update, _job_update_interval);
+	int32_t	rc = 0;
+
+next:
+	// 停止指示がある場合は停止する
+	if (_mod_update->_is_stop) {
+		return;
 	}
-	device->_update_time = time_cycle_start;
-
-	// 平均インターバルを計算する
-	device->_update_count ++;
-	float interval	= (float)(time_cycle_start - device->_update_start_time)
-					/ (float)device->_update_count / 1000000.0f;
+	// 最後まで完了している場合は、Endへ行く
+	if (&_mod_update->_update->update_list == &_mod_update->_update_list) {
+		mod_pre_update_end(job);
+		return;
+	}
 
 	// pre_updateを実行する
-	device->pre_update(interval, 0);
-	time_pre_update_end = sharaku_get_usec();
+	// EAGAINを返された場合は、いま処理したupdateをもう一度実行する。
+	rc = _mod_update->_update->pre_update(_mod_update->_interval, 0);
+	if (rc != EAGAIN) {
+		_mod_update->_update = list_next_entry(_mod_update->_update,
+							update_operations, update_list);
+		goto next;
+	} else {
+		sharaku_async_message(job, mod_pre_update_retry);
+		return;
+	}
+}
+
+void
+mod_update::mod_pre_update_retry(struct sharaku_job* job)
+{
+	mod_update *_mod_update = (mod_update*)list_entry(job, mod_update, _job_update_interval);
+	int32_t	rc = 0;
+
+	// 停止指示がある場合は停止する
+	if (_mod_update->_is_stop) {
+		return;
+	}
+	// pre_updateを実行する
+	// EAGAINを返された場合は、いま処理したupdateをもう一度実行する。
+	rc = _mod_update->_update->pre_update(_mod_update->_interval, 1);
+	if (rc != EAGAIN) {
+		_mod_update->_update = list_next_entry(_mod_update->_update,
+							update_operations, update_list);
+		sharaku_async_message(job, mod_pre_update);
+		return;
+	} else {
+		sharaku_async_message(job, mod_pre_update_retry);
+		return;
+	}
+}
+
+void
+mod_update::mod_pre_update_end(struct sharaku_job* job)
+{
+	sharaku_db_trace("", 0, 0, 0, 0, 0, 0);
+	mod_update *_mod_update = (mod_update*)list_entry(job, mod_update, _job_update_interval);
+	// 統計情報を取って次へ行く
+	sharaku_usec_t	time_update_end = sharaku_get_usec();
 	sharaku_prof_add(&__prof_update_pre_update_processing,
-					time_cycle_start, time_pre_update_end);
+			 _mod_update->_time_start, time_update_end);
+	mod_update_begin(job);
+}
+
+// -------------------------------------------------------------------------
+// updateを処理する
+void
+mod_update::mod_update_begin(struct sharaku_job* job)
+{
+	sharaku_db_trace("", 0, 0, 0, 0, 0, 0);
+	mod_update *_mod_update = (mod_update*)list_entry(job, mod_update, _job_update_interval);
+	_mod_update->_time_start = sharaku_get_usec();
+	_mod_update->_update = list_first_entry(&_mod_update->_update_list,
+						update_operations, update_list);
+	mod_update_(job);
+}
+
+void
+mod_update::mod_update_(struct sharaku_job* job)
+{
+	mod_update *_mod_update = (mod_update*)list_entry(job, mod_update, _job_update_interval);
+	int32_t	rc = 0;
+
+next:
+	// 停止指示がある場合は停止する
+	if (_mod_update->_is_stop) {
+		return;
+	}
+	// 最後まで完了している場合は、Endへ行く
+	if (&_mod_update->_update->update_list == &_mod_update->_update_list) {
+		mod_update_end(job);
+		return;
+	}
 
 	// updateを実行する
-	device->update(interval, 0);
-	time_update_end = sharaku_get_usec();
+	rc = _mod_update->_update->update(_mod_update->_interval, 0);
+	if (rc != EAGAIN) {
+		_mod_update->_update = list_next_entry(_mod_update->_update,
+							update_operations, update_list);
+		goto next;
+	} else {
+		sharaku_async_message(job, mod_update_retry);
+		return;
+	}
+}
+
+void
+mod_update::mod_update_retry(struct sharaku_job* job)
+{
+	mod_update *_mod_update = (mod_update*)list_entry(job, mod_update, _job_update_interval);
+	int32_t	rc = 0;
+
+	// 停止指示がある場合は停止する
+	if (_mod_update->_is_stop) {
+		return;
+	}
+	// updateを実行する
+	rc = _mod_update->_update->update(_mod_update->_interval, 1);
+	if (rc != EAGAIN) {
+		_mod_update->_update = list_next_entry(_mod_update->_update,
+							update_operations, update_list);
+		sharaku_async_message(job, mod_update_);
+	} else {
+		sharaku_async_message(job, mod_update_retry);
+	}
+}
+
+void
+mod_update::mod_update_end(struct sharaku_job* job)
+{
+	sharaku_db_trace("", 0, 0, 0, 0, 0, 0);
+	mod_update *_mod_update = (mod_update*)list_entry(job, mod_update, _job_update_interval);
+	// 統計情報を取って次へ行く
+	sharaku_usec_t	time_update_end = sharaku_get_usec();
 	sharaku_prof_add(&__prof_update_update_processing,
-					time_pre_update_end, time_update_end);
+			 _mod_update->_time_start, time_update_end);
+	mod_post_update_begin(job);
+}
+
+// -------------------------------------------------------------------------
+// post_updateを処理する
+void
+mod_update::mod_post_update_begin(struct sharaku_job* job)
+{
+	sharaku_db_trace("", 0, 0, 0, 0, 0, 0);
+	mod_update *_mod_update = (mod_update*)list_entry(job, mod_update, _job_update_interval);
+	_mod_update->_time_start = sharaku_get_usec();
+	_mod_update->_update = list_last_entry(&_mod_update->_update_list,
+						update_operations, update_list);
+	mod_post_update(job);
+}
+
+void
+mod_update::mod_post_update(struct sharaku_job* job)
+{
+	mod_update *_mod_update = (mod_update*)list_entry(job, mod_update, _job_update_interval);
+	int32_t	rc = 0;
+
+next:
+	// 停止指示がある場合は停止する
+	if (_mod_update->_is_stop) {
+		return;
+	}
+	// 最後まで完了している場合は、Endへ行く
+	if (&_mod_update->_update->update_list == &_mod_update->_update_list) {
+		mod_post_update_end(job);
+		return;
+	}
 
 	// post_updateを実行する
-	device->post_update(interval, 0);
-	time_post_update_end = sharaku_get_usec();
-	sharaku_prof_add(&__prof_update_post_update_processing,
-					time_update_end, time_post_update_end);
-	sharaku_prof_add(&__prof_update_processing,
-					time_cycle_start, time_post_update_end);
+	// EAGAINを返された場合は、いま処理したupdateをもう一度実行する。
+	rc = _mod_update->_update->post_update(_mod_update->_interval, 0);
+	if (rc != EAGAIN) {
+		_mod_update->_update = list_prev_entry(_mod_update->_update,
+							update_operations, update_list);
+		goto next;
+	} else {
+		sharaku_async_message(job, mod_post_update_retry);
+		return;
+	}
+}
 
-	sharaku_db_trace("time=%d", (int32_t)(sharaku_get_usec() - time), 0, 0, 0, 0, 0);
+void
+mod_update::mod_post_update_retry(struct sharaku_job* job)
+{
+	mod_update *_mod_update = (mod_update*)list_entry(job, mod_update, _job_update_interval);
+	int32_t	rc = 0;
+
+	// 停止指示がある場合は停止する
+	if (_mod_update->_is_stop) {
+		return;
+	}
+	// post_updateを実行する
+	// EAGAINを返された場合は、いま処理したupdateをもう一度実行する。
+	rc = _mod_update->_update->post_update(_mod_update->_interval, 0);
+	if (rc != EAGAIN) {
+		_mod_update->_update = list_prev_entry(_mod_update->_update,
+							update_operations, update_list);
+		sharaku_async_message(job, mod_post_update);
+		return;
+	} else {
+		sharaku_async_message(job, mod_post_update_retry);
+		return;
+	}
+}
+
+void
+mod_update::mod_post_update_end(struct sharaku_job* job)
+{
+	sharaku_db_trace("", 0, 0, 0, 0, 0, 0);
+	mod_update *_mod_update = (mod_update*)list_entry(job, mod_update, _job_update_interval);
+	// 統計情報を取って次へ行く
+	sharaku_usec_t	time_update_end = sharaku_get_usec();
+	sharaku_prof_add(&__prof_update_pre_update_processing,
+			 _mod_update->_time_start, time_update_end);
+	sharaku_prof_add(&__prof_update_processing,
+			 _mod_update->_update_cycle_start, time_update_end);
+
+	// 使用していたjobを返却する
+	// - mod_update_cycleがサイクルを経過済みの場合は、次のasync_message
+	//   起動を契機にmod_update_cycleが次をキックする。
+	// - mod_update_cycleがサイクルを経過していない場合は、次のサイクル
+	//   起動を契機にmod_update_cycleが次をキックする。
+	_mod_update->_job_update_i = job;
 }
 
 SHARAKU_REGIST_MODULE_BEGIN(UPDATE_MODULE_ID)

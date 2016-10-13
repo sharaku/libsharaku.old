@@ -14,26 +14,6 @@
 
 NAMESPACE_SHARAKU_BEGIN
 
-//-----------------------------------------------------------------------------
-
-class update_group
- : public update_operations
-{
- public:
-	update_group() {
-		INIT_LIST_HEAD(&_update_list);
-	}
-	// Updateの登録
-	void register_update(update_operations* update);
-
-	virtual int32_t pre_update(const float &interval, uint32_t retry_cnt);
-	virtual int32_t update(const float &interval, uint32_t retry_cnt);
-	virtual int32_t post_update(const float &interval, uint32_t retry_cnt);
-
- private:
-	list_head		_update_list;
-};
-
 // mdsetup addのようなもので登録する。
 // 登録したものに対してUpdateイベントを発行する、
 // 登録時に優先度を設定することで、uodate優先度を設定する。
@@ -41,12 +21,13 @@ class update_group
 // 登録されたモジュールにUpdate通知を発行する
 // また、定期的に出力情報をポーリングする
 class mod_update
- : public update_group
+ : public update_operations
 {
  public:
-	typedef void (*vehicle_cycle_function)(float interval);
- public:
 	mod_update(uint32_t interval);
+
+	// Updateの登録
+	void register_update(update_operations* update);
 
 	// Updateの開始と停止
 	void start();
@@ -54,6 +35,18 @@ class mod_update
 
  protected:
 	static void mod_update_cycle(struct sharaku_job* job);
+	static void mod_pre_update_begin(struct sharaku_job* job);
+	static void mod_pre_update(struct sharaku_job* job);
+	static void mod_pre_update_retry(struct sharaku_job* job);
+	static void mod_pre_update_end(struct sharaku_job* job);
+	static void mod_update_begin(struct sharaku_job* job);
+	static void mod_update_(struct sharaku_job* job);
+	static void mod_update_retry(struct sharaku_job* job);
+	static void mod_update_end(struct sharaku_job* job);
+	static void mod_post_update_begin(struct sharaku_job* job);
+	static void mod_post_update(struct sharaku_job* job);
+	static void mod_post_update_retry(struct sharaku_job* job);
+	static void mod_post_update_end(struct sharaku_job* job);
 
  private:
 	mod_update();
@@ -61,14 +54,21 @@ class mod_update
  private:
 	sharaku_usec_t		_time;		// 前回実行時の時間
 
+	struct sharaku_job	_job_update;
+	struct sharaku_job	_job_update_interval;
+	struct sharaku_job	*_job_update_i;
+	update_operations	*_update;
+
 	uint32_t		_update_count;
 	sharaku_usec_t		_update_start_time;
 	sharaku_usec_t		_update_time;
+	sharaku_usec_t		_update_cycle_start;
+	sharaku_usec_t		_time_start;
+	float			_interval;
 
-	struct sharaku_job	_job_update;
 	uint32_t		_interval_ms;	// jobの周期
 	uint32_t		_is_stop:1;
-	list_head		_cycle_function;
+	list_head		_update_list;
 };
 
 NAMESPACE_SHARAKU_END

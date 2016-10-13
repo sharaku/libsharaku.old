@@ -223,21 +223,6 @@ sd_motors::post_update(const float &interval, uint32_t retry_cnt)
 				_dps_l_motor, _dps_r_motor,
 				left_pos, right_pos, 0, 0);
 	}
-
-	if (out_device_update_l && out_device_update_r) {
-		if(out_device_update_l->is_commited() &&
-		   out_device_update_l->is_updated() &&
-		   out_device_update_r->is_commited() &&
-		   out_device_update_r->is_updated()) {
-			// 両輪のupdate, commitが完了している場合のみ次をキックする。
-			// そうしないと、片方のみ命令が発行され、ずれが生じる
-			out_device_update_l->start_update();
-			out_device_update_l->start_commit();
-			out_device_update_r->start_update();
-			out_device_update_r->start_commit();
-		}
-	}
-
 	return 0;
 }
 
