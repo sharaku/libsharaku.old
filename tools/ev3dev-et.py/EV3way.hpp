@@ -29,8 +29,8 @@ class EV3way
 	usonic(sharaku::EV3_INPUT_2, 25),	// IN4, 周期25ms
 	color(sharaku::EV3_INPUT_3, 4, sharaku::color_operations::MODE_REFLECTED),
 						// IN2, 周期4ms
-	gyro(sharaku::EV3_INPUT_4, 4),		// IN1, 周期4ms
-	motor_t(sharaku::EV3_OUTPUT_D, 8, sharaku::ev3dev_tacho_motor::MOTOR_MODE_DUTY),
+	gyro(sharaku::EV3_INPUT_4, 2),		// IN1, 周期4ms
+	motor_t(sharaku::EV3_OUTPUT_D, 8, sharaku::ev3dev_tacho_motor::MOTOR_MODE_ANGLE),
 						// OUT D, 周期8ms
 	motor_r(sharaku::EV3_OUTPUT_B, 4, sharaku::ev3dev_tacho_motor::MOTOR_MODE_DUTY),
 						// OUT B, 周期4ms
