@@ -17,24 +17,25 @@
 #include <devices/sd/sd-position-move.hpp>
 #include <devices/sd/sd-linetrace-pid.hpp>
 #include <modules/mod-update.hpp>
+#include <modules/mod-devupdate.hpp>
 
 
 class EV3way
  : protected  sharaku::mod_update {
  public:
  	EV3way() :
- 	mod_update(4),				// updateは4ms
+ 	mod_update(5),				// updateは4ms
 	power(50),				// 電源制御 50ms
 	touch(sharaku::EV3_INPUT_1, 50),	// IN3, 周期50ms
 	usonic(sharaku::EV3_INPUT_2, 25),	// IN4, 周期25ms
 	color(sharaku::EV3_INPUT_3, 4, sharaku::color_operations::MODE_REFLECTED),
 						// IN2, 周期4ms
-	gyro(sharaku::EV3_INPUT_4, 2),		// IN1, 周期4ms
-	motor_t(sharaku::EV3_OUTPUT_D, 8, sharaku::ev3dev_tacho_motor::MOTOR_MODE_ANGLE),
+	gyro(sharaku::EV3_INPUT_4, 0),		// IN1, 周期4ms
+	motor_t(sharaku::EV3_OUTPUT_D, 0, sharaku::ev3dev_tacho_motor::MOTOR_MODE_ANGLE),
 						// OUT D, 周期8ms
-	motor_r(sharaku::EV3_OUTPUT_B, 4, sharaku::ev3dev_tacho_motor::MOTOR_MODE_DUTY),
+	motor_r(sharaku::EV3_OUTPUT_B, 0, sharaku::ev3dev_tacho_motor::MOTOR_MODE_DUTY),
 						// OUT B, 周期4ms
-	motor_l(sharaku::EV3_OUTPUT_C, 4, sharaku::ev3dev_tacho_motor::MOTOR_MODE_DUTY),
+	motor_l(sharaku::EV3_OUTPUT_C, 0, sharaku::ev3dev_tacho_motor::MOTOR_MODE_DUTY),
 						// OUT C, 周期4ms
 	linetrace(1.0f, 0.0f, 0.0f),		// PID無効
 	target_move(81),			// 車輪直径81mm
@@ -76,6 +77,10 @@ class EV3way
 		// 車両クラスに対して定期アップデートを登録する
 		// デバイス類は自前で定期アップデートするため、登録不要
 		// ----------------------------------------------------------
+		devupdate.register_update(motor_r);
+		devupdate.register_update(motor_l);
+		devupdate.register_update(gyro);
+		register_update(devupdate);
 		register_update(odo);
 		register_update(linetrace);
 		register_update(target_move);
@@ -119,5 +124,6 @@ class EV3way
 	sharaku::sd_linetrace_pid	linetrace;
 	sharaku::sd_position_move	target_move;
 	sharaku::sd_wheel_odometry	odo;
+	sharaku::mod_devupdate		devupdate;
 };
 

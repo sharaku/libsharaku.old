@@ -12,6 +12,7 @@ extern "C" {
 #include <sys/stat.h>
 }
 #include <stdint.h>
+#include <string.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <string.h>
@@ -325,44 +326,61 @@ class linux_proc_device
 		_interval_ms	= interval_ms;
 		_read_flags 	= 0;
 		_write_flags 	= 0;
+		_type = PROC_IOTYPE_RW;
+
+		_prof_time_start = 0;
 	}
 	virtual ~linux_proc_device() {
 		sharaku_mutex_destroy(&_mutex_job_i);
+	}
+	void set_read_profname(char *process, char *interval) {
+		strncpy(_profname_read_process, process, sizeof _profname_read_process);
+		strncpy(_profname_read_interval, interval, sizeof _profname_read_interval);
+		sharaku_prof_init(&_prof_read_process, _profname_read_process);
+		sharaku_prof_init(&_prof_read_interval, _profname_read_interval);
+		sharaku_prof_regist(&_prof_read_process);
+		sharaku_prof_regist(&_prof_read_interval);
+	}
+	void set_write_profname(char *process, char *interval) {
+		strncpy(_profname_write_process, process, sizeof _profname_write_process);
+		strncpy(_profname_write_interval, interval, sizeof _profname_write_interval);
+		sharaku_prof_init(&_prof_write_process, _profname_write_process);
+		sharaku_prof_init(&_prof_write_interval, _profname_write_interval);
+		sharaku_prof_regist(&_prof_write_process);
+		sharaku_prof_regist(&_prof_write_interval);
 	}
 	virtual int32_t start(void) {
 		sharaku_mutex_lock(&_mutex_job_i);
 		if (_job_i) {
 			_job_i = NULL;
-			sharaku_async_message(&_job_interval,
-					      linux_proc_device::update_device);
-		}
-		sharaku_mutex_unlock(&_mutex_job_i);
-		return 0;
-	}
-	virtual void start_commit(void) {
-		sharaku_mutex_lock(&_mutex_job_i);
-		if (_job_i) {
-			_job_i = NULL;
+			_type = PROC_IOTYPE_RW;
 			sharaku_async_message(&_job_interval,
 					linux_proc_device::update_device);
 		}
 		sharaku_mutex_unlock(&_mutex_job_i);
+		return 0;
 	}
 	virtual void start_update(void) {
 		sharaku_mutex_lock(&_mutex_job_i);
 		if (_job_i) {
 			_job_i = NULL;
+			_type = PROC_IOTYPE_READ;
 			sharaku_async_message(&_job_interval,
-					linux_proc_device::update_device);
+					linux_proc_device::start_update_device);
 		}
 		sharaku_mutex_unlock(&_mutex_job_i);
 	}
-	virtual int32_t is_commited(void) {
-		int32_t ret;
-		ret = (_job) ? 1 : 0;
-		return ret;
+	virtual void start_commit(void) {
+		sharaku_mutex_lock(&_mutex_job_i);
+		if (_job_i) {
+			_job_i = NULL;
+			_type = PROC_IOTYPE_WRITE;
+			sharaku_async_message(&_job_interval,
+					linux_proc_device::start_commit_device);
+		}
+		sharaku_mutex_unlock(&_mutex_job_i);
 	}
-	virtual int32_t is_updated(void) {
+	virtual int32_t is_ioend(void) {
 		int32_t ret;
 		ret = (_job) ? 1 : 0;
 		return ret;
@@ -392,13 +410,21 @@ class linux_proc_device
 
  protected:
 	static void update_device(struct sharaku_job* job);
+	static void start_update_device(struct sharaku_job* job);
+	static void start_commit_device(struct sharaku_job* job);
 	static void io_submit(struct sharaku_job* job);
 	static void io_end(struct sharaku_job* job);
 
  protected:
+	enum PROC_IOTYPE {
+		PROC_IOTYPE_READ,
+		PROC_IOTYPE_WRITE,
+		PROC_IOTYPE_RW
+	};
 	virtual void __update(void) = 0;
+	virtual void __commit(void) = 0;
 	virtual int32_t __io_submit(void) = 0;
-	virtual void __io_end(void) = 0;
+	virtual void __io_end(PROC_IOTYPE type) = 0;
 
  protected:
 	sharaku_job		_job_interval;
@@ -409,6 +435,18 @@ class linux_proc_device
 	uint32_t		_interval_ms;
 	uint32_t		_write_flags;
 	uint32_t		_read_flags;
+	PROC_IOTYPE		_type;
+
+	// profile
+	sharaku_usec_t		_prof_time_start;
+	sharaku_prof_t		_prof_read_process;
+	sharaku_prof_t		_prof_read_interval;
+	sharaku_prof_t		_prof_write_process;
+	sharaku_prof_t		_prof_write_interval;
+	char			_profname_read_process[64];
+	char			_profname_read_interval[64];
+	char			_profname_write_process[64];
+	char			_profname_write_interval[64];
 
  private:
 	linux_proc_device() {}
@@ -445,6 +483,49 @@ class linux_proc_device
 	 endio:					\
 		return result;			\
 	}
+
+#define DEVICE_IO_READ				\
+	if (type == PROC_IOTYPE_READ || type == PROC_IOTYPE_RW) {
+#define DEVICE_IO_WRITE				\
+	} if (type == PROC_IOTYPE_WRITE || type == PROC_IOTYPE_RW) {
+#define DEVICE_IO_END				\
+	}
+#define DEVICE_PROC_SET_READ_PROFNAME(fmt_process, fmt_interval, ...)			\
+	{										\
+		char	prof_process[64];						\
+		char	prof_interval[64];						\
+		char	*work;								\
+		snprintf(prof_process, sizeof prof_process, fmt_process, ## __VA_ARGS__);	\
+		work = strstr(prof_process, "\n");					\
+		if (work) {								\
+			*work = '>';							\
+		}									\
+		snprintf(prof_interval, sizeof prof_interval, fmt_interval, ## __VA_ARGS__);	\
+		work = strstr(prof_interval, "\n");					\
+		if (work) {								\
+			*work = '>';							\
+		}									\
+		linux_proc_device::set_read_profname(prof_process, prof_interval);	\
+	}
+#define DEVICE_PROC_SET_WRITE_PROFNAME(fmt_process, fmt_interval, ...)			\
+	{										\
+		char	prof_process[64];						\
+		char	prof_interval[64];						\
+		char	*work;								\
+		snprintf(prof_process, sizeof prof_process, fmt_process, ## __VA_ARGS__);	\
+		work = strstr(prof_process, "\n");					\
+		if (work) {								\
+			*work = '>';							\
+		}									\
+		snprintf(prof_interval, sizeof prof_interval, fmt_interval, ## __VA_ARGS__);	\
+		work = strstr(prof_interval, "\n");					\
+		if (work) {								\
+			*work = '>';							\
+		}									\
+		linux_proc_device::set_write_profname(prof_process, prof_interval);	\
+	}
+
+
 
 NAMESPACE_SHARAKU_END
 

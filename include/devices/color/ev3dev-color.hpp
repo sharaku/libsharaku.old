@@ -89,7 +89,8 @@ class ev3dev_color
 
  protected:
 	void __update(void);
-	void __io_end(void);
+	void __commit(void);
+	void __io_end(PROC_IOTYPE type);
 
  private:
 	int32_t 		__correction;
@@ -101,10 +102,6 @@ class ev3dev_color
 	int32_t			_blue;
 	color_operations::mode	_mode_sp;
 	color_operations::mode	_mode;
-
-	sharaku_prof_t		_prof;
-	sharaku_usec_t		_prof_time_start;
-	char			_profname[64];
 };
 
 NAMESPACE_SHARAKU_END

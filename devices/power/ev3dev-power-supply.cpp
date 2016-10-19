@@ -16,9 +16,8 @@ int32_t ev3dev_powersupply::connect(void)
 {
 	sharaku_db_trace("start", 0, 0, 0, 0, 0, 0);
 
-	snprintf(_profname, 64, "ev3dev_powersupply");
-	sharaku_prof_init(&_prof, _profname);
-	sharaku_prof_regist(&_prof);
+	DEVICE_PROC_SET_READ_PROFNAME("ev3dev_powersupply::process",
+				      "ev3dev_powersupply::interval");
 
 	int32_t result = ev3dev_lego_powersupply::connect();
 	if (result != 0) {
@@ -45,27 +44,27 @@ int32_t ev3dev_powersupply::connect(void)
 // デバイスから情報を更新する
 void ev3dev_powersupply::__update(void)
 {
-	_prof_time_start = sharaku_get_usec();
-
 	set_read_flag(DEVICE_FILE_CURRENT_NOW);
 	set_read_flag(DEVICE_FILE_VOLTAGE_NOW);
 	sharaku_db_trace("update-flag get_read_flag=0x%08x get_write_flag=0x%08x",
 			 get_read_flag(), get_write_flag(), 0, 0, 0, 0);
 }
 
+void ev3dev_powersupply::__commit(void)
+{
+}
 
 // デバイスから情報を更新する
-void ev3dev_powersupply::__io_end(void)
+void ev3dev_powersupply::__io_end(PROC_IOTYPE type)
 {
-	_current = ev3dev_lego_powersupply::current_now / 1000;
-	_voltage = ev3dev_lego_powersupply::voltage_now / 1000;
-	_voltage_max = ev3dev_lego_powersupply::voltage_max_design / 1000;
-	_voltage_min = ev3dev_lego_powersupply::voltage_min_design / 1000;
-	sharaku_db_trace("current=%u _voltage=%u _voltage_max=%u _voltage_min=%u",
-			 _current, _voltage, _voltage_max, _voltage_min, 0, 0);
-
-	sharaku_usec_t time_end = sharaku_get_usec();
-	sharaku_prof_add(&_prof, _prof_time_start, time_end);
+	DEVICE_IO_READ
+		_current = ev3dev_lego_powersupply::current_now / 1000;
+		_voltage = ev3dev_lego_powersupply::voltage_now / 1000;
+		_voltage_max = ev3dev_lego_powersupply::voltage_max_design / 1000;
+		_voltage_min = ev3dev_lego_powersupply::voltage_min_design / 1000;
+		sharaku_db_trace("current=%u _voltage=%u _voltage_max=%u _voltage_min=%u",
+				 _current, _voltage, _voltage_max, _voltage_min, 0, 0);
+	DEVICE_IO_END
 }
 
 NAMESPACE_SHARAKU_END

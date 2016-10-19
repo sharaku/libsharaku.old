@@ -167,7 +167,8 @@ class ev3dev_tacho_motor
 
  protected:
 	void __update(void);
-	void __io_end(void);
+	void __commit(void);
+	void __io_end(PROC_IOTYPE type);
 
  private:
  	enum {
@@ -197,10 +198,6 @@ class ev3dev_tacho_motor
 	// duty_motor_operations API
 	int32_t			_duty_cycle;
 	int32_t			_duty_cycle_sp;
-
-	sharaku_prof_t		_prof;
-	sharaku_usec_t		_prof_time_start;
-	char			_profname[64];
 };
 
 NAMESPACE_SHARAKU_END

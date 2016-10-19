@@ -44,6 +44,9 @@ class ev3dev_gyro
 	operator gyro_operations*() {
 		return (gyro_operations *)this;
 	}
+	operator device_update_operations*() {
+		return (device_update_operations *)this;
+	}
 
  public:
 	int32_t set_sign(int32_t s) {
@@ -74,7 +77,8 @@ class ev3dev_gyro
 
  protected:
 	void __update(void);
-	void __io_end(void);
+	void __commit(void);
+	void __io_end(PROC_IOTYPE type);
 
  private:
 	sharaku_usec_t	_start_time;
@@ -91,10 +95,6 @@ class ev3dev_gyro
 	int32_t		_count;
 	float		_rate;
 	float		_angle;
-
-	sharaku_prof_t		_prof;
-	sharaku_usec_t		_prof_time_start;
-	char			_profname[64];
 };
 
 NAMESPACE_SHARAKU_END

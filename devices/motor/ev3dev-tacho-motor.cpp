@@ -14,13 +14,13 @@ NAMESPACE_SHARAKU_BEGIN
 
 int32_t ev3dev_tacho_motor::connect(const char* port)
 {
+	char *work;
 	sharaku_db_trace("start", 0, 0, 0, 0, 0, 0);
 
-	snprintf(_profname, 64, "ev3dev_tacho_motor<%s", port);
-	char *work = strstr(_profname, "\n");
-	*work = '>';
-	sharaku_prof_init(&_prof, _profname);
-	sharaku_prof_regist(&_prof);
+	DEVICE_PROC_SET_READ_PROFNAME("ev3dev_tacho_motor::read::process<%s",
+				      "ev3dev_tacho_motor::read::interval<%s", port);
+	DEVICE_PROC_SET_WRITE_PROFNAME("ev3dev_tacho_motor::write::process<%s",
+				       "ev3dev_tacho_motor::write::interval<%s", port);
 
 	int32_t result = ev3dev_lego_tacho_motor::connect(port);
 	if (result != 0) {
@@ -50,8 +50,62 @@ int32_t ev3dev_tacho_motor::connect(const char* port)
 // デバイスから情報を更新する
 void ev3dev_tacho_motor::__update(void)
 {
-	_prof_time_start = sharaku_get_usec();
+	// STOPもしくはRESETの場合は、その処理を行う。
+	// それ以外でモード変化がある場合は変化させる。
+	if (_flag & (FLAG_RESET | FLAG_STOP)) {
+		if(_flag | FLAG_RESET) {
+			sharaku_db_trace("motor reset", 0, 0, 0, 0, 0, 0);
+			ev3dev_lego_tacho_motor::command = "reset";
+			set_write_flag(DEVICE_FILE_WRITE_COMMAND);
+			set_write_flag(DEVICE_FILE_WRITE_STOP_COMMAND);
+			set_read_flag(DEVICE_FILE_READ_POSITION);
+			set_read_flag(DEVICE_FILE_READ_COUNT_PER_ROT);
+			set_read_flag(DEVICE_FILE_READ_SPEED);
+			set_read_flag(DEVICE_FILE_READ_SPEED_PID_KD);
+			set_read_flag(DEVICE_FILE_READ_SPEED_PID_KI);
+			set_read_flag(DEVICE_FILE_READ_SPEED_PID_KP);
+			set_read_flag(DEVICE_FILE_READ_HOLD_PID_KD);
+			set_read_flag(DEVICE_FILE_READ_HOLD_PID_KI);
+			set_read_flag(DEVICE_FILE_READ_HOLD_PID_KP);
+			set_read_flag(DEVICE_FILE_READ_DUTY_CYCLE_SP);
+			set_read_flag(DEVICE_FILE_READ_POSITION_SP);
+			set_read_flag(DEVICE_FILE_READ_SPEED_SP);
+			_speed_sp	= 0;
+			_position_sp	= 0;
+			_duty_cycle_sp	= 0;
+			ev3dev_lego_tacho_motor::position.update();
+			_position_base = ev3dev_lego_tacho_motor::position;
+		} else {
+			sharaku_db_trace("motor stop", 0, 0, 0, 0, 0, 0);
+			ev3dev_lego_tacho_motor::command = "stop";
+			set_write_flag(DEVICE_FILE_WRITE_COMMAND);
+		}
+		_motor_mode = MOTOR_MODE_STOP;
+		_flag = _flag & ~(FLAG_RESET | FLAG_STOP);
+	}
 
+	switch (_motor_mode_sp) {
+	case MOTOR_MODE_SPEED:
+		set_read_flag(DEVICE_FILE_READ_SPEED);
+		set_read_flag(DEVICE_FILE_READ_POSITION);
+		break;
+	case MOTOR_MODE_ANGLE:
+		set_read_flag(DEVICE_FILE_READ_POSITION);
+		break;
+	case MOTOR_MODE_DUTY:
+		set_read_flag(DEVICE_FILE_READ_DUTY_CYCLE);
+		set_read_flag(DEVICE_FILE_READ_POSITION);
+		break;
+	default:
+		break;
+	}
+
+	sharaku_db_trace("update-flag get_read_flag=0x%08x get_write_flag=0x%08x",
+			 get_read_flag(), get_write_flag(), 0, 0, 0, 0);
+}
+
+void ev3dev_tacho_motor::__commit(void)
+{
 	// STOPもしくはRESETの場合は、その処理を行う。
 	// それ以外でモード変化がある場合は変化させる。
 	if (_flag & (FLAG_RESET | FLAG_STOP)) {
@@ -155,25 +209,6 @@ void ev3dev_tacho_motor::__update(void)
 	default:
 		break;
 	}
-	switch (_motor_mode_sp) {
-	case MOTOR_MODE_SPEED:
-		set_read_flag(DEVICE_FILE_READ_SPEED);
-		set_read_flag(DEVICE_FILE_READ_POSITION);
-		break;
-	case MOTOR_MODE_ANGLE:
-		set_read_flag(DEVICE_FILE_READ_POSITION);
-		break;
-	case MOTOR_MODE_DUTY:
-		set_read_flag(DEVICE_FILE_READ_DUTY_CYCLE);
-		set_read_flag(DEVICE_FILE_READ_POSITION);
-		break;
-	default:
-		break;
-	}
-//	if (ev3dev_lego_tacho_motor::position != _position) {
-//		set_write_flag(DEVICE_FILE_WRITE_POSITION);
-//		ev3dev_lego_tacho_motor::position = _position;
-//	}
 	// stopモードのテキストを設定
 	switch (_stop_mode_sp) {
 	case STOPMODE_COAST:
@@ -196,56 +231,55 @@ void ev3dev_tacho_motor::__update(void)
 			 get_read_flag(), get_write_flag(), 0, 0, 0, 0);
 }
 
-
 // デバイスから情報を更新する
-void ev3dev_tacho_motor::__io_end(void)
+void ev3dev_tacho_motor::__io_end(PROC_IOTYPE type)
 {
-	if (_motor_mode == MOTOR_MODE_STOP) {
-		// motor_ctrl_operations API
-		int32_t pos = ev3dev_lego_tacho_motor::position;
-		_position	= pos - _position_base;
-		// speed_motor_operations API
-		_count_per_rot	= ev3dev_lego_tacho_motor::count_per_rot;
-		_speed		= ev3dev_lego_tacho_motor::speed;
-		_speed_pid_kd	= ev3dev_lego_tacho_motor::speed_pid_Kd;
-		_speed_pid_ki	= ev3dev_lego_tacho_motor::speed_pid_Ki;
-		_speed_pid_kp	= ev3dev_lego_tacho_motor::speed_pid_Kp;
-		// angle_motor_operations APIions API
-		_hold_pid_kd	= ev3dev_lego_tacho_motor::hold_pid_Kd;
-		_hold_pid_ki	= ev3dev_lego_tacho_motor::hold_pid_Ki;
-		_hold_pid_kp	= ev3dev_lego_tacho_motor::hold_pid_Kp;
-		// duty_motor_operations API
-		_duty_cycle	= ev3dev_lego_tacho_motor::duty_cycle;
-		sharaku_db_trace("motor stop _position=%d _speed=%d _duty_cycle=%d",
-				 _position, _speed, _duty_cycle, 0, 0, 0);
-	} else {
-		switch (_motor_mode_sp) {
-		case MOTOR_MODE_SPEED:
-			_speed = ev3dev_lego_tacho_motor::speed;
-			_position = ev3dev_lego_tacho_motor::position;
-			sharaku_db_trace("motor speed _speed=%d _position=%d",
-					 _speed, _position, 0, 0, 0, 0);
-			break;
-		case MOTOR_MODE_ANGLE:
-			_position = ev3dev_lego_tacho_motor::position;
-			sharaku_db_trace("motor angle _position=%d",
-					 _position, 0, 0, 0, 0, 0);
-			break;
-		case MOTOR_MODE_DUTY:
-			_duty_cycle = ev3dev_lego_tacho_motor::duty_cycle;
-			_position = ev3dev_lego_tacho_motor::position;
-			sharaku_db_trace("motor duty _duty_cycle=%d _position=%d",
-					 _duty_cycle, _position, 0, 0, 0, 0);
-			break;
-		default:
-			sharaku_db_trace("motor unknown type.",
-					 0, 0, 0, 0, 0, 0);
-			break;
+	DEVICE_IO_READ
+		if (_motor_mode == MOTOR_MODE_STOP) {
+			// motor_ctrl_operations API
+			int32_t pos = ev3dev_lego_tacho_motor::position;
+			_position	= pos - _position_base;
+			// speed_motor_operations API
+			_count_per_rot	= ev3dev_lego_tacho_motor::count_per_rot;
+			_speed		= ev3dev_lego_tacho_motor::speed;
+			_speed_pid_kd	= ev3dev_lego_tacho_motor::speed_pid_Kd;
+			_speed_pid_ki	= ev3dev_lego_tacho_motor::speed_pid_Ki;
+			_speed_pid_kp	= ev3dev_lego_tacho_motor::speed_pid_Kp;
+			// angle_motor_operations APIions API
+			_hold_pid_kd	= ev3dev_lego_tacho_motor::hold_pid_Kd;
+			_hold_pid_ki	= ev3dev_lego_tacho_motor::hold_pid_Ki;
+			_hold_pid_kp	= ev3dev_lego_tacho_motor::hold_pid_Kp;
+			// duty_motor_operations API
+			_duty_cycle	= ev3dev_lego_tacho_motor::duty_cycle;
+			sharaku_db_trace("motor stop _position=%d _speed=%d _duty_cycle=%d",
+					 _position, _speed, _duty_cycle, 0, 0, 0);
+		} else {
+			switch (_motor_mode_sp) {
+			case MOTOR_MODE_SPEED:
+				_speed = ev3dev_lego_tacho_motor::speed;
+				_position = ev3dev_lego_tacho_motor::position;
+				sharaku_db_trace("motor speed _speed=%d _position=%d",
+						 _speed, _position, 0, 0, 0, 0);
+				break;
+			case MOTOR_MODE_ANGLE:
+				_position = ev3dev_lego_tacho_motor::position;
+				sharaku_db_trace("motor angle _position=%d",
+						 _position, 0, 0, 0, 0, 0);
+				break;
+			case MOTOR_MODE_DUTY:
+				_duty_cycle = ev3dev_lego_tacho_motor::duty_cycle;
+				_position = ev3dev_lego_tacho_motor::position;
+				sharaku_db_trace("motor duty _duty_cycle=%d _position=%d",
+						 _duty_cycle, _position, 0, 0, 0, 0);
+				break;
+			default:
+				sharaku_db_trace("motor unknown type.",
+						 0, 0, 0, 0, 0, 0);
+				break;
+			}
 		}
-	}
 
-	sharaku_usec_t time_end = sharaku_get_usec();
-	sharaku_prof_add(&_prof, _prof_time_start, time_end);
+	DEVICE_IO_END
 }
 
 NAMESPACE_SHARAKU_END

@@ -15,7 +15,7 @@ lib-defines	+= $(if $(CONFIG_PROFILE_CLEAR), SHARAKU_PROF_CLEAR_ENABLE)
 lib-flags	+= $(if $(CONFIG_O), -O$(CONFIG_O))
 lib-flags	+= -g
 lib-flags	+= -Wall
-lib-flags	+= -Wextra
+#lib-flags	+= -Wextra
 lib-flags	+= -Wno-unused-function
 lib-flags	+= -Wno-unused-variable
 lib-flags	+= -Wno-invalid-offsetof
@@ -27,6 +27,7 @@ cc-opt		+= $(addprefix -D,$(lib-defines))
 cc-opt		+= $(lib-flags)
 
 lib-mod		+= mod-update/mod-update.cpp
+lib-mod		+= mod-update/mod_devupdate.cpp
 
 lib-obj		:= $(lib-mod:.c=.o)
 lib-obj		:= $(lib-obj:.cpp=.o)

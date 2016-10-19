@@ -18,7 +18,7 @@ float EXEC_PERIOD;
 NAMESPACE_SHARAKU_BEGIN
 
 ev3way_balancer::ev3way_balancer()
- : _interval(0.2)
+ : _interval(0.4)
 {
 	_max_dps = 1000;
 	sharaku_db_trace("balance_init", 0, 0, 0, 0, 0, 0);

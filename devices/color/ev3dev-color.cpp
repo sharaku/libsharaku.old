@@ -16,11 +16,8 @@ int32_t ev3dev_color::connect(const char* port)
 {
 	sharaku_db_trace("start", 0, 0, 0, 0, 0, 0);
 
-	snprintf(_profname, 64, "ev3dev_color<%s", port);
-	char *work = strstr(_profname, "\n");
-	*work = '>';
-	sharaku_prof_init(&_prof, _profname);
-	sharaku_prof_regist(&_prof);
+	DEVICE_PROC_SET_READ_PROFNAME("ev3dev_color::process<%s",
+				      "ev3dev_color::interval<%s", port);
 
 	int32_t result = ev3dev_lego_sensor::connect(port);
 	if (result != 0) {
@@ -45,8 +42,6 @@ int32_t ev3dev_color::connect(const char* port)
 // デバイスから情報を更新する
 void ev3dev_color::__update(void)
 {
-	_prof_time_start = sharaku_get_usec();
-
 	// モード切替がない場合、かつ現在のモードがcolor_operations::MODE_CORRECTION
 	// ではない場合、モード切替をスキップする。
 	if (_mode != _mode_sp || _mode == color_operations::MODE_CORRECTION) {
@@ -95,46 +90,48 @@ void ev3dev_color::__update(void)
 			 get_read_flag(), get_write_flag(), 0, 0, 0, 0);
 }
 
+void ev3dev_color::__commit(void)
+{
+}
 
 // デバイスから情報を更新する
-void ev3dev_color::__io_end(void)
+void ev3dev_color::__io_end(PROC_IOTYPE type)
 {
-	// モードによって次のフェーズ、
-	switch (_mode) {
-	case color_operations::MODE_REFLECTED:
-		_reflected = ev3dev_lego_sensor::value0;
-		sharaku_db_trace("color_operations::MODE_REFLECTED reflected=%d",
-				 _reflected, 0, 0, 0, 0, 0);
-		break;
-	case color_operations::MODE_AMBIENT:
-		_ambient = ev3dev_lego_sensor::value0;
-		sharaku_db_trace("AMBIENT ambient=%d",
-				 _ambient, 0, 0, 0, 0, 0);
-		break;
-	case color_operations::MODE_CORRECTION:
-		if (__correction) {
+	DEVICE_IO_READ
+		// モードによって次のフェーズ、
+		switch (_mode) {
+		case color_operations::MODE_REFLECTED:
 			_reflected = ev3dev_lego_sensor::value0;
-		} else {
+			sharaku_db_trace("color_operations::MODE_REFLECTED reflected=%d",
+					 _reflected, 0, 0, 0, 0, 0);
+			break;
+		case color_operations::MODE_AMBIENT:
 			_ambient = ev3dev_lego_sensor::value0;
+			sharaku_db_trace("AMBIENT ambient=%d",
+					 _ambient, 0, 0, 0, 0, 0);
+			break;
+		case color_operations::MODE_CORRECTION:
+			if (__correction) {
+				_reflected = ev3dev_lego_sensor::value0;
+			} else {
+				_ambient = ev3dev_lego_sensor::value0;
+			}
+			sharaku_db_trace("CORRECTION reflected=%d ambient=%d",
+					 _reflected, _ambient, 0, 0, 0, 0);
+			_correction = _reflected - _ambient;
+			break;
+		case color_operations::MODE_FULLCOLOR:
+			_red	= ev3dev_lego_sensor::value0;
+			_green	= ev3dev_lego_sensor::value1;
+			_blue	= ev3dev_lego_sensor::value2;
+			sharaku_db_trace("FULLCOLOR red=%d green=%d blue=%d",
+					 _red, _green, _blue, 0, 0, 0);
+			break;
+		default:
+			sharaku_db_trace("unknown mode.", 0, 0, 0, 0, 0, 0);
+			break;
 		}
-		sharaku_db_trace("CORRECTION reflected=%d ambient=%d",
-				 _reflected, _ambient, 0, 0, 0, 0);
-		_correction = _reflected - _ambient;
-		break;
-	case color_operations::MODE_FULLCOLOR:
-		_red	= ev3dev_lego_sensor::value0;
-		_green	= ev3dev_lego_sensor::value1;
-		_blue	= ev3dev_lego_sensor::value2;
-		sharaku_db_trace("FULLCOLOR red=%d green=%d blue=%d",
-				 _red, _green, _blue, 0, 0, 0);
-		break;
-	default:
-		sharaku_db_trace("unknown mode.", 0, 0, 0, 0, 0, 0);
-		break;
-	}
-
-	sharaku_usec_t time_end = sharaku_get_usec();
-	sharaku_prof_add(&_prof, _prof_time_start, time_end);
+	DEVICE_IO_END
 }
 
 NAMESPACE_SHARAKU_END

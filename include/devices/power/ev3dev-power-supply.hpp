@@ -55,17 +55,14 @@ class ev3dev_powersupply
 
  protected:
 	void __update(void);
-	void __io_end(void);
+	void __commit(void);
+	void __io_end(PROC_IOTYPE type);
 
  private:
 	int32_t		_current;
 	int32_t		_voltage;
 	int32_t		_voltage_max;
 	int32_t		_voltage_min;
-
-	sharaku_prof_t		_prof;
-	sharaku_usec_t		_prof_time_start;
-	char			_profname[64];
 };
 
 NAMESPACE_SHARAKU_END

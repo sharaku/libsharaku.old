@@ -62,16 +62,13 @@ class ev3dev_touch
 
  protected:
 	void __update(void);
-	void __io_end(void);
+	void __commit(void);
+	void __io_end(PROC_IOTYPE type);
 
  private:
 	int32_t		_press;
 	int32_t		_push;
 	int32_t		_release;
-
-	sharaku_prof_t		_prof;
-	sharaku_usec_t		_prof_time_start;
-	char			_profname[64];
 };
 
 NAMESPACE_SHARAKU_END

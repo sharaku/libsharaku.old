@@ -17,11 +17,8 @@ ev3dev_ultrasonic::connect(const char* port)
 {
 	sharaku_db_trace("start", 0, 0, 0, 0, 0, 0);
 
-	snprintf(_profname, 64, "ev3dev_ultrasonic<%s", port);
-	char *work = strstr(_profname, "\n");
-	*work = '>';
-	sharaku_prof_init(&_prof, _profname);
-	sharaku_prof_regist(&_prof);
+	DEVICE_PROC_SET_READ_PROFNAME("ev3dev_ultrasonic::process<%s",
+				      "ev3dev_ultrasonic::interval<%s", port);
 
 	int32_t result = ev3dev_lego_sensor::connect(port);
 	if (result != 0) {
@@ -43,8 +40,6 @@ ev3dev_ultrasonic::connect(const char* port)
 // デバイスから情報を更新する
 void ev3dev_ultrasonic::__update(void)
 {
-	_prof_time_start = sharaku_get_usec();
-
 	if (_uint_sp != _uint) {
 		switch (_uint_sp) {
 		case USONIC_MM:
@@ -62,23 +57,25 @@ void ev3dev_ultrasonic::__update(void)
 			 get_read_flag(), get_write_flag(), 0, 0, 0, 0);
 }
 
+void ev3dev_ultrasonic::__commit(void)
+{
+}
 
 // デバイスから情報を更新する
-void ev3dev_ultrasonic::__io_end(void)
+void ev3dev_ultrasonic::__io_end(PROC_IOTYPE type)
 {
-	switch (_uint) {
-	case USONIC_MM:
-		_dist_mm = ev3dev_lego_sensor::value0;
-		sharaku_db_trace("usonic mm=%u.", _dist_mm, 0, 0, 0, 0, 0);
-		break;
-	case USONIC_IN:
-		_dist_in = ev3dev_lego_sensor::value0;
-		sharaku_db_trace("usonic in=%u.", _dist_in, 0, 0, 0, 0, 0);
-		break;
-	}
-
-	sharaku_usec_t time_end = sharaku_get_usec();
-	sharaku_prof_add(&_prof, _prof_time_start, time_end);
+	DEVICE_IO_READ
+		switch (_uint) {
+		case USONIC_MM:
+			_dist_mm = ev3dev_lego_sensor::value0;
+			sharaku_db_trace("usonic mm=%u.", _dist_mm, 0, 0, 0, 0, 0);
+			break;
+		case USONIC_IN:
+			_dist_in = ev3dev_lego_sensor::value0;
+			sharaku_db_trace("usonic in=%u.", _dist_in, 0, 0, 0, 0, 0);
+			break;
+		}
+	DEVICE_IO_END
 }
 
 NAMESPACE_SHARAKU_END

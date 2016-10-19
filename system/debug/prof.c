@@ -62,7 +62,7 @@ __sharaku_prof_flash(void)
 static void
 __sharaku_prof_flashjob(struct sharaku_job *job)
 {
-	__sharaku_prof_flash();
+//	__sharaku_prof_flash();
 	sharaku_timer_message(job, SHARAKU_PROF_FLASH_INTERVALE,
 			      __sharaku_prof_flashjob);
 }

@@ -15,7 +15,7 @@ lib-defines	+= $(if $(filter y,$(CONFIG_PROFILE_CLEAR)), SHARAKU_PROF_CLEAR_ENAB
 lib-flags	+= $(if $(CONFIG_O), -O$(CONFIG_O))
 lib-flags	+= -g
 lib-flags	+= -Wall
-lib-flags	+= -Wextra
+#lib-flags	+= -Wextra
 lib-flags	+= -Wno-unused-function
 
 cc-opt		+= $(CFLAGS)

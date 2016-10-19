@@ -364,7 +364,7 @@ mod_update::mod_post_update_retry(struct sharaku_job* job)
 	}
 	// post_updateを実行する
 	// EAGAINを返された場合は、いま処理したupdateをもう一度実行する。
-	rc = _mod_update->_update->post_update(_mod_update->_interval, 0);
+	rc = _mod_update->_update->post_update(_mod_update->_interval, 1);
 	if (rc != EAGAIN) {
 		_mod_update->_update = list_prev_entry(_mod_update->_update,
 							update_operations, update_list);
