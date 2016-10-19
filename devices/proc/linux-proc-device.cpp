@@ -36,8 +36,8 @@ linux_proc_device::update_device(struct sharaku_job *job)
 
 		sharaku_usec_t time_start = sharaku_get_usec();
 		if (_this->_prof_time_start) {
-			sharaku_prof_add(&_this->_prof_read_interval, time_start, _this->_prof_time_start);
-			sharaku_prof_add(&_this->_prof_write_interval, time_start, _this->_prof_time_start);
+			sharaku_prof_add(&_this->_prof_read_interval, _this->_prof_time_start, time_start);
+			sharaku_prof_add(&_this->_prof_write_interval, _this->_prof_time_start, time_start);
 		}
 		_this->_prof_time_start = time_start;
 
@@ -68,7 +68,7 @@ linux_proc_device::start_update_device(struct sharaku_job *job)
 
 		sharaku_usec_t time_start = sharaku_get_usec();
 		if (_this->_prof_time_start) {
-			sharaku_prof_add(&_this->_prof_read_interval, time_start, _this->_prof_time_start);
+			sharaku_prof_add(&_this->_prof_read_interval, _this->_prof_time_start, time_start);
 		}
 		_this->_prof_time_start = time_start;
 
@@ -98,7 +98,7 @@ linux_proc_device::start_commit_device(struct sharaku_job *job)
 
 		sharaku_usec_t time_start = sharaku_get_usec();
 		if (_this->_prof_time_start) {
-			sharaku_prof_add(&_this->_prof_write_interval, time_start, _this->_prof_time_start);
+			sharaku_prof_add(&_this->_prof_write_interval, _this->_prof_time_start, time_start);
 		}
 		_this->_prof_time_start = time_start;
 
