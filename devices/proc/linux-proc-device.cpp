@@ -32,18 +32,28 @@ linux_proc_device::update_device(struct sharaku_job *job)
 
 	// updateの必要があればupdateする
 	if (_this->_job) {
-		_this->_job = NULL;
 
 		sharaku_usec_t time_start = sharaku_get_usec();
-		if (_this->_prof_time_start) {
-			sharaku_prof_add(&_this->_prof_read_interval, _this->_prof_time_start, time_start);
-			sharaku_prof_add(&_this->_prof_write_interval, _this->_prof_time_start, time_start);
+		if (_this->_prof_time_read_start) {
+			sharaku_prof_add(&_this->_prof_read_interval, _this->_prof_time_read_start, time_start);
 		}
-		_this->_prof_time_start = time_start;
+		if (_this->_prof_time_write_start) {
+			sharaku_prof_add(&_this->_prof_write_interval, _this->_prof_time_write_start, time_start);
+		}
+		_this->_prof_time_read_start = time_start;
+		_this->_prof_time_write_start = time_start;
 
 		_this->__update();
 		_this->__commit();
-		io_submit(&_this->_job_update);
+
+		// flagが0以外であれば、スケジュールする。
+		// 0であればスケジュールしない。
+		if (_this->_write_flags | _this->_read_flags) {
+			_this->_job = NULL;
+			io_submit(&_this->_job_update);
+		} else {
+			_this->_job_i = &_this->_job_interval;
+		}
 	}
 }
 void
@@ -64,16 +74,22 @@ linux_proc_device::start_update_device(struct sharaku_job *job)
 
 	// updateの必要があればupdateする
 	if (_this->_job) {
-		_this->_job = NULL;
 
 		sharaku_usec_t time_start = sharaku_get_usec();
-		if (_this->_prof_time_start) {
-			sharaku_prof_add(&_this->_prof_read_interval, _this->_prof_time_start, time_start);
+		if (_this->_prof_time_read_start) {
+			sharaku_prof_add(&_this->_prof_read_interval, _this->_prof_time_read_start, time_start);
 		}
-		_this->_prof_time_start = time_start;
+		_this->_prof_time_read_start = time_start;
 
 		_this->__update();
-		io_submit(&_this->_job_update);
+		// flagが0以外であれば、スケジュールする。
+		// 0であればスケジュールしない。
+		if (_this->_write_flags | _this->_read_flags) {
+			_this->_job = NULL;
+			io_submit(&_this->_job_update);
+		} else {
+			_this->_job_i = &_this->_job_interval;
+		}
 	}
 }
 void
@@ -94,16 +110,20 @@ linux_proc_device::start_commit_device(struct sharaku_job *job)
 
 	// updateの必要があればupdateする
 	if (_this->_job) {
-		_this->_job = NULL;
 
 		sharaku_usec_t time_start = sharaku_get_usec();
-		if (_this->_prof_time_start) {
-			sharaku_prof_add(&_this->_prof_write_interval, _this->_prof_time_start, time_start);
+		if (_this->_prof_time_write_start) {
+			sharaku_prof_add(&_this->_prof_write_interval, _this->_prof_time_write_start, time_start);
 		}
-		_this->_prof_time_start = time_start;
+		_this->_prof_time_write_start = time_start;
 
 		_this->__commit();
-		io_submit(&_this->_job_update);
+		if (_this->_write_flags | _this->_read_flags) {
+			_this->_job = NULL;
+			io_submit(&_this->_job_update);
+		} else {
+			_this->_job_i = &_this->_job_interval;
+		}
 	}
 }
 
@@ -116,6 +136,18 @@ linux_proc_device::io_submit(struct sharaku_job *job)
 	// もし、まだ読み込む必要がある場合は自身をスケジュールする。
 	int32_t result = _this->__io_submit();
 	if (result == EAGAIN || result == EWOULDBLOCK) {
+		switch (_this->_type) {
+		case PROC_IOTYPE_READ:
+			sharaku_prof_add_notime(&_this->_prof_read_count);
+			break;
+		case PROC_IOTYPE_WRITE:
+			sharaku_prof_add_notime(&_this->_prof_write_count);
+			break;
+		case PROC_IOTYPE_RW:
+			sharaku_prof_add_notime(&_this->_prof_read_count);
+			sharaku_prof_add_notime(&_this->_prof_write_count);
+			break;
+		}
 		sharaku_async_message(job, linux_proc_device::io_submit);
 	} else if (result != 0) {
 		sharaku_db_error("io_submit get_read_flag=0x%08x get_write_flag=0x%08x error=%d",
@@ -136,14 +168,14 @@ linux_proc_device::io_end(struct sharaku_job *job)
 	sharaku_usec_t time_end = sharaku_get_usec();
 	switch (_this->_type) {
 	case PROC_IOTYPE_READ:
-		sharaku_prof_add(&_this->_prof_read_process, _this->_prof_time_start, time_end);
+		sharaku_prof_add(&_this->_prof_read_process, _this->_prof_time_read_start, time_end);
 		break;
 	case PROC_IOTYPE_WRITE:
-		sharaku_prof_add(&_this->_prof_write_process, _this->_prof_time_start, time_end);
+		sharaku_prof_add(&_this->_prof_write_process, _this->_prof_time_write_start, time_end);
 		break;
 	case PROC_IOTYPE_RW:
-		sharaku_prof_add(&_this->_prof_read_process, _this->_prof_time_start, time_end);
-		sharaku_prof_add(&_this->_prof_write_process, _this->_prof_time_start, time_end);
+		sharaku_prof_add(&_this->_prof_read_process, _this->_prof_time_read_start, time_end);
+		sharaku_prof_add(&_this->_prof_write_process, _this->_prof_time_write_start, time_end);
 		break;
 	}
 }

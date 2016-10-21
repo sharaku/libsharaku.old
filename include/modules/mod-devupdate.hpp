@@ -22,7 +22,7 @@ class mod_devupdate
  : public update_operations
 {
  public:
-	mod_devupdate() { _devindex = 0; }
+	mod_devupdate();
 
 	operator update_operations*() {
 		return (update_operations *)this;

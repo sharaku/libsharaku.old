@@ -24,22 +24,13 @@
 
 NAMESPACE_SHARAKU_BEGIN
 
-static sharaku_prof_t	__prof_motors_interval;
-static sharaku_prof_t	__prof_motors_processing;
-
 sd_motors::sd_motors(int32_t wheel_axle_length, int32_t wheel_length)
  : _pid_l_motor(1.05f, 0.01f, 0.0f), _pid_r_motor(1.05f, 0.01f, 0.0f)
 {
 	sharaku_db_trace("start", 0, 0, 0, 0, 0, 0);
 
-	sharaku_prof_init(&__prof_motors_interval, "sd_motors::interval");
-	sharaku_prof_init(&__prof_motors_processing, "sd_motors::processing");
-	sharaku_prof_regist(&__prof_motors_interval);
-	sharaku_prof_regist(&__prof_motors_processing);
-
 	_wheel_axle_length	= wheel_axle_length;
 	_wheel_length		= wheel_length;
-	_time			= 0;
 	_steer_sp		= 0;
 	_speed_sp		= 0;
 	_steer			= 0;
@@ -58,6 +49,13 @@ sd_motors::sd_motors(int32_t wheel_axle_length, int32_t wheel_length)
 	_pid_r_motor.clear();
 	_pos_r_motor		= 0;
 	_dps_r_motor		= 0;
+
+	sharaku_prof_init(&_prof_interval, "sd_motors::interval");
+	sharaku_prof_init(&_prof_pre_update_process, "sd_motors::pre_update::processing");
+	sharaku_prof_init(&_prof_post_update_process, "sd_motors::post_update::processing");
+	sharaku_prof_regist(&_prof_interval);
+	sharaku_prof_regist(&_prof_pre_update_process);
+	sharaku_prof_regist(&_prof_post_update_process);
 }
 
 // ステアリング角度を元にした制御
@@ -156,14 +154,6 @@ sd_motors::pre_update(const float &interval, uint32_t retry_cnt)
 {
 	sharaku_db_trace("interval=%d", (int32_t)(interval * 1000.0f), 0, 0, 0, 0, 0);
 
-	// 時間収集(最初の1回は採取しない)
-	sharaku_usec_t time = sharaku_get_usec();
-	if (_time) {
-		sharaku_prof_add(&__prof_motors_interval,
-				 _time, time);
-	}
-	_time = time;
-
 	// 両輪の状態を取得し、位置と速度を算出する
 	register int32_t	left_pos	= out_speed_motor_l->get_position();
 	register int32_t	right_pos	= out_speed_motor_r->get_position();
@@ -183,11 +173,6 @@ sd_motors::pre_update(const float &interval, uint32_t retry_cnt)
 	_prev_deltas[2] = _prev_deltas[1];
 	_prev_deltas[1] = _prev_deltas[0];
 	_prev_deltas[0] = delta;
-
-	// 時間収集
-	time = sharaku_get_usec();
-	sharaku_prof_add(&__prof_motors_processing, _time, time);
-	sharaku_db_trace("time=%d", (int32_t)(time - _time), 0, 0, 0, 0, 0);
 
 	return 0;
 }

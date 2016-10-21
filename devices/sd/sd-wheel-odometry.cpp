@@ -27,39 +27,29 @@
 
 NAMESPACE_SHARAKU_BEGIN
 
-static sharaku_prof_t	__prof_odometory_interval;
-static sharaku_prof_t	__prof_odometory_processing;
 sd_wheel_odometry::sd_wheel_odometry(int32_t wheel_axle_length,int32_t wheel_length)
 {
 	sharaku_db_trace("start", 0, 0, 0, 0, 0, 0);
-
-	sharaku_prof_init(&__prof_odometory_interval, "sd_wheel_odometry::interval");
-	sharaku_prof_init(&__prof_odometory_processing, "sd_wheel_odometry::processing");
-	sharaku_prof_regist(&__prof_odometory_interval);
-	sharaku_prof_regist(&__prof_odometory_processing);
 
 	_wheel_axle_length	= wheel_axle_length;
 	_wheel_length		= wheel_length;
 	_prev_count_r		= 0;
 	_prev_count_l		= 0;
-	_time			= 0;
 	_distance		= 0;
 	_theta			= 0.0f;
 	_pos(0, 0, 0);
 	_rot(0, 0, 0);
+
+	sharaku_prof_init(&_prof_interval, "sd_wheel_odometry::interval");
+	sharaku_prof_init(&_prof_pre_update_process, "sd_wheel_odometry::processing");
+	sharaku_prof_regist(&_prof_interval);
+	sharaku_prof_regist(&_prof_pre_update_process);
 }
 
 int32_t
 sd_wheel_odometry::pre_update(const float & interval, uint32_t retry_cnt)
 {
 	sharaku_db_trace("interval=%d", (int32_t)(interval * 1000.0f), 0, 0, 0, 0, 0);
-
-	sharaku_usec_t time = sharaku_get_usec();
-	if (_time) {
-		sharaku_prof_add(&__prof_odometory_interval,
-				 _time, time);
-	}
-	_time = time;
 
 	// 角度単位の距離 (直径×3.1415 / 360)
 	register const float rpd = (_wheel_length * M_PI) / 360.0f;
@@ -110,11 +100,6 @@ sd_wheel_odometry::pre_update(const float & interval, uint32_t retry_cnt)
 				(int32_t)_rot.y,
 				(int32_t)(_theta * 180.0f / M_PI),
 				(int32_t)_rot.z);
-
-	// 時間収集
-	time = sharaku_get_usec();
-	sharaku_prof_add(&__prof_odometory_processing, _time, time);
-	sharaku_db_trace("time=%d", (int32_t)(time - _time), 0, 0, 0, 0, 0);
 
 	return 0;
 }

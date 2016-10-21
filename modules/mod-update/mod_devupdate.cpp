@@ -26,6 +26,25 @@ class section
 /******************************************************************************
 mod_update
 ******************************************************************************/
+mod_devupdate::mod_devupdate() {
+	_devindex = 0;
+
+	sharaku_prof_init(&_prof_interval, "mod_devupdate::interval");
+	sharaku_prof_init(&_prof_pre_update_retry, "mod_devupdate::pre_update::retry");
+	sharaku_prof_init(&_prof_pre_update_process, "mod_devupdate::pre_update::process");
+	sharaku_prof_init(&_prof_update_retry, "mod_devupdate::update::retry");
+	sharaku_prof_init(&_prof_update_process, "mod_devupdate::update::process");
+	sharaku_prof_init(&_prof_post_update_retry, "mod_devupdate::post_update::retry");
+	sharaku_prof_init(&_prof_post_update_process, "mod_devupdate::post_update::process");
+	sharaku_prof_regist(&_prof_interval);
+	sharaku_prof_regist(&_prof_pre_update_retry);
+	sharaku_prof_regist(&_prof_pre_update_process);
+	sharaku_prof_regist(&_prof_update_retry);
+	sharaku_prof_regist(&_prof_update_process);
+	sharaku_prof_regist(&_prof_post_update_retry);
+	sharaku_prof_regist(&_prof_post_update_process);
+}
+
 void
 mod_devupdate::register_update(device_update_operations* update)
 {

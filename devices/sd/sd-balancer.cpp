@@ -63,6 +63,11 @@ sd_balancer::sd_balancer(float wheel_length, float max_speed)
 	_steering		= 0;
 	_motorPos		= 0;
 	_motorControlDrive	= 0;
+
+	sharaku_prof_init(&_prof_interval, "sd_balancer::interval");
+	sharaku_prof_init(&_prof_update_process, "sd_balancer::process");
+	sharaku_prof_regist(&_prof_interval);
+	sharaku_prof_regist(&_prof_update_process);
 }
 
 /******************************************************************************
@@ -93,12 +98,6 @@ int32_t sd_balancer::set_steer_sp(int32_t steer)
 int32_t sd_balancer::update(const float &interval, uint32_t retry_cnt)
 {
 	sharaku_db_trace("interval=%d", (int32_t)(interval * 1000.0f), 0, 0, 0, 0, 0);
-
-	// 時間収集(最初の1回は採取しない)
-	sharaku_usec_t time = sharaku_get_usec();
-	if (_time) {
-	}
-	_time = time;
 
 	register int32_t gyro_speed	= in_gyro->get_rate();
 	register int32_t gyro_angle	= in_gyro->get_angle();
@@ -133,10 +132,6 @@ int32_t sd_balancer::update(const float &interval, uint32_t retry_cnt)
 
 	out_move->set_speed_sp((int32_t)(duty2speed(power, _max_speed)));
 	out_move->set_steer_sp(_steering);
-
-	// 時間収集
-	time = sharaku_get_usec();
-	sharaku_db_trace("time=%d", (int32_t)(time - _time), 0, 0, 0, 0, 0);
 
 	return 0;
 

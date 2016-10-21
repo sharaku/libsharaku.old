@@ -17,8 +17,7 @@ ev3dev_ultrasonic::connect(const char* port)
 {
 	sharaku_db_trace("start", 0, 0, 0, 0, 0, 0);
 
-	DEVICE_PROC_SET_READ_PROFNAME("ev3dev_ultrasonic::process<%s",
-				      "ev3dev_ultrasonic::interval<%s", port);
+	DEVICE_PROC_SET_READ_PROFNAME("ev3dev_ultrasonic<%s", port);
 
 	int32_t result = ev3dev_lego_sensor::connect(port);
 	if (result != 0) {

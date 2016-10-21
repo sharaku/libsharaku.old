@@ -10,6 +10,7 @@
 #include <stdint.h>
 #include <sharaku/types.h>
 #include <sharaku/list.h>
+#include <sharaku/prof.h>
 
 
 NAMESPACE_SHARAKU_BEGIN
@@ -39,6 +40,19 @@ class update_operations
 	virtual int32_t	post_update(const float &interval, uint32_t retry_cnt) { return 0; }
  public:
 	list_head	update_list;
+
+	// profile採取用。
+	// 登録は自前で行う。
+	sharaku_usec_t		_prof_time_per_update_start;
+	sharaku_usec_t		_prof_time_update_start;
+	sharaku_usec_t		_prof_time_post_update_start;
+	sharaku_prof_t		_prof_interval;			// 全体のインターバル
+	sharaku_prof_t		_prof_pre_update_retry;		// pre_updateのリトライ数
+	sharaku_prof_t		_prof_pre_update_process;	// pre_updateの処理時間
+	sharaku_prof_t		_prof_update_retry;		// updateのリトライ数
+	sharaku_prof_t		_prof_update_process;		// updateの処理時間
+	sharaku_prof_t		_prof_post_update_retry;	// post_updateのリトライ数
+	sharaku_prof_t		_prof_post_update_process;	// post_updateの処理時間
 };
 
 NAMESPACE_SHARAKU_END

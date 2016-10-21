@@ -87,8 +87,6 @@ class sd_motors
 	 , _pid_r_motor(1.0f, 0.0f, 0.0f){}
 	void differential(int32_t steering);
 
-	sharaku_usec_t		_time;		// 前回実行時の時間
-
 	int32_t			_steer_sp;
 	int32_t			_speed_sp;
 	float			_steer;

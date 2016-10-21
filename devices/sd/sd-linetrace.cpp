@@ -30,8 +30,6 @@ static const int	_table_out[2] = {
 	sd_linetrace::LINETRACE_TURN_LEFT,	sd_linetrace::LINETRACE_TURN_RIGHT
 };
 
-static sharaku_prof_t	__prof_linetrace_interval;
-static sharaku_prof_t	__prof_linetrace_processing;
 
 /******************************************************************************
 class section
@@ -41,12 +39,6 @@ sd_linetrace::sd_linetrace()
 {
 	sharaku_db_trace("start", 0, 0, 0, 0, 0, 0);
 
-	sharaku_prof_init(&__prof_linetrace_interval, "sd_linetrace::interval");
-	sharaku_prof_init(&__prof_linetrace_processing, "sd_linetrace::processing");
-	sharaku_prof_regist(&__prof_linetrace_interval);
-	sharaku_prof_regist(&__prof_linetrace_processing);
-
-	_time		= 0;
 	_trace_onoff	= 0;
 	_interval	= 0.0f;
 
@@ -61,20 +53,17 @@ sd_linetrace::sd_linetrace()
 	_steering	= 0;
 	_tangle_in	= 30;
 	_tangle_out	= 30;
+
+	sharaku_prof_init(&_prof_interval, "sd_linetrace::interval");
+	sharaku_prof_init(&_prof_update_process, "sd_linetrace::processing");
+	sharaku_prof_regist(&_prof_interval);
+	sharaku_prof_regist(&_prof_update_process);
 }
 
 
 int32_t sd_linetrace::update(const float &interval, uint32_t retry_cnt)
 {
 	sharaku_db_trace("interval=%d", (int32_t)(interval * 1000.0f), 0, 0, 0, 0, 0);
-
-	// 時間収集(最初の1回は採取しない)
-	sharaku_usec_t time = sharaku_get_usec();
-	if (_time) {
-		sharaku_prof_add(&__prof_linetrace_interval,
-				 _time, time);
-	}
-	_time = time;
 
 	int32_t		dps = 0;
 	int32_t		steering = 0;
@@ -119,10 +108,6 @@ int32_t sd_linetrace::update(const float &interval, uint32_t retry_cnt)
 	// move_operationsに対して出力を行う
 	out_move->set_speed_sp(dps);
 	out_move->set_steer_sp(steering);
-
-	// 時間収集
-	time = sharaku_get_usec();
-	sharaku_prof_add(&__prof_linetrace_processing, _time, time);
 
 	return 0;
 }

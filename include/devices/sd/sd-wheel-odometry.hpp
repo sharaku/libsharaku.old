@@ -81,8 +81,6 @@ class sd_wheel_odometry
 	int32_t			_wheel_length;		// 車輪の径
 
  private:
-	sharaku_usec_t		_time;			// 前回実行時の時間
-
 	int32_t			_prev_count_r;
 	int32_t			_prev_count_l;
 	position3		_pos;			// 累積位置

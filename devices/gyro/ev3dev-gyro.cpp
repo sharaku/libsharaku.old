@@ -23,8 +23,7 @@ int32_t ev3dev_gyro::connect(const char* port)
 {
 	sharaku_db_trace("start", 0, 0, 0, 0, 0, 0);
 
-	DEVICE_PROC_SET_READ_PROFNAME("ev3dev_gyro::process<%s",
-				      "ev3dev_gyro::interval<%s", port);
+	DEVICE_PROC_SET_READ_PROFNAME("ev3dev_gyro<%s", port);
 
 	int32_t result = ev3dev_lego_sensor::connect(port);
 	if (result != 0) {

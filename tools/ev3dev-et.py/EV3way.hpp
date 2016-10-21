@@ -24,11 +24,11 @@ class EV3way
  : protected  sharaku::mod_update {
  public:
  	EV3way() :
- 	mod_update(5),				// updateは4ms
+ 	mod_update(4),				// updateは4ms
 	power(50),				// 電源制御 50ms
 	touch(sharaku::EV3_INPUT_1, 50),	// IN3, 周期50ms
 	usonic(sharaku::EV3_INPUT_2, 25),	// IN4, 周期25ms
-	color(sharaku::EV3_INPUT_3, 4, sharaku::color_operations::MODE_REFLECTED),
+	color(sharaku::EV3_INPUT_3, 5, sharaku::color_operations::MODE_REFLECTED),
 						// IN2, 周期4ms
 	gyro(sharaku::EV3_INPUT_4, 0),		// IN1, 周期4ms
 	motor_t(sharaku::EV3_OUTPUT_D, 0, sharaku::ev3dev_tacho_motor::MOTOR_MODE_ANGLE),

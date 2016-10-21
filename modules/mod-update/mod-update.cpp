@@ -187,12 +187,21 @@ next:
 
 	// pre_updateを実行する
 	// EAGAINを返された場合は、いま処理したupdateをもう一度実行する。
+	sharaku_usec_t time_start = sharaku_get_usec();
+	if (_mod_update->_update->_prof_time_per_update_start) {
+		sharaku_prof_add(&_mod_update->_update->_prof_interval, _mod_update->_update->_prof_time_per_update_start, time_start);
+	}
+
+	_mod_update->_update->_prof_time_per_update_start = time_start;
 	rc = _mod_update->_update->pre_update(_mod_update->_interval, 0);
 	if (rc != EAGAIN) {
+		sharaku_usec_t time_process = sharaku_get_usec();
+		sharaku_prof_add(&_mod_update->_update->_prof_pre_update_process, _mod_update->_update->_prof_time_per_update_start, time_process);
 		_mod_update->_update = list_next_entry(_mod_update->_update,
 							update_operations, update_list);
 		goto next;
 	} else {
+		sharaku_prof_add_notime(&_mod_update->_update->_prof_pre_update_retry);
 		sharaku_async_message(job, mod_pre_update_retry);
 		return;
 	}
@@ -212,11 +221,14 @@ mod_update::mod_pre_update_retry(struct sharaku_job* job)
 	// EAGAINを返された場合は、いま処理したupdateをもう一度実行する。
 	rc = _mod_update->_update->pre_update(_mod_update->_interval, 1);
 	if (rc != EAGAIN) {
+		sharaku_usec_t time_process = sharaku_get_usec();
+		sharaku_prof_add(&_mod_update->_update->_prof_pre_update_process, _mod_update->_update->_prof_time_per_update_start, time_process);
 		_mod_update->_update = list_next_entry(_mod_update->_update,
 							update_operations, update_list);
 		sharaku_async_message(job, mod_pre_update);
 		return;
 	} else {
+		sharaku_prof_add_notime(&_mod_update->_update->_prof_pre_update_retry);
 		sharaku_async_message(job, mod_pre_update_retry);
 		return;
 	}
@@ -265,12 +277,16 @@ next:
 	}
 
 	// updateを実行する
+	_mod_update->_update->_prof_time_update_start =  sharaku_get_usec();
 	rc = _mod_update->_update->update(_mod_update->_interval, 0);
 	if (rc != EAGAIN) {
+		sharaku_usec_t time_process = sharaku_get_usec();
+		sharaku_prof_add(&_mod_update->_update->_prof_update_process, _mod_update->_update->_prof_time_update_start, time_process);
 		_mod_update->_update = list_next_entry(_mod_update->_update,
 							update_operations, update_list);
 		goto next;
 	} else {
+		sharaku_prof_add_notime(&_mod_update->_update->_prof_update_retry);
 		sharaku_async_message(job, mod_update_retry);
 		return;
 	}
@@ -289,10 +305,13 @@ mod_update::mod_update_retry(struct sharaku_job* job)
 	// updateを実行する
 	rc = _mod_update->_update->update(_mod_update->_interval, 1);
 	if (rc != EAGAIN) {
+		sharaku_usec_t time_process = sharaku_get_usec();
+		sharaku_prof_add(&_mod_update->_update->_prof_update_process, _mod_update->_update->_prof_time_update_start, time_process);
 		_mod_update->_update = list_next_entry(_mod_update->_update,
 							update_operations, update_list);
 		sharaku_async_message(job, mod_update_);
 	} else {
+		sharaku_prof_add_notime(&_mod_update->_update->_prof_update_retry);
 		sharaku_async_message(job, mod_update_retry);
 	}
 }
@@ -341,12 +360,16 @@ next:
 
 	// post_updateを実行する
 	// EAGAINを返された場合は、いま処理したupdateをもう一度実行する。
+	_mod_update->_update->_prof_time_post_update_start =  sharaku_get_usec();
 	rc = _mod_update->_update->post_update(_mod_update->_interval, 0);
 	if (rc != EAGAIN) {
+		sharaku_usec_t time_process = sharaku_get_usec();
+		sharaku_prof_add(&_mod_update->_update->_prof_post_update_process, _mod_update->_update->_prof_time_post_update_start, time_process);
 		_mod_update->_update = list_prev_entry(_mod_update->_update,
 							update_operations, update_list);
 		goto next;
 	} else {
+		sharaku_prof_add_notime(&_mod_update->_update->_prof_post_update_retry);
 		sharaku_async_message(job, mod_post_update_retry);
 		return;
 	}
@@ -366,11 +389,14 @@ mod_update::mod_post_update_retry(struct sharaku_job* job)
 	// EAGAINを返された場合は、いま処理したupdateをもう一度実行する。
 	rc = _mod_update->_update->post_update(_mod_update->_interval, 1);
 	if (rc != EAGAIN) {
+		sharaku_usec_t time_process = sharaku_get_usec();
+		sharaku_prof_add(&_mod_update->_update->_prof_post_update_process, _mod_update->_update->_prof_time_post_update_start, time_process);
 		_mod_update->_update = list_prev_entry(_mod_update->_update,
 							update_operations, update_list);
 		sharaku_async_message(job, mod_post_update);
 		return;
 	} else {
+		sharaku_prof_add_notime(&_mod_update->_update->_prof_post_update_retry);
 		sharaku_async_message(job, mod_post_update_retry);
 		return;
 	}

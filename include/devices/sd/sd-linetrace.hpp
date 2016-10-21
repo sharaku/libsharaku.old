@@ -172,8 +172,6 @@ class sd_linetrace
 	virtual int32_t	get_correction_color(int32_t color);
 
  private:
-	sharaku_usec_t	_time;		// 前回実行時の時間
-
 	uint32_t	_trace_onoff:1;
 	float		_interval;
 

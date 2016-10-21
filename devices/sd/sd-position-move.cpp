@@ -28,20 +28,11 @@
 
 NAMESPACE_SHARAKU_BEGIN
 
-static sharaku_prof_t	__prof_position_move_interval;
-static sharaku_prof_t	__prof_position_move_processing;
-
 sd_position_move::sd_position_move(int32_t wheel_length)
  : _pid(1.50f, 0.0f, 0.0f)
 {
 	sharaku_db_trace("start", 0, 0, 0, 0, 0, 0);
 
-	sharaku_prof_init(&__prof_position_move_interval, "sd_position_move::interval");
-	sharaku_prof_init(&__prof_position_move_processing, "sd_position_move::processing");
-	sharaku_prof_regist(&__prof_position_move_interval);
-	sharaku_prof_regist(&__prof_position_move_processing);
-
-	_time			= 0;
 	_wheel_length		= wheel_length;
 
 	_mode			= MODE_TARGET_DISTANCE;
@@ -71,6 +62,11 @@ sd_position_move::sd_position_move(int32_t wheel_length)
 	_old_diff[0] = 0xffffffff;
 	_old_diff[1] = 0xffffffff;
 	_old_diff[2] = 0xffffffff;
+
+	sharaku_prof_init(&_prof_interval, "sd_position_move::interval");
+	sharaku_prof_init(&_prof_update_process, "sd_position_move::processing");
+	sharaku_prof_regist(&_prof_interval);
+	sharaku_prof_regist(&_prof_update_process);
 }
 
 void
@@ -279,12 +275,6 @@ sd_position_move::update(const float &interval, uint32_t retry_cnt)
 {
 	sharaku_db_trace("interval=%d", (int32_t)(interval * 1000.0f), 0, 0, 0, 0, 0);
 	// 時間収集(最初の1回は採取しない)
-	sharaku_usec_t time = sharaku_get_usec();
-//	if (_time) {
-//		sharaku_prof_add(&__prof_motors_interval,
-//				 _time, time);
-//	}
-	_time = time;
 
 	if (_move_onoff) {
 		switch(_mode) {
@@ -317,11 +307,6 @@ sd_position_move::update(const float &interval, uint32_t retry_cnt)
 			 _speed, _steer, _move_onoff, _auto, 0, 0);
 	out_move->set_speed_sp((int32_t)_speed);
 	out_move->set_steer_sp((int32_t)_steer);
-
-	// 時間収集
-	time = sharaku_get_usec();
-//	sharaku_prof_add(&__prof_odometory_processing, _time, time);
-	sharaku_db_trace("time=%d", (int32_t)(time - _time), 0, 0, 0, 0, 0);
 
 	return 0;
 }

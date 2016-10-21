@@ -328,25 +328,32 @@ class linux_proc_device
 		_write_flags 	= 0;
 		_type = PROC_IOTYPE_RW;
 
-		_prof_time_start = 0;
+		_prof_time_read_start = 0;
+		_prof_time_write_start = 0;
 	}
 	virtual ~linux_proc_device() {
 		sharaku_mutex_destroy(&_mutex_job_i);
 	}
-	void set_read_profname(char *process, char *interval) {
-		strncpy(_profname_read_process, process, sizeof _profname_read_process);
+	void set_read_profname(char *process, char *count, char *interval) {
 		strncpy(_profname_read_interval, interval, sizeof _profname_read_interval);
-		sharaku_prof_init(&_prof_read_process, _profname_read_process);
+		strncpy(_profname_read_count, count, sizeof _profname_read_count);
+		strncpy(_profname_read_process, process, sizeof _profname_read_process);
 		sharaku_prof_init(&_prof_read_interval, _profname_read_interval);
-		sharaku_prof_regist(&_prof_read_process);
+		sharaku_prof_init(&_prof_read_count, _profname_read_count);
+		sharaku_prof_init(&_prof_read_process, _profname_read_process);
 		sharaku_prof_regist(&_prof_read_interval);
+		sharaku_prof_regist(&_prof_read_count);
+		sharaku_prof_regist(&_prof_read_process);
 	}
-	void set_write_profname(char *process, char *interval) {
+	void set_write_profname(char *process, char *count, char *interval) {
 		strncpy(_profname_write_process, process, sizeof _profname_write_process);
+		strncpy(_profname_write_count, count, sizeof _profname_write_count);
 		strncpy(_profname_write_interval, interval, sizeof _profname_write_interval);
 		sharaku_prof_init(&_prof_write_process, _profname_write_process);
+		sharaku_prof_init(&_prof_write_count, _profname_write_count);
 		sharaku_prof_init(&_prof_write_interval, _profname_write_interval);
 		sharaku_prof_regist(&_prof_write_process);
+		sharaku_prof_regist(&_prof_write_count);
 		sharaku_prof_regist(&_prof_write_interval);
 	}
 	virtual int32_t start(void) {
@@ -438,14 +445,19 @@ class linux_proc_device
 	PROC_IOTYPE		_type;
 
 	// profile
-	sharaku_usec_t		_prof_time_start;
+	sharaku_usec_t		_prof_time_read_start;
+	sharaku_usec_t		_prof_time_write_start;
 	sharaku_prof_t		_prof_read_process;
+	sharaku_prof_t		_prof_read_count;
 	sharaku_prof_t		_prof_read_interval;
 	sharaku_prof_t		_prof_write_process;
+	sharaku_prof_t		_prof_write_count;
 	sharaku_prof_t		_prof_write_interval;
 	char			_profname_read_process[64];
+	char			_profname_read_count[64];
 	char			_profname_read_interval[64];
 	char			_profname_write_process[64];
+	char			_profname_write_count[64];
 	char			_profname_write_interval[64];
 
  private:
@@ -490,39 +502,41 @@ class linux_proc_device
 	} if (type == PROC_IOTYPE_WRITE || type == PROC_IOTYPE_RW) {
 #define DEVICE_IO_END				\
 	}
-#define DEVICE_PROC_SET_READ_PROFNAME(fmt_process, fmt_interval, ...)			\
+#define DEVICE_PROC_SET_READ_PROFNAME(fmt, ...)						\
 	{										\
-		char	prof_process[64];						\
 		char	prof_interval[64];						\
+		char	prof_count[64];							\
+		char	prof_process[64];						\
 		char	*work;								\
-		snprintf(prof_process, sizeof prof_process, fmt_process, ## __VA_ARGS__);	\
-		work = strstr(prof_process, "\n");					\
-		if (work) {								\
-			*work = '>';							\
-		}									\
-		snprintf(prof_interval, sizeof prof_interval, fmt_interval, ## __VA_ARGS__);	\
+		snprintf(prof_interval, sizeof prof_interval / 2, fmt, ## __VA_ARGS__);	\
 		work = strstr(prof_interval, "\n");					\
 		if (work) {								\
 			*work = '>';							\
 		}									\
-		linux_proc_device::set_read_profname(prof_process, prof_interval);	\
+		memcpy(prof_count, prof_interval, sizeof prof_count);			\
+		memcpy(prof_process, prof_interval, sizeof prof_process);		\
+		strncat(prof_interval, "::read::interval", sizeof prof_interval);	\
+		strncat(prof_count, "::read::count", sizeof prof_count);		\
+		strncat(prof_process, "::read::process", sizeof prof_process);		\
+		linux_proc_device::set_read_profname(prof_process, prof_count, prof_interval);	\
 	}
-#define DEVICE_PROC_SET_WRITE_PROFNAME(fmt_process, fmt_interval, ...)			\
+#define DEVICE_PROC_SET_WRITE_PROFNAME(fmt, ...)					\
 	{										\
-		char	prof_process[64];						\
 		char	prof_interval[64];						\
+		char	prof_count[64];							\
+		char	prof_process[64];						\
 		char	*work;								\
-		snprintf(prof_process, sizeof prof_process, fmt_process, ## __VA_ARGS__);	\
-		work = strstr(prof_process, "\n");					\
-		if (work) {								\
-			*work = '>';							\
-		}									\
-		snprintf(prof_interval, sizeof prof_interval, fmt_interval, ## __VA_ARGS__);	\
+		snprintf(prof_interval, sizeof prof_interval / 2, fmt, ## __VA_ARGS__);	\
 		work = strstr(prof_interval, "\n");					\
 		if (work) {								\
 			*work = '>';							\
 		}									\
-		linux_proc_device::set_write_profname(prof_process, prof_interval);	\
+		memcpy(prof_count, prof_interval, sizeof prof_count);			\
+		memcpy(prof_process, prof_interval, sizeof prof_process);		\
+		strncat(prof_interval, "::write::interval", sizeof prof_interval);	\
+		strncat(prof_count, "::write::count", sizeof prof_count);		\
+		strncat(prof_process, "::write::process", sizeof prof_process);		\
+		linux_proc_device::set_write_profname(prof_process, prof_count, prof_interval);	\
 	}
 
 

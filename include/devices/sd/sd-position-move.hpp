@@ -216,7 +216,6 @@ class sd_position_move
 	}
 
  private:
-	sharaku_usec_t		_time;		// 前回実行時の時間
 	uint32_t		_wheel_length;
 
 	mode			_mode;		// モード

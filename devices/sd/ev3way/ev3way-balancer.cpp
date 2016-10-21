@@ -23,7 +23,12 @@ ev3way_balancer::ev3way_balancer()
 	_max_dps = 1000;
 	sharaku_db_trace("balance_init", 0, 0, 0, 0, 0, 0);
 	reset();
-	_interval = 0.00500000000F;
+	_interval = 0.00400000000F;
+
+	sharaku_prof_init(&_prof_interval, "ev3way_balancer::interval");
+	sharaku_prof_init(&_prof_update_process, "ev3way_balancer::process");
+	sharaku_prof_regist(&_prof_interval);
+	sharaku_prof_regist(&_prof_update_process);
 }
 
 int32_t

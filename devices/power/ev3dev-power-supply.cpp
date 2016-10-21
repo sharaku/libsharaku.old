@@ -16,8 +16,7 @@ int32_t ev3dev_powersupply::connect(void)
 {
 	sharaku_db_trace("start", 0, 0, 0, 0, 0, 0);
 
-	DEVICE_PROC_SET_READ_PROFNAME("ev3dev_powersupply::process",
-				      "ev3dev_powersupply::interval");
+	DEVICE_PROC_SET_READ_PROFNAME("ev3dev_powersupply");
 
 	int32_t result = ev3dev_lego_powersupply::connect();
 	if (result != 0) {
