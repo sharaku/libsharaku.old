@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sharaku/log.h>
+#include <sharaku/debug.h>
 #include <devices/sd/sd-wheel-odometry.hpp>
 
 // 数学定義
@@ -42,8 +43,8 @@ sd_wheel_odometry::sd_wheel_odometry(int32_t wheel_axle_length,int32_t wheel_len
 
 	sharaku_prof_init(&_prof_interval, "sd_wheel_odometry::interval");
 	sharaku_prof_init(&_prof_pre_update_process, "sd_wheel_odometry::processing");
-	sharaku_prof_regist(&_prof_interval);
-	sharaku_prof_regist(&_prof_pre_update_process);
+	debug_code(sharaku_prof_regist(&_prof_interval));
+	debug_code(sharaku_prof_regist(&_prof_pre_update_process));
 }
 
 int32_t

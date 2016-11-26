@@ -11,6 +11,7 @@
 #include <devices/sd/sd-motors.hpp>
 #include <sharaku/prof.h>
 #include <sharaku/log.h>
+#include <sharaku/debug.h>
 
 // 数学定義
 #ifndef M_PI
@@ -53,9 +54,9 @@ sd_motors::sd_motors(int32_t wheel_axle_length, int32_t wheel_length)
 	sharaku_prof_init(&_prof_interval, "sd_motors::interval");
 	sharaku_prof_init(&_prof_pre_update_process, "sd_motors::pre_update::processing");
 	sharaku_prof_init(&_prof_post_update_process, "sd_motors::post_update::processing");
-	sharaku_prof_regist(&_prof_interval);
-	sharaku_prof_regist(&_prof_pre_update_process);
-	sharaku_prof_regist(&_prof_post_update_process);
+	debug_code(sharaku_prof_regist(&_prof_interval));
+	debug_code(sharaku_prof_regist(&_prof_pre_update_process));
+	debug_code(sharaku_prof_regist(&_prof_post_update_process));
 }
 
 // ステアリング角度を元にした制御

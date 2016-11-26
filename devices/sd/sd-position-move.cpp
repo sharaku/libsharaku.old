@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sharaku/log.h>
+#include <sharaku/debug.h>
 #include <devices/sd/sd-position-move.hpp>
 
 // 数学定義
@@ -65,8 +66,8 @@ sd_position_move::sd_position_move(int32_t wheel_length)
 
 	sharaku_prof_init(&_prof_interval, "sd_position_move::interval");
 	sharaku_prof_init(&_prof_update_process, "sd_position_move::processing");
-	sharaku_prof_regist(&_prof_interval);
-	sharaku_prof_regist(&_prof_update_process);
+	debug_code(sharaku_prof_regist(&_prof_interval));
+	debug_code(sharaku_prof_regist(&_prof_update_process));
 }
 
 void

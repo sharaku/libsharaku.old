@@ -10,6 +10,7 @@
 #include <string.h>
 #include <sharaku/prof.h>
 #include <sharaku/log.h>
+#include <sharaku/debug.h>
 #include <devices/sd/ev3way/ev3way-balancer.hpp>
 #include "balancer.h"
 
@@ -27,24 +28,24 @@ ev3way_balancer::ev3way_balancer()
 
 	sharaku_prof_init(&_prof_interval, "ev3way_balancer::interval");
 	sharaku_prof_init(&_prof_update_process, "ev3way_balancer::process");
-	sharaku_prof_regist(&_prof_interval);
-	sharaku_prof_regist(&_prof_update_process);
+	debug_code(sharaku_prof_regist(&_prof_interval));
+	debug_code(sharaku_prof_regist(&_prof_update_process));
 }
 
 int32_t
 ev3way_balancer::reset(void)
 {
 	sharaku_db_trace("reset", 0, 0, 0, 0, 0, 0);
-	balance_init(); /* “|—§UqAPI‰Šú‰» */
+	balance_init(); /* å€’ç«‹æŒ¯å­APIåˆæœŸåŒ– */
 	return 0;
 }
 
 int32_t ev3way_balancer::update(const float &interval, uint32_t retry_cnt)
 {
-	signed char pwm_L, pwm_R; /* ¶‰Eƒ‚[ƒ^PWMo—Í */
+	signed char pwm_L, pwm_R; /* å·¦å³ãƒ¢ãƒ¼ã‚¿PWMå‡ºåŠ› */
 	int gyro, volt;
 
-	// —¼—Ö‚Ìó‘Ô‚ğæ“¾‚µAˆÊ’u‚Æ‘¬“x‚ğZo‚·‚é
+	// ä¸¡è¼ªã®çŠ¶æ…‹ã‚’å–å¾—ã—ã€ä½ç½®ã¨é€Ÿåº¦ã‚’ç®—å‡ºã™ã‚‹
 	int32_t	left_pos	= -1 * out_duty_motor_l->get_position();
 	int32_t	right_pos	= -1 * out_duty_motor_r->get_position();
 
@@ -60,7 +61,7 @@ int32_t ev3way_balancer::update(const float &interval, uint32_t retry_cnt)
 	sharaku_db_trace("interval=%u left_pos=%d right_pos=%d delta=%d _speed=%d _position=%d",
 			 EXEC_PERIOD * 1000000, left_pos, right_pos, delta, _speed, _position);
 
-	// î•ñ‚ğXV
+	// æƒ…å ±ã‚’æ›´æ–°
 	_prev_sum	= pos_sum;
 	_prev_deltas[2] = _prev_deltas[1];
 	_prev_deltas[1] = _prev_deltas[0];
@@ -71,7 +72,7 @@ int32_t ev3way_balancer::update(const float &interval, uint32_t retry_cnt)
 	sharaku_db_trace("_speed_sp=%d _steer_sp=%d gyro=%d left_pos=%d right_pos=%d volt=%d",
 			 _speed_sp, _steer_sp, gyro, left_pos, right_pos, volt);
 	if (!_onoff) {
-		// off‚Ìê‡‚ÍƒXƒ‹[‚·‚é
+		// offã®å ´åˆã¯ã‚¹ãƒ«ãƒ¼ã™ã‚‹
 		balance_control((float)(_speed_sp * 100) / _max_dps,
 				(float)_steer_sp,
 				(float)0,

@@ -10,6 +10,7 @@
 #include <sharaku/prof.h>
 #include <sharaku/log.h>
 #include <sharaku/list.h>
+#include <sharaku/debug.h>
 #include <sharaku/module.h>
 #include <modules/mod-update.hpp>
 
@@ -101,10 +102,10 @@ mod_update_init(void)
 	sharaku_prof_init(&__prof_update_update_processing, "mod_update::update_processing");
 	sharaku_prof_init(&__prof_update_post_update_processing, "mod_update::post_update_processing");
 	sharaku_prof_regist(&__prof_update_interval);
-	sharaku_prof_regist(&__prof_update_processing);
-	sharaku_prof_regist(&__prof_update_pre_update_processing);
-	sharaku_prof_regist(&__prof_update_update_processing);
-	sharaku_prof_regist(&__prof_update_post_update_processing);
+	debug_code(sharaku_prof_regist(&__prof_update_processing));
+	debug_code(sharaku_prof_regist(&__prof_update_pre_update_processing));
+	debug_code(sharaku_prof_regist(&__prof_update_update_processing));
+	debug_code(sharaku_prof_regist(&__prof_update_post_update_processing));
 }
 
 // -------------------------------------------------------------------------

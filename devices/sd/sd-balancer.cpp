@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <devices/sd/sd-balancer.hpp>
 #include <sharaku/log.h>
+#include <sharaku/debug.h>
 
 #define PROFILE
 
@@ -66,8 +67,8 @@ sd_balancer::sd_balancer(float wheel_length, float max_speed)
 
 	sharaku_prof_init(&_prof_interval, "sd_balancer::interval");
 	sharaku_prof_init(&_prof_update_process, "sd_balancer::process");
-	sharaku_prof_regist(&_prof_interval);
-	sharaku_prof_regist(&_prof_update_process);
+	debug_code(sharaku_prof_regist(&_prof_interval));
+	debug_code(sharaku_prof_regist(&_prof_update_process));
 }
 
 /******************************************************************************

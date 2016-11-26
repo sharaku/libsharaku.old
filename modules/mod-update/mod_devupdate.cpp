@@ -10,6 +10,7 @@
 #include <sharaku/prof.h>
 #include <sharaku/log.h>
 #include <sharaku/list.h>
+#include <sharaku/debug.h>
 #include <sharaku/module.h>
 #include <modules/mod-devupdate.hpp>
 
@@ -36,13 +37,13 @@ mod_devupdate::mod_devupdate() {
 	sharaku_prof_init(&_prof_update_process, "mod_devupdate::update::process");
 	sharaku_prof_init(&_prof_post_update_retry, "mod_devupdate::post_update::retry");
 	sharaku_prof_init(&_prof_post_update_process, "mod_devupdate::post_update::process");
-	sharaku_prof_regist(&_prof_interval);
-	sharaku_prof_regist(&_prof_pre_update_retry);
-	sharaku_prof_regist(&_prof_pre_update_process);
-	sharaku_prof_regist(&_prof_update_retry);
-	sharaku_prof_regist(&_prof_update_process);
-	sharaku_prof_regist(&_prof_post_update_retry);
-	sharaku_prof_regist(&_prof_post_update_process);
+	debug_code(sharaku_prof_regist(&_prof_interval));
+	debug_code(sharaku_prof_regist(&_prof_pre_update_retry));
+	debug_code(sharaku_prof_regist(&_prof_pre_update_process));
+	debug_code(sharaku_prof_regist(&_prof_update_retry));
+	debug_code(sharaku_prof_regist(&_prof_update_process));
+	debug_code(sharaku_prof_regist(&_prof_post_update_retry));
+	debug_code(sharaku_prof_regist(&_prof_post_update_process));
 }
 
 void

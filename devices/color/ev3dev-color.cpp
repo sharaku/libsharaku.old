@@ -97,7 +97,6 @@ void ev3dev_color::__commit(void)
 void ev3dev_color::__io_end(PROC_IOTYPE type)
 {
 	DEVICE_IO_READ
-		// モードによって次のフェーズ、
 		switch (_mode) {
 		case color_operations::MODE_REFLECTED:
 			_reflected = ev3dev_lego_sensor::value0;

@@ -1,3 +1,8 @@
+/*
+ * Copyright Abe Takafumi All Rights Reserved, 2014-2015
+ * Author Abe Takafumi
+ *
+ */
 #ifndef _SHARAKU_TYPES_H
 #define _SHARAKU_TYPES_H
 

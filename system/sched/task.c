@@ -16,6 +16,7 @@ include section
 #include <assert.h>
 #include <sharaku/task.h>
 #include <sharaku/prof.h>
+#include <sharaku/debug.h>
 #include "task-in.h"
 
 ////////////////////////////////////////////////////////////////////////
@@ -163,11 +164,11 @@ void sharaku_initialize_scheduler(void)
 	sharaku_prof_init(&_prof_task_async_msg, "sharaku::task::async_message");
 	sharaku_prof_init(&_prof_task_sync_msg, "sharaku::task::sync_message");
 	sharaku_prof_init(&_prof_task_timer_msg, "sharaku::task::timer_message");
-	sharaku_prof_regist(&_prof_task_timer);
-	sharaku_prof_regist(&_prof_task_internal);
-	sharaku_prof_regist(&_prof_task_async_msg);
-	sharaku_prof_regist(&_prof_task_sync_msg);
-	sharaku_prof_regist(&_prof_task_timer_msg);
+	debug_code(sharaku_prof_regist(&_prof_task_timer));
+	debug_code(sharaku_prof_regist(&_prof_task_internal));
+	debug_code(sharaku_prof_regist(&_prof_task_async_msg));
+	debug_code(sharaku_prof_regist(&_prof_task_sync_msg));
+	debug_code(sharaku_prof_regist(&_prof_task_timer_msg));
 
 	// 特別スケジューラを初期化
 	_sharaku_initialize_specialcontext(&_default_context);

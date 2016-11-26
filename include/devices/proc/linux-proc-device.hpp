@@ -20,6 +20,7 @@ extern "C" {
 #include <sharaku/types.h>
 #include <sharaku/task.h>
 #include <sharaku/thread.h>
+#include <sharaku/debug.h>
 #include <devices/update-api.hpp>
 
 NAMESPACE_SHARAKU_BEGIN
@@ -341,9 +342,9 @@ class linux_proc_device
 		sharaku_prof_init(&_prof_read_interval, _profname_read_interval);
 		sharaku_prof_init(&_prof_read_count, _profname_read_count);
 		sharaku_prof_init(&_prof_read_process, _profname_read_process);
-		sharaku_prof_regist(&_prof_read_interval);
-		sharaku_prof_regist(&_prof_read_count);
-		sharaku_prof_regist(&_prof_read_process);
+		debug_code(sharaku_prof_regist(&_prof_read_interval));
+		debug_code(sharaku_prof_regist(&_prof_read_count));
+		debug_code(sharaku_prof_regist(&_prof_read_process));
 	}
 	void set_write_profname(char *process, char *count, char *interval) {
 		strncpy(_profname_write_process, process, sizeof _profname_write_process);
@@ -352,9 +353,9 @@ class linux_proc_device
 		sharaku_prof_init(&_prof_write_process, _profname_write_process);
 		sharaku_prof_init(&_prof_write_count, _profname_write_count);
 		sharaku_prof_init(&_prof_write_interval, _profname_write_interval);
-		sharaku_prof_regist(&_prof_write_process);
-		sharaku_prof_regist(&_prof_write_count);
-		sharaku_prof_regist(&_prof_write_interval);
+		debug_code(sharaku_prof_regist(&_prof_write_process));
+		debug_code(sharaku_prof_regist(&_prof_write_count));
+		debug_code(sharaku_prof_regist(&_prof_write_interval));
 	}
 	virtual int32_t start(void) {
 		sharaku_mutex_lock(&_mutex_job_i);
