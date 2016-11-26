@@ -16,7 +16,7 @@ include_directories(
 link_directories(${SHARAKU_LIB_PATH})
 
 add_library(EV3Way SHARED 
-	EV3Way.cpp
+	libEV3Way.cpp
 	)
 target_link_libraries(
 	EV3Way
@@ -29,7 +29,7 @@ target_link_libraries(
 	)
 
 add_library(HackEV SHARED 
-	HackEV.cpp
+	libHackEV.cpp
 	)
 target_link_libraries(
 	HackEV

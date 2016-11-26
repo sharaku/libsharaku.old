@@ -16,7 +16,7 @@
 #include <sharaku/task.h>
 #define BOOST_PYTHON_STATIC_LIB
 #include <boost/python.hpp>
-#include "EV3way.hpp"
+#include "libEV3Way.hpp"
 
 using namespace std;
 
@@ -70,11 +70,11 @@ static int32_t initialize(void)
 {
 	pthread_create(&_th, NULL, start_routine, NULL);
 
-	struct sched_param	param;
-	param.sched_priority = 1;
-	pthread_setschedparam(_th, SCHED_RR, &param);
+//	struct sched_param	param;
+//	param.sched_priority = 1;
+//	pthread_setschedparam(_th, SCHED_RR, &param);
 
-	sleep(3);
+	sleep(1);
 	return 0;
 }
 
@@ -573,7 +573,7 @@ static int32_t Reset(void)
 void export_submodule_gyro() {
 	using namespace boost::python;
 
-	object module(handle<>(borrowed(PyImport_AddModule("EV3Way.Gyro"))));
+	object module(handle<>(borrowed(PyImport_AddModule("libEV3Way.Gyro"))));
 	// from mainmodule import gyro を使えるようにする
 	scope().attr("Gyro") = module;
 	// スコープを設定
@@ -588,7 +588,7 @@ void export_submodule_gyro() {
 void export_submodule_color() {
 	using namespace boost::python;
 
-	object module(handle<>(borrowed(PyImport_AddModule("EV3Way.Color"))));
+	object module(handle<>(borrowed(PyImport_AddModule("libEV3Way.Color"))));
 	// from mainmodule import color を使えるようにする
 	scope().attr("Color") = module;
 	// スコープを設定
@@ -604,7 +604,7 @@ void export_submodule_color() {
 void export_submodule_usonic() {
 	using namespace boost::python;
 
-	object module(handle<>(borrowed(PyImport_AddModule("EV3Way.USonic"))));
+	object module(handle<>(borrowed(PyImport_AddModule("libEV3Way.USonic"))));
 	// from mainmodule import usonic を使えるようにする
 	scope().attr("USonic") = module;
 	// スコープを設定
@@ -617,7 +617,7 @@ void export_submodule_usonic() {
 void export_submodule_touch() {
 	using namespace boost::python;
 
-	object module(handle<>(borrowed(PyImport_AddModule("EV3Way.Touch"))));
+	object module(handle<>(borrowed(PyImport_AddModule("libEV3Way.Touch"))));
 	// from mainmodule import usonic を使えるようにする
 	scope().attr("Touch") = module;
 	// スコープを設定
@@ -634,7 +634,7 @@ void export_submodule_touch() {
 void export_submodule_tail() {
 	using namespace boost::python;
 
-	object module(handle<>(borrowed(PyImport_AddModule("EV3Way.Tail"))));
+	object module(handle<>(borrowed(PyImport_AddModule("libEV3Way.Tail"))));
 	// from mainmodule import usonic を使えるようにする
 	scope().attr("Tail") = module;
 	// スコープを設定
@@ -652,7 +652,7 @@ void export_submodule_tail() {
 void export_submodule_motors() {
 	using namespace boost::python;
 
-	object module(handle<>(borrowed(PyImport_AddModule("EV3Way.Motors"))));
+	object module(handle<>(borrowed(PyImport_AddModule("libEV3Way.Motors"))));
 	// from mainmodule import odo を使えるようにする
 	scope().attr("Motors") = module;
 	// スコープを設定
@@ -668,7 +668,7 @@ void export_submodule_motors() {
 void export_submodule_odo() {
 	using namespace boost::python;
 
-	object module(handle<>(borrowed(PyImport_AddModule("EV3Way.Odo"))));
+	object module(handle<>(borrowed(PyImport_AddModule("libEV3Way.Odo"))));
 	// from mainmodule import odo を使えるようにする
 	scope().attr("Odo") = module;
 	// スコープを設定
@@ -686,7 +686,7 @@ void export_submodule_odo() {
 void export_submodule_linetrace() {
 	using namespace boost::python;
 
-	object module(handle<>(borrowed(PyImport_AddModule("EV3Way.Linetrace"))));
+	object module(handle<>(borrowed(PyImport_AddModule("libEV3Way.Linetrace"))));
 	// from mainmodule import linetrace を使えるようにする
 	scope().attr("Linetrace") = module;
 	// スコープを設定
@@ -703,7 +703,7 @@ void export_submodule_linetrace() {
 void export_submodule_targetmove() {
 	using namespace boost::python;
 
-	object module(handle<>(borrowed(PyImport_AddModule("EV3Way.TargetMove"))));
+	object module(handle<>(borrowed(PyImport_AddModule("libEV3Way.TargetMove"))));
 	// from mainmodule import linetrace を使えるようにする
 	scope().attr("TargetMove") = module;
 	// スコープを設定
@@ -725,7 +725,7 @@ void export_submodule_targetmove() {
 void export_submodule_baranser() {
 	using namespace boost::python;
 
-	object module(handle<>(borrowed(PyImport_AddModule("EV3Way.Baranser"))));
+	object module(handle<>(borrowed(PyImport_AddModule("libEV3Way.Baranser"))));
 	// from mainmodule import linetrace を使えるようにする
 	scope().attr("Baranser") = module;
 	// スコープを設定
@@ -738,12 +738,12 @@ void export_submodule_baranser() {
 // ---------------------------------------------------------------------
 // モジュール定義
 // ---------------------------------------------------------------------
-BOOST_PYTHON_MODULE(EV3Way)
+BOOST_PYTHON_MODULE(libEV3Way)
 {
 	using namespace boost::python;
 
 	object package = scope();
-	package.attr("__path__") = "EV3Way";
+	package.attr("__path__") = "libEV3Way";
 	def("Initialize", initialize);
 	def("Finalize", finalize);
 	def("Version", version);

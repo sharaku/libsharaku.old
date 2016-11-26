@@ -16,7 +16,7 @@
 #include <sharaku/task.h>
 #define BOOST_PYTHON_STATIC_LIB
 #include <boost/python.hpp>
-#include "HackEV.hpp"
+#include "libHackEV.hpp"
 
 using namespace std;
 
@@ -611,7 +611,7 @@ static int32_t WaitStatus(std::string status1, std::string status2 = "",
 void export_submodule_gyro() {
 	using namespace boost::python;
 
-	object module(handle<>(borrowed(PyImport_AddModule("HackEV.Gyro"))));
+	object module(handle<>(borrowed(PyImport_AddModule("libHackEV.Gyro"))));
 	// from mainmodule import gyro を使えるようにする
 	scope().attr("Gyro") = module;
 	// スコープを設定
@@ -626,7 +626,7 @@ void export_submodule_gyro() {
 void export_submodule_color() {
 	using namespace boost::python;
 
-	object module(handle<>(borrowed(PyImport_AddModule("HackEV.Color"))));
+	object module(handle<>(borrowed(PyImport_AddModule("libHackEV.Color"))));
 	// from mainmodule import color を使えるようにする
 	scope().attr("Color") = module;
 	// スコープを設定
@@ -642,7 +642,7 @@ void export_submodule_color() {
 void export_submodule_usonic() {
 	using namespace boost::python;
 
-	object module(handle<>(borrowed(PyImport_AddModule("HackEV.USonic"))));
+	object module(handle<>(borrowed(PyImport_AddModule("libHackEV.USonic"))));
 	// from mainmodule import usonic を使えるようにする
 	scope().attr("USonic") = module;
 	// スコープを設定
@@ -655,7 +655,7 @@ void export_submodule_usonic() {
 void export_submodule_touch() {
 	using namespace boost::python;
 
-	object module(handle<>(borrowed(PyImport_AddModule("HackEV.Touch"))));
+	object module(handle<>(borrowed(PyImport_AddModule("libHackEV.Touch"))));
 	// from mainmodule import usonic を使えるようにする
 	scope().attr("Touch") = module;
 	// スコープを設定
@@ -672,7 +672,7 @@ void export_submodule_touch() {
 void export_submodule_arm() {
 	using namespace boost::python;
 
-	object module(handle<>(borrowed(PyImport_AddModule("HackEV.Arm"))));
+	object module(handle<>(borrowed(PyImport_AddModule("libHackEV.Arm"))));
 	// from mainmodule import usonic を使えるようにする
 	scope().attr("Arm") = module;
 	// スコープを設定
@@ -686,7 +686,7 @@ void export_submodule_arm() {
 void export_submodule_tail() {
 	using namespace boost::python;
 
-	object module(handle<>(borrowed(PyImport_AddModule("HackEV.Tail"))));
+	object module(handle<>(borrowed(PyImport_AddModule("libHackEV.Tail"))));
 	// from mainmodule import usonic を使えるようにする
 	scope().attr("Tail") = module;
 	// スコープを設定
@@ -704,7 +704,7 @@ void export_submodule_tail() {
 void export_submodule_motors() {
 	using namespace boost::python;
 
-	object module(handle<>(borrowed(PyImport_AddModule("HackEV.Motors"))));
+	object module(handle<>(borrowed(PyImport_AddModule("libHackEV.Motors"))));
 	// from mainmodule import odo を使えるようにする
 	scope().attr("Motors") = module;
 	// スコープを設定
@@ -722,7 +722,7 @@ void export_submodule_motors() {
 void export_submodule_odo() {
 	using namespace boost::python;
 
-	object module(handle<>(borrowed(PyImport_AddModule("HackEV.Odo"))));
+	object module(handle<>(borrowed(PyImport_AddModule("libHackEV.Odo"))));
 	// from mainmodule import odo を使えるようにする
 	scope().attr("Odo") = module;
 	// スコープを設定
@@ -740,7 +740,7 @@ void export_submodule_odo() {
 void export_submodule_linetrace() {
 	using namespace boost::python;
 
-	object module(handle<>(borrowed(PyImport_AddModule("HackEV.Linetrace"))));
+	object module(handle<>(borrowed(PyImport_AddModule("libHackEV.Linetrace"))));
 	// from mainmodule import linetrace を使えるようにする
 	scope().attr("Linetrace") = module;
 	// スコープを設定
@@ -757,7 +757,7 @@ void export_submodule_linetrace() {
 void export_submodule_targetmove() {
 	using namespace boost::python;
 
-	object module(handle<>(borrowed(PyImport_AddModule("HackEV.TargetMove"))));
+	object module(handle<>(borrowed(PyImport_AddModule("libHackEV.TargetMove"))));
 	// from mainmodule import linetrace を使えるようにする
 	scope().attr("TargetMove") = module;
 	// スコープを設定
@@ -779,12 +779,12 @@ void export_submodule_targetmove() {
 // ---------------------------------------------------------------------
 // モジュール定義
 // ---------------------------------------------------------------------
-BOOST_PYTHON_MODULE(HackEV)
+BOOST_PYTHON_MODULE(libHackEV)
 {
 	using namespace boost::python;
 
 	object package = scope();
-	package.attr("__path__") = "HackEV";
+	package.attr("__path__") = "libHackEV";
 	def("Initialize", initialize);
 	def("Finalize", finalize);
 	def("Version", version);
