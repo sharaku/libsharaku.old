@@ -64,3 +64,4 @@ RUN \
 	/opt/install/python_install.sh && \
 	/opt/install/boost_install.sh
 
+CMD ["tail","-f","/dev/null"]
