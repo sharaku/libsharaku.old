@@ -1,16 +1,17 @@
 #!/bin/sh
 
-mkdir -p result
-make -C ../../ clear
+rm -rf build
+mkdir build
+cd build
 
-# libsharaku builds
-make -C ../../ x86 2> result/result-build.x86.txt
-make -C ../../ arm 2> result/result-build.arm.txt
+# arm-linuxビルドを行う
+rm -f CMakeCache.txt cmake_install.cmake rm Makefile
+rm -rf CMakeFiles
+cmake ../../../ -DCMAKE_TOOLCHAIN_FILE=tools/cmake/ev3dev-arm.cmake
+make
 
-# testing builds
-make -C ../../ x86-testing 2> result/result-build.x86-testing.txt
-
-# ev3dev tools builds
-make -C ../ev3dev-et.py clean
-make -C ../ev3dev-et.py CC=arm-linux-gnueabi-gcc CXX=arm-linux-gnueabi-g++
-
+# arm-itronビルドを行う
+rm -f CMakeCache.txt cmake_install.cmake rm Makefile
+rm -rf CMakeFiles
+cmake ../../../ -DCMAKE_TOOLCHAIN_FILE=tools/cmake/ev3rt-arm.cmake
+make

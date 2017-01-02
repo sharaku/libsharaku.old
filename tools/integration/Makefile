@@ -1,5 +1,5 @@
 
-all: check build deproy
+all: check build deproy packageing
 
 check:
 	sh 01-static_check.sh
@@ -10,6 +10,10 @@ build:
 deproy:
 	sh 03-deproy.sh
 
+packageing:
+	sh 04-package.sh
+
 clean:
 	@rm -fr result
-	@rm -fr src
+	@rm -fr build
+	@rm -fr deproy
