@@ -51,11 +51,19 @@ class ev3way_balancer
 		return 0;
 	}
 
+	virtual float get_interval(void) {
+		return _interval_raw;
+	}
+	virtual float get_exec_period(void) {
+		return _interval;
+	}
+
 	// sm_move_op インタフェース
 	virtual void set_max_dps(int32_t dps) {
 		_max_dps = dps;
 	}
 	virtual void balancer_on(void) {
+		reset();
 		_onoff = true;
 	}
 	virtual void balancer_off(void) {
@@ -104,6 +112,7 @@ class ev3way_balancer
 	int32_t			_prev_sum;
 	int32_t			_prev_deltas[3];
 	low_pass_filter		_interval;
+	float			_interval_raw;
 };
 
 NAMESPACE_SHARAKU_END

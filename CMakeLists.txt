@@ -22,8 +22,9 @@ set(SHARAKU_LIB_PATH
 	"${CMAKE_SOURCE_DIR}/system"
 	)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CROSS_FLAGS}")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CROSS_FLAGS}")
+
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CROSS_FLAGS} -g -O2")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CROSS_FLAGS} -g -O2")
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} ${CROSS_FLAGS} -g -O0")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${CROSS_FLAGS} -g -O0")
 set(CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO} ${CROSS_FLAGS} -g -O2")
@@ -36,6 +37,9 @@ set(CMAKE_CXX_FLAGS_MINSIZEREL "${CMAKE_CXX_FLAGS_MINSIZEREL} ${CROSS_FLAGS} -O3
 add_subdirectory(system)
 add_subdirectory(devices)
 add_subdirectory(modules)
+
+# 共有ライブラリ用ヘッダーファイルのインストール指定
+install(FILES ${CMAKE_SOURCE_DIR}/include/sharaku/vector.hpp DESTINATION include/sharaku)
 
 # 追加ビルド
 if (${TARGET_PLATFORM} STREQUAL "ev3dev")

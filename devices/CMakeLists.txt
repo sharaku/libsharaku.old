@@ -77,31 +77,13 @@ if (${TARGET_PLATFORM} STREQUAL "ev3dev")
 		"sd/ev3way/balancer_param.c"
 		"sd/ev3way/ev3way-balancer.cpp"
 		)
-#elseif (${TARGET_PLATFORM} STREQUAL "ev3rt")
-#	# EV3RT用ビルド
-#	set(DEVICE_COLOR ${DEVICE_COLOR}
-#		"color/ev3rt-color.cpp"
-#		)
-#	set(DEVICE_GYRO ${DEVICE_GYRO}
-#		"gyro/ev3rt-gyro.cpp"
-#		)
-#	set(DEVICE_MOTOR ${DEVICE_MOTOR}
-#		"motor/ev3rt-tacho-motor.cpp"
-#		)
-#	set(DEVICE_POWER ${DEVICE_POWER}
-#		"power/ev3rt-power-supply.cpp"
-#		)
-#	set(DEVICE_TOUCH ${DEVICE_TOUCH}
-#		"touch/ev3rt-touch.cpp"
-#		)
-#	set(DEVICE_USONIC ${DEVICE_USONIC}
-#		"usonic/ev3rt-ultrasonic.cpp"
-#		)
-#	set(DEVICE_SD ${DEVICE_SD}
-#		"sd/ev3way/balancer.c"
-#		"sd/ev3way/balancer_param.c"
-#		"sd/ev3way/ev3way-balancer.cpp"
-#		)
+elseif (${TARGET_PLATFORM} STREQUAL "ev3rt")
+	# EV3RT用ビルド
+	set(DEVICE_SD ${DEVICE_SD}
+		"sd/ev3way/balancer.c"
+		"sd/ev3way/balancer_param.c"
+		"sd/ev3way/ev3way-balancer.cpp"
+		)
 endif()
 
 add_library(sharaku-dev.${TARGET_SUFFIX} STATIC

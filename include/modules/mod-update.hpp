@@ -32,6 +32,10 @@ class mod_update
 	// Updateの開始と停止
 	void start();
 	void stop();
+	uint32_t get_prof_count_interval();
+	sharaku_usec_t get_prof_usec_interval();
+	uint32_t get_prof_count_processing();
+	sharaku_usec_t get_prof_usec_processing();
 
  protected:
 	static void mod_update_cycle(struct sharaku_job* job);

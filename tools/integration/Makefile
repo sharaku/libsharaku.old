@@ -13,6 +13,9 @@ deproy:
 packageing:
 	sh 04-package.sh
 
+install:
+	@tar zxvf deproy/libsharaku-0.0.0.tgz
+
 clean:
 	@rm -fr result
 	@rm -fr build

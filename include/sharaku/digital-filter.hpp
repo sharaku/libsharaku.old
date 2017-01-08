@@ -34,6 +34,9 @@ class low_pass_filter
 		_x = x;
 		return *this;
 	}
+	operator float() {
+		return _x;
+	}
 
  public:
 	float get_q(void) { return _q; }
