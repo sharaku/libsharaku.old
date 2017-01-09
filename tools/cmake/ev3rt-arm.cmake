@@ -30,7 +30,7 @@ set(CMAKE_SYSTEM_NAME Generic)
 set(toolchain   ""      CACHE FILEPATH     "")
 
 set(CROSS_TOOLCHAIN_PATH /usr/lib/arm-none-eabi)
-set(CROSS_FLAGS "-Wall -Wno-unused-function -Wunused-variable -Winvalid-offsetof")
+set(CROSS_FLAGS "-Wall -Wno-unused-function -Wunused-variable")
 set(CROSS_FLAGS "${CROSS_FLAGS} -Dgcc -mcpu=arm926ej-s -mlittle-endian -DUSE_CFG_PASS3 -g -Wall -O2 -DBUILD_EV3_PLATFORM -DCONFIG_FB_DEFERRED_IO -D__TARGET_ARCH_ARM=5")
 set(CROSS_FLAGS "${CROSS_FLAGS} -DSHARAKU_PROF_ENABLE -DSHARAKU_PROF_CLEAR_ENABLE")
 set(CROSS_FLAGS "${CROSS_FLAGS} -DSHARAKU_DBLOG_FILENAME=\\\"/sharaku_db_log.log\\\"")

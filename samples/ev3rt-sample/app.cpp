@@ -18,7 +18,7 @@ extern "C" {
 extern "C" void job_entry(struct sharaku_job *job);
 
 #include <sharaku/sched.h>
-#include <sharaku/task.h>
+#include <sharaku/sched.h>
 
 // ---------------------------------------------------------------------
 // 定義

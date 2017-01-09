@@ -11,7 +11,6 @@
 #include <sharaku/log.h>
 #include <sharaku/list.h>
 #include <sharaku/debug.h>
-#include <sharaku/module.h>
 #include <modules/mod-update.hpp>
 
 #define UPDATE_MODULE_ID	0
@@ -477,9 +476,5 @@ mod_update::mod_post_update_end(struct sharaku_job* job)
 	_mod_update->_job_update_i = job;
 	sharaku_async_message(job, mod_update_cycle);
 }
-
-SHARAKU_REGIST_MODULE_BEGIN(UPDATE_MODULE_ID)
-  init = mod_update_init;
-SHARAKU_REGIST_MODULE_END
 
 NAMESPACE_SHARAKU_END

@@ -11,12 +11,12 @@ cmake_minimum_required(VERSION 3.5)
 include_directories(${SHARAKU_INCLUDE_PATH})
 
 set(MODULE_SYSTEM
-	"sched/task.c"
-	"sched/sched.c"
-	"debug/log.c"
-	"debug/prof.c"
-	"activity.c"
-	"module.c"
+	"plist.c"
+	"jiffies.c"
+	"sched.c"
+	"debug.c"
+	"prof.c"
+	"system.c"
 	)
 
 add_library(sharaku-sys.${TARGET_SUFFIX} STATIC

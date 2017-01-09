@@ -8,7 +8,7 @@
 #define SHARAKU_DEVICE_SD_WHEELODO_H_
 
 #include <stdint.h>
-#include <sharaku/task.h>
+#include <sharaku/sched.h>
 #include <sharaku/utime.h>
 #include <sharaku/position.hpp>
 #include <devices/update-api.hpp>

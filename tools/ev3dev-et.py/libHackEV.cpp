@@ -13,7 +13,7 @@
 #include <sys/time.h>
 #include <sys/resource.h>
 #include <sharaku/sched.h>
-#include <sharaku/task.h>
+#include <sharaku/system.h>
 #define BOOST_PYTHON_STATIC_LIB
 #include <boost/python.hpp>
 #include "libHackEV.hpp"

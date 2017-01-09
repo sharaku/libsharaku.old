@@ -4,7 +4,7 @@
  *
  */
 
-#include <sharaku/task.h>
+#include <sharaku/sched.h>
 #include "ev3way.hpp"
 EV3way *_ev3way;
 

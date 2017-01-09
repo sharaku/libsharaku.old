@@ -11,7 +11,7 @@ include section
 ******************************************************************************/
 #include <stdio.h>
 #include <string.h>
-#include <sharaku/task.h>
+#include <sharaku/sched.h>
 #include <sharaku/prof.h>
 
 /******************************************************************************
@@ -46,8 +46,13 @@ __sharaku_prof_flash(void)
 	fseek(__prof_file, 0, SEEK_SET);
 	list_for_each_entry(prof, &__prof_list, sharaku_prof_t, list) {
 		fprintf(__prof_file, "%s,%u,%u,%u,%u,%u\n",
-			prof->name, prof->count, prof->usec,
-			(prof->count) ? prof->usec / prof->count : 0, prof->min, prof->max);
+			prof->name,
+			(unsigned int)prof->count,
+			(unsigned int)prof->usec,
+			(unsigned int)((prof->count)
+					? prof->usec / prof->count : 0),
+			(unsigned int)prof->min,
+			(unsigned int)prof->max);
 
 #if defined(SHARAKU_PROF_CLEAR_ENABLE)
 		// 出力するごとにクリアする場合はこのコードを有効にする
@@ -59,23 +64,27 @@ __sharaku_prof_flash(void)
 	}
 }
 
+#if (SHARAKU_PROF_FLASH_INTERVALE == 0)
 static void
 __sharaku_prof_flashjob(struct sharaku_job *job)
 {
-//	__sharaku_prof_flash();
+	__sharaku_prof_flash();
 	sharaku_timer_message(job, SHARAKU_PROF_FLASH_INTERVALE,
 			      __sharaku_prof_flashjob);
 }
+#endif
 
-void sharaku_prof_initialize(void)
+void sharaku_init_prof(void)
 {
 	__prof_file = fopen(SHARAKU_PROF_FILENAME, "w+");
+#if (SHARAKU_PROF_FLASH_INTERVALE == 0)
 	sharaku_init_job(&__prof_job);
 	sharaku_timer_message(&__prof_job, SHARAKU_PROF_FLASH_INTERVALE,
 			       __sharaku_prof_flashjob);
+#endif
 }
 
-void sharaku_prof_finalize(void)
+void sharaku_finl_prof(void)
 {
 	__sharaku_prof_flash();
 	fclose(__prof_file);

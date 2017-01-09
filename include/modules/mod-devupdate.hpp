@@ -8,16 +8,16 @@
 #define SHARAKU_MODULES_MOD_DEVUPDATE_H_
 
 #include <stdint.h>
-#include <sharaku/task.h>
+#include <sharaku/sched.h>
 #include <sharaku/list.h>
 #include <devices/update-api.hpp>
 
 NAMESPACE_SHARAKU_BEGIN
 
 #define SHARAKU_MOD_DEVUPDATE_MAX	16
-// “o˜^‚³‚ê‚½ƒfƒoƒCƒX‚ğupdate, commit‚·‚éB
-// ƒfƒoƒCƒX‚ÌƒLƒbƒN‚Íˆê“x‚És‚¤B
-// ‚»‚ÌŒãA‘SƒfƒoƒCƒX‚Ìupdate, commit‚ªŠ®—¹‚·‚é‚Ü‚Å‘Ò‚¿‡‚í‚¹‚éB
+// ç™»éŒ²ã•ã‚ŒãŸãƒ‡ãƒã‚¤ã‚¹ã‚’update, commitã™ã‚‹ã€‚
+// ãƒ‡ãƒã‚¤ã‚¹ã®ã‚­ãƒƒã‚¯ã¯ä¸€åº¦ã«è¡Œã†ã€‚
+// ãã®å¾Œã€å…¨ãƒ‡ãƒã‚¤ã‚¹ã®update, commitãŒå®Œäº†ã™ã‚‹ã¾ã§å¾…ã¡åˆã‚ã›ã‚‹ã€‚
 class mod_devupdate
  : public update_operations
 {
@@ -28,7 +28,7 @@ class mod_devupdate
 		return (update_operations *)this;
 	}
 
-	// Update‚Ì“o˜^
+	// Updateã®ç™»éŒ²
 	void register_update(device_update_operations* update);
 
 	virtual int32_t	pre_update(const float &interval, uint32_t retry_cnt);

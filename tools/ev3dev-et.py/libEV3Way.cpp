@@ -13,7 +13,7 @@
 #include <sys/time.h>
 #include <sys/resource.h>
 #include <sharaku/sched.h>
-#include <sharaku/task.h>
+#include <sharaku/system.h>
 #define BOOST_PYTHON_STATIC_LIB
 #include <boost/python.hpp>
 #include "libEV3Way.hpp"
@@ -69,11 +69,6 @@ static void* start_routine(void *arg)
 static int32_t initialize(void)
 {
 	pthread_create(&_th, NULL, start_routine, NULL);
-
-//	struct sched_param	param;
-//	param.sched_priority = 1;
-//	pthread_setschedparam(_th, SCHED_RR, &param);
-
 	sleep(1);
 	return 0;
 }

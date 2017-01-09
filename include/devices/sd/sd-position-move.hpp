@@ -9,7 +9,7 @@
 
 #include <stdint.h>
 #include <sharaku/utime.h>
-#include <sharaku/task.h>
+#include <sharaku/sched.h>
 #include <sharaku/pid.hpp>
 #include <sharaku/position.hpp>
 #include <devices/update-api.hpp>

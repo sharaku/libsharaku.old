@@ -8,7 +8,7 @@
 #define SHARAKU_MODULES_MOD_UPDATE_H_
 
 #include <stdint.h>
-#include <sharaku/task.h>
+#include <sharaku/sched.h>
 #include <sharaku/list.h>
 #include <devices/update-api.hpp>
 

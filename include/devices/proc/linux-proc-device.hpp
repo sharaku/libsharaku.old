@@ -18,7 +18,7 @@ extern "C" {
 #include <string.h>
 #include <errno.h>
 #include <sharaku/types.h>
-#include <sharaku/task.h>
+#include <sharaku/sched.h>
 #include <sharaku/thread.h>
 #include <sharaku/debug.h>
 #include <devices/update-api.hpp>

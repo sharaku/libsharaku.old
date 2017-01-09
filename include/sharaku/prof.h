@@ -28,7 +28,7 @@
 typedef struct sharaku_prof {
 	struct list_head	list;
 	const char		*name;
-	sharaku_usec_t		count;
+	uint32_t		count;
 	sharaku_usec_t		usec;
 	sharaku_usec_t		min;
 	sharaku_usec_t		max;
@@ -40,7 +40,17 @@ typedef struct sharaku_prof {
 extern "C" {
 #endif
 
-static void
+#define SHARAKU_PROF_INIT(PROF, NAME)	\
+	{					\
+		INIT_LIST_HEAD(&(PROF)->list),	\
+		NAME,				\
+		0,				\
+		0,				\
+		0,				\
+		0				\
+	}
+
+static inline void
 sharaku_prof_init(sharaku_prof_t *prof, const char *name)
 {
 	INIT_LIST_HEAD(&prof->list);
@@ -52,7 +62,7 @@ sharaku_prof_init(sharaku_prof_t *prof, const char *name)
 }
 
 extern void sharaku_prof_regist(sharaku_prof_t *prof);
-static void inline
+static inline void
 sharaku_prof_add(sharaku_prof_t *prof, sharaku_usec_t us_start, sharaku_usec_t us_end)
 {
 	sharaku_usec_t	t = us_end - us_start;
@@ -61,25 +71,25 @@ sharaku_prof_add(sharaku_prof_t *prof, sharaku_usec_t us_start, sharaku_usec_t u
 	if (prof->min > t) { prof->min = t;}
 	if (prof->max < t) { prof->max = t;}
 }
-static void inline
+static inline void
 sharaku_prof_add_notime(sharaku_prof_t *prof)
 {
 	prof->count ++;
 }
-static uint32_t inline
+static inline uint32_t
 sharaku_prof_get_count(sharaku_prof_t *prof)
 {
 	return prof->count;
 }
-static sharaku_usec_t inline
+static inline sharaku_usec_t
 sharaku_prof_get_usec(sharaku_prof_t *prof)
 {
 	return prof->usec;
 }
 
 
-extern void sharaku_prof_initialize(void);
-extern void sharaku_prof_finalize(void);
+extern void sharaku_init_prof(void);
+extern void sharaku_finl_prof(void);
 
 #if defined(__cplusplus)
 }
@@ -93,8 +103,8 @@ extern void sharaku_prof_finalize(void);
 #define sharaku_prof_add_notime(...)
 #define sharaku_prof_get_count(...) 0
 #define sharaku_prof_get_usec(...) 0
-#define sharaku_prof_initialize(...)
-#define sharaku_prof_finalize(...)
+#define sharaku_init_prof(...)
+#define sharaku_finl_prof(...)
 
 #endif /* SHARAKU_PROF_ENABLE */
 

@@ -13,7 +13,7 @@
 #include <stdint.h>
 #include <sys/types.h>
 #include <dirent.h>
-#include <sharaku/task.h>
+#include <sharaku/sched.h>
 #include <devices/proc/linux-proc-device.hpp>
 
 NAMESPACE_SHARAKU_BEGIN

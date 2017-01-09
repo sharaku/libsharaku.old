@@ -11,7 +11,6 @@
 #include <sharaku/log.h>
 #include <sharaku/list.h>
 #include <sharaku/debug.h>
-#include <sharaku/module.h>
 #include <modules/mod-devupdate.hpp>
 
 NAMESPACE_SHARAKU_BEGIN
