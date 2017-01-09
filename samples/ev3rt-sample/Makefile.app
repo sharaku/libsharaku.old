@@ -624,7 +624,7 @@ $(SYSSVC_ASMOBJS): %.o: %.S
 	$(CC) -c $(CFLAGS) $(SYSSVC_CFLAGS) $<
 
 $(APPL_COBJS): %.o: %.c
-	$(call print_cmd, "CC", $(CFLAGS) $(APPL_CFLAGS) $<)
+#	$(call print_cmd, "CC", $(CFLAGS) $(APPL_CFLAGS) $<)
 	$(CC) -c $(CFLAGS) $(APPL_CFLAGS) $<
 
 $(APPL_COBJS:.o=.s): %.s: %.c

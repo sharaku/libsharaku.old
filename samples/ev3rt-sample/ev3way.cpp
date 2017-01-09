@@ -128,52 +128,23 @@ static void job_chk_rmotor(struct sharaku_job *job)
 	}
 }
 
-#include "balancer.h"
-
 static uint32_t static_time = 0;
 static void job_balancer_start(struct sharaku_job *job)
 {
 	ev3_led_set_color(LED_RED);
 	_ev3way->balancer.balancer_on();
 	static_time = sharaku_get_usec() - 4000;
+	tslp_tsk(4);
 	job_balancer(job);
 }
 static void job_balancer(struct sharaku_job *job)
 {
-	int32_t motor_ang_l, motor_ang_r;
-	int32_t gyro, volt;
-	int8_t pwm_L, pwm_R;
-
-	if ((sharaku_get_usec() - static_time) < 4000) {
-		sharaku_async_message(job, job_balancer);
-		return;
-	}
-
-
-#if 0
-	float interval = 0.004f;
-	_ev3way->balancer.update(interval, 0);
-#else
-	motor_ang_l = _ev3way->motor_l.get_position();
-	motor_ang_r = _ev3way->motor_r.get_position();
-	gyro = _ev3way->gyro.get_rate();
-	volt = _ev3way->power.get_voltage();
-	balance_control(
-		(float)0.0f,
-		(float)0.0f,
-		(float)gyro,
-		(float)0,
-		(float)motor_ang_l,
-		(float)motor_ang_r,
-		(float)volt,
-		(int8_t *)&pwm_L,
-		(int8_t *)&pwm_R);
-	_ev3way->motor_l.set_duty_cycle_sp(pwm_L);
-	_ev3way->motor_r.set_duty_cycle_sp(pwm_R);
-#endif
+retry:
+	_ev3way->balancer.update(0.004f, 0);
 	static_time = sharaku_get_usec();
 
-	sharaku_async_message(job, job_balancer);
+	tslp_tsk(4);
+	goto retry;
 }
 
 // ---------------------------------------------------------------------
