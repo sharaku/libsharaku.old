@@ -15,7 +15,8 @@ extern "C" {
 #include "kernel_cfg.h"
 #endif
 
-extern "C" void job_entry(struct sharaku_job *job);
+extern void job_entry(struct sharaku_job *job);
+extern void balancer_cycle(void);
 
 #include <sharaku/utime.h>
 #include <sharaku/jiffies.h>
@@ -30,13 +31,6 @@ static struct sharaku_job	_job_init;
 // ---------------------------------------------------------------------
 // タスクエントリ
 // ---------------------------------------------------------------------
-void idle_task(intptr_t unused)
-{
-	while(1) {
-		tslp_tsk(1000);
-	}
-}
-
 void
 timer_task(intptr_t unused) {
 	int64_t	start_us, now_ms, now_us,diff_ms;
@@ -51,13 +45,18 @@ timer_task(intptr_t unused) {
 	}
 }
 
+void cycle_task(intptr_t unused)
+{
+	balancer_cycle();
+}
+
 void main_task(intptr_t unused)
 {
 	// Start task for timer
 	act_tsk(TIMER_TASK);
 
 	// Start task for printing message while idle
-	act_tsk(IDLE_TASK);
+	act_tsk(CYCLE_TASK);
 
 	ev3_led_set_color(LED_ORANGE); /* 初期化完了通知 */
 	sharaku_init_job(&_job_init);

@@ -20,7 +20,7 @@
 
 class EV3way
  : public  sharaku::mod_update {
- public:
+public:
  	EV3way() :
  	mod_update(4),				// updateは4ms
 	power(),				// 電源制御
@@ -34,6 +34,7 @@ class EV3way
 	motor_tail(EV3_PORT_D),
 	linetrace(1.0f, 0, 0)
 	{
+		start_flag = 0;
 	}
 
 	void start() {
@@ -62,15 +63,19 @@ class EV3way
 		linetrace.set_turn_angle(30, 30);
 		linetrace.set_lowpass(1.0f);
 		linetrace.clear_pid();
-//		mod_update::register_update(balancer);
-//		mod_update::start();
+
+		start_flag = 1;
 	}
 
 	void stop() {
 		mod_update::stop();
 	}
 
- public:
+	int is_start() {
+		return start_flag;
+	}
+
+public:
 	sharaku::ev3rt_powersupply	power;		// 電源制御
 	sharaku::ev3rt_touch		touch;		// タッチセンサー
 	sharaku::ev3rt_ultrasonic	usonic;		// 超音波センサー
@@ -81,6 +86,9 @@ class EV3way
 	sharaku::ev3rt_motor		motor_tail;	// 
 	sharaku::ev3way_balancer	balancer;
 	sharaku::sd_linetrace_pid	linetrace;
+
+private:
+	int				start_flag;
 };
 
 #define DISP_FONT_WIDTH		(6)
@@ -229,5 +237,6 @@ sharaku_prof_disp(EV3way *ev3)
 
 }
 
-extern "C" void job_entry(struct sharaku_job *job);
+extern void job_entry(struct sharaku_job *job);
+extern void balancer_cycle(void);
 

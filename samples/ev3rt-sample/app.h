@@ -20,7 +20,7 @@
 
 // タスクエントリ関数のプロトタイプ宣言
 #ifndef TOPPERS_MACRO_ONLY
-extern void idle_task(intptr_t exinf);
+extern void cycle_task(intptr_t exinf);
 extern void main_task(intptr_t exinf);
 extern void timer_task(intptr_t exinf);
 #endif /* TOPPERS_MACRO_ONLY */
