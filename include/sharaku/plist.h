@@ -53,18 +53,6 @@ static inline int plist_empty(const struct plist_head *head)
 extern void plist_add(struct plist_node *node, struct plist_head *head);
 extern void plist_del(struct plist_node *node, struct plist_head *head);
 
-#define plist_entry(ptr, type, member)				\
-	container_of(ptr, type, member.node_list)
-
-#define plist_first_entry(ptr, type, member)			\
-	plist_entry(&(ptr)->node_list.next, type, member)
-
-#define plist_last_entry(ptr, type, member)			\
-	plist_entry(&(ptr)->node_list.prev, type, member)
-
-#define plist_first_entry_or_null(ptr, type, member)		\
-	(!(plist_empty(ptr) ? plist_first_entry(ptr, type, member) : NULL))
-
 #define plist_for_each_safe(pos, n, head)		\
 	 list_for_each_entry_safe(pos, n, &(head)->node_list, node_list)
 

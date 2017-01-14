@@ -12,6 +12,7 @@ include_directories(${SHARAKU_INCLUDE_PATH})
 
 set(MODULE_SYSTEM
 	"plist.c"
+	"slab.c"
 	"jiffies.c"
 	"sched.c"
 	"debug.c"
