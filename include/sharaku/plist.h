@@ -26,7 +26,7 @@ struct plist_node {
 
 #define PLIST_HEAD_INIT(head)		\
 {							\
-	.node_list = LIST_HEAD_INIT((head)->node_list)	\
+	.node_list = LIST_HEAD_INIT((head).node_list)	\
 }
 
 #define PLIST_NODE_INIT(node, _prio)	\

@@ -65,8 +65,8 @@
 		0,						\
 		0,						\
 		0,						\
-		PLIST_HEAD_INIT(&(context).plist),		\
-		PLIST_HEAD_INIT(&(context).timer_plist),	\
+		PLIST_HEAD_INIT((context).plist),		\
+		PLIST_HEAD_INIT((context).timer_plist),		\
 	}
 
 struct sharaku_sched_context {

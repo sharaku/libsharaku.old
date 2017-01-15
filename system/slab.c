@@ -247,18 +247,13 @@ sharaku_sfree(void *buf)
 }
 
 struct sharaku_slab*
-sharaku_slab_create(size_t size)
+sharaku_slab_create(size_t size, size_t node_size, uint32_t max_cnt)
 {
 	struct sharaku_slab *slab;
 	int buf_sz;
 
 	slab = (struct sharaku_slab *)malloc(sizeof(struct sharaku_slab));
-	INIT_PLIST_HEAD(&slab->s_list);
-	INIT_PLIST_HEAD(&slab->s_flist);
-	slab->s_node_cnt = 0;
-	slab->s_size = size;
-	slab->s_max_nodes = 0;
-
+	INIT_SLAB(slab, size, node_size, max_cnt);
 	return slab;
 }
 
