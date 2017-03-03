@@ -1,9 +1,4 @@
-﻿/*
- * Copyright Abe Takafumi All Rights Reserved, 2014-2016
- * Author Abe Takafumi
- *
- */
-
+﻿
 #ifndef _SHARAKU_LIST_H
 #define _SHARAKU_LIST_H
 

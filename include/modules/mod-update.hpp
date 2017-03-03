@@ -9,7 +9,7 @@
 
 #include <stdint.h>
 #include <sharaku/sched.h>
-#include <sharaku/list.h>
+#include <sharaku/linux/list.h>
 #include <devices/update-api.hpp>
 
 NAMESPACE_SHARAKU_BEGIN

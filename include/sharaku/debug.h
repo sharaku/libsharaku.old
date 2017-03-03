@@ -7,7 +7,7 @@
 #define _SHARAKU_DEBUG_H
 
 #include <stdint.h>
-#include <sharaku/list.h>
+#include <sharaku/linux/list.h>
 #include <sharaku/thread.h>
 
 #ifdef DEBUG_CODE_ENABLE

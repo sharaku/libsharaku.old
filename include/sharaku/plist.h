@@ -7,7 +7,7 @@
 #ifndef _SHARAKU_PLIST_H
 #define _SHARAKU_PLIST_H
 
-#include <sharaku/list.h>
+#include <sharaku/linux/list.h>
 
 #if defined(__cplusplus)
 extern "C" {
