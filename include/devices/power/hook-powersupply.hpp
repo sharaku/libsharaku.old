@@ -1,6 +1,26 @@
-/*
- * Copyright Abe Takafumi All Rights Reserved, 2016
- * Author Abe Takafumi
+/* --
+ *
+ * MIT License
+ * 
+ * Copyright (c) 2016 Abe Takafumi
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE. *
  *
  */
 
@@ -18,10 +38,10 @@ class hook_powersupply
  public:
 	hook_powersupply() {}
 	virtual ~hook_powersupply(){}
-	// ÉCÉìÉ^Å[ÉtÉFÅ[ÉXê⁄ë±(ï°êîconnectã÷é~)
+	// „Ç§„É≥„Çø„Éº„Éï„Çß„Éº„ÇπÊé•Á∂ö(Ë§áÊï∞connectÁ¶ÅÊ≠¢)
 	connection_interface<powersupply_operations> out_power;
 
-	// ÉCÉìÉ^ÉtÉFÅ[ÉXÇ÷ÇÃÉAÉNÉZÉX
+	// „Ç§„É≥„Çø„Éï„Çß„Éº„Çπ„Å∏„ÅÆ„Ç¢„ÇØ„Çª„Çπ
 	operator powersupply_operations*() {
 		return (powersupply_operations*)this;
 	}

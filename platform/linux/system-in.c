@@ -1,11 +1,29 @@
-﻿/*
- * Copyright Abe Takafumi All Rights Reserved, 2004-2016
- * Author Abe Takafumi
+/* --
+ *
+ * MIT License
+ * 
+ * Copyright (c) 2014-2016 Abe Takafumi
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  *
  */
 
-////////////////////////////////////////////////////////////////////////
-// linux / gcc
 #define _GNU_SOURCE
 #include <sched.h>
 #include <stdlib.h>
@@ -42,7 +60,11 @@ static void* _timer_handler(void* pparam)
 
 static void* _cpu_handler(void* pparam)
 {
-	int cpu_num = (int)pparam;
+//	int64_t cpu_num = (int)pparam;
+
+	// ToDo
+	// ここでCPUアフィニティを設定し、特定のCPUコアでのみ動作するように
+	// 設定を行う。
 
 	sharaku_cpu_handler();
 	pthread_exit(NULL);
@@ -50,7 +72,7 @@ static void* _cpu_handler(void* pparam)
 
 int sharaku_entry(void)
 {
-	int			i;
+	int64_t			i;
 	pthread_attr_t		thread_attr;
 	pthread_t		thread;
 
@@ -65,9 +87,9 @@ int sharaku_entry(void)
 	pthread_attr_init(&thread_attr);
 	pthread_attr_setdetachstate(&thread_attr, PTHREAD_CREATE_DETACHED);
 	for (i = 1; i < WORKER_THREADS ; i++) {
-		pthread_create(&thread, &thread_attr, _cpu_handler, i);
+		pthread_create(&thread, &thread_attr, _cpu_handler, (void *)i);
 	}
-	pthread_create(&thread, &thread_attr, _timer_handler, i);
+	pthread_create(&thread, &thread_attr, _timer_handler, (void *)i);
 
 	sharaku_cpu_handler();
 

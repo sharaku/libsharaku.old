@@ -1,38 +1,51 @@
-/*
- * Copyright Abe Takafumi All Rights Reserved, 2017
- * Author Abe Takafumi
+/* --
+ *
+ * MIT License
+ * 
+ * Copyright (c) 2017 Abe Takafumi
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  *
  */
 
 //  lh:list_head
 //  pl:prio_list
 //  nl:node_list
-//  
-//  < 初期状態 >
-//      +->|lh|<-+
-//      |        |
-//      +--------+
-// 
-//  < 最初の登録時点の状態 >
-//             +--------+
-//             |        |
-//             +->|pl|<-+
-//                |02|   (prioメンバ)
-//      +->|lh|<->|nl|<-+
-//      |               |
-//      +---------------+
 // 
 //  < 複数登録の状態 >
+//      +-----------------------------------------------+
+//      |                                               |
+//      +->|lh|<->|nl|<->|nl|<-->|nl|<--->|nl|<-->|nl|<-+
 //             +----------------------------------------+
-//             |                                        |
+//             |  |  |   |  |    |  |     |  |    |  |  |
 //             +->|pl|<->|pl|<------------------->|pl|<-+
 //                |  |   |  |  +------+ +------+  |  |
-//                |  |   |  |  |      | |      |  |  |
+//                |  |   |  |  | |  | | | |  | |  |  |
 //                |  |   |  |  +>|pl|<+ +>|pl|<+  |  |
 //                |01|   |02|    |02|     |02|    |10|   (prioメンバ)
-//      +->|lh|<->|nl|<->|nl|<-->|nl|<--->|nl|<-->|nl|<-+
-//      |                                               |
+//
+// list_for_eachでアクセスする場合、先頭の構造が同じであるため、
+// キャストするだけで使える。
 //      +-----------------------------------------------+
+//      |                                               |
+//      +->|lh|<->|nl|<->|nl|<-->|nl|<--->|nl|<-->|nl|<-+
+
 
 #include <sharaku/plist.h>
 
@@ -45,25 +58,23 @@ plist_add(struct plist_node *node, struct plist_head *head)
 	struct list_head *next = &head->node_list;
 
 	if (list_empty(&head->node_list)) {
-		// 最初の登録であれば無条件に登録する
+		// 最初の登録であれば無条件に登録する。
 		// 
 		// < 初期登録状態 >
-		//         +--------+
-		//         |        |
-		//         +->|pl|<-+
-		//            |02|   (prio)
-		//            |  |
-		//            |  |
-		//  +->|lh|<->|nl|<-+
-		//  |               |
 		//  +---------------+
+		//  |               |
+		//  +->|lh|<->|nl|<-+
+		//         +->|pl|<---------+
+		//         |  |02| (prio)   |
+		//         |                |
+		//         +----------------+
 		goto insert;
 	}
 
-	// 2回目以降の登録であれば挿入する位置を検索する
-	// 挿入は同一prioの最後に行う。
-	// これにより、prio順に昇順でソートされる。かつ、
-	// 新規登録はprio内の最後に入る
+	// 2回目以降の登録であれば挿入する位置を検索する挿入は同一prioの
+	// 最後に行う。
+	// これにより、prio順に昇順でソートされる。かつ、新規登録はprio内の
+	// 最後に入る
 	// prevがNULLの場合は先頭に挿入する。
 	// iter == firstの場合は末尾に挿入する。
 	// それ以外の場合はiterの直前に登録する。

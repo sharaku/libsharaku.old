@@ -1,6 +1,26 @@
-/*
- * Copyright Abe Takafumi All Rights Reserved, 2017
- * Author Abe Takafumi
+/* --
+ *
+ * MIT License
+ * 
+ * Copyright (c) 2017 Abe Takafumi
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  *
  */
 
@@ -64,7 +84,7 @@ __slab_resched(struct slab_cache *slab,
 {
 	int64_t	prio;
 
-	plist_del(node, &slab->s_list);
+	plist_del(&node->sn_plist, &slab->s_list);
 	// 空きがある場合は空きリストに入れる
 	// fullの場合はfullリストに入れる
 	// リストは同一優先度の末端に挿入されるため、抜き差しが頻発する
@@ -72,9 +92,9 @@ __slab_resched(struct slab_cache *slab,
 	prio = __get_slab_prio(node);
 	node->sn_plist.prio = prio;
 	if (prio) {
-		plist_add(node, &slab->s_list);
+		plist_add(&node->sn_plist, &slab->s_list);
 	} else {
-		plist_add(node, &slab->s_flist);
+		plist_add(&node->sn_plist, &slab->s_flist);
 	}
 }
 
@@ -186,8 +206,7 @@ __slab_node_free(struct slab_node *node)
 		return -EBUSY;
 	}
 	slab = node->sn_slab;
-	plist_del(node, &slab->s_list);
-	list_del_init(&node->sn_plist);
+	plist_del(&node->sn_plist, &slab->s_list);
 	free(node);
 
 	slab->s_node_cnt--;
@@ -264,7 +283,6 @@ struct slab_cache*
 slab_create(size_t size, size_t node_size, uint32_t max_cnt)
 {
 	struct slab_cache *slab;
-	int buf_sz;
 
 	if (node_size < SLAB_NODE_SZ_MIN) {
 		return NULL;

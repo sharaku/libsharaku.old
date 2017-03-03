@@ -1,27 +1,49 @@
-/*
- * Copyright Abe Takafumi All Rights Reserved, 2017
- * Author Abe Takafumi
+/* --
+ *
+ * MIT License
+ * 
+ * Copyright (c) 2017 Abe Takafumi
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  *
  */
 
 #ifndef _SHARAKU_PLIST_H
 #define _SHARAKU_PLIST_H
 
-#include <sharaku/linux/list.h>
+#include <sharaku/list.h>
 
 #if defined(__cplusplus)
 extern "C" {
 #endif
 
 // 構造を合わせるため、plist_headを定義する。
+// plist_head, plist_nodeをlist_headでキャストしてlist_for_eachできるように
+// node_listを頭に持ってくる。
 struct plist_head {
 	struct list_head	node_list;
 };
 
 struct plist_node {
-	int64_t			prio;
-	struct list_head	prio_list;
 	struct list_head	node_list;
+	struct list_head	prio_list;
+	int64_t			prio;
 };
 
 #define PLIST_HEAD_INIT(head)		\
