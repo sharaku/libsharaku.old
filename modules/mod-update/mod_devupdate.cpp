@@ -29,7 +29,7 @@
 #include <sharaku/types.h>
 #include <sharaku/prof.h>
 #include <sharaku/log.h>
-#include <sharaku/list.h>
+#include <sharaku/linux/list.h>
 #include <sharaku/debug.h>
 #include <modules/mod-devupdate.hpp>
 

@@ -27,7 +27,7 @@
 #ifndef _SHARAKU_SLAB_H
 #define _SHARAKU_SLAB_H
 
-#include <sharaku/list.h>
+#include <sharaku/linux/list.h>
 #include <sharaku/plist.h>
 
 // SLABを使用してメモリを確保する。

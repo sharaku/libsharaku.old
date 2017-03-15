@@ -29,7 +29,7 @@
 
 #include <stdint.h>
 #include <sharaku/types.h>
-#include <sharaku/list.h>
+#include <sharaku/linux/list.h>
 #include <sharaku/prof.h>
 
 

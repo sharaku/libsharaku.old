@@ -28,7 +28,7 @@
 #define SHARAKU_PROF_H_
 
 #include <sharaku/utime.h>
-#include <sharaku/list.h>
+#include <sharaku/linux/list.h>
 
 #ifndef SHARAKU_PROF_IDMAX
 #define SHARAKU_PROF_IDMAX 256
