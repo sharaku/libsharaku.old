@@ -1,0 +1,25 @@
+# sharaku/cross-buildを使用してマルチプラットフォームのビルドを行います。
+# see https://hub.docker.com/r/sharaku/cross-build/
+image: sharaku/cross-build
+
+stages:
+  - build
+
+# 前提条件としてev3rtの環境構築を行う
+before_script:
+    - wget http://www.toppers.jp/download.cgi/ev3rt-beta5-2-release.zip
+    - unzip ev3rt-beta5-2-release.zip -d /srv/
+    - xz -dv /srv/ev3rt-beta5-2-release/hrp2.tar.xz
+    - tar xvf /srv/ev3rt-beta5-2-release/hrp2.tar -C /srv/ev3rt-beta5-2-release
+    - make -C /srv/ev3rt-beta5-2-release/hrp2/cfg
+    - cd /srv/ev3rt-beta5-2-release/hrp2/workspace; make app=test-cpp; cd -
+
+build_job:
+  stage: build
+  script:
+    - cd tools/integration
+    - make
+  artifacts:
+    paths:
+      - tools/integration/deproy/*.tgz
+      - tools/integration/result/
