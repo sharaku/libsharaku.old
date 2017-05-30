@@ -133,7 +133,6 @@ sd_position_move::update_distance_deg_mode(const float &interval, int turn)
 {
 	// ODOから情報を取得し、現在位置と目的地の差分を出す。
 	// 目的地に応じてステータスを変更
-	int32_t	speed;
 	rotation3 rot;
 	rot = in_odo->get_rotation();
 	int32_t	diff = _target_dist_deg - rot.z;

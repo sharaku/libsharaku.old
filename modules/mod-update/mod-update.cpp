@@ -181,7 +181,6 @@ mod_update::mod_update_cycle(struct sharaku_job* job)
 					/ (float)_mod_update->_update_count / 1000000.0f;
 
 
-	sharaku_usec_t time = sharaku_get_usec();
 	// 停止指示がある場合は停止する
 	if (_mod_update->_is_stop) {
 		return;

@@ -64,6 +64,12 @@ if (${TARGET_OS} STREQUAL "linux")
 	set(DEVICE_PROC ${DEVICE_PROC}
 		"proc/linux-proc-device.cpp"
 		)
+	set(DEVICE_COLOR ${DEVICE_COLOR}
+		"color/simuration-color.cpp"
+		)
+	set(DEVICE_MOTOR ${DEVICE_MOTOR}
+		"motor/simuration-motor.cpp"
+		)
 endif()
 
 

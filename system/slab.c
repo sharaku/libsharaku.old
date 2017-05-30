@@ -220,7 +220,7 @@ _slab_alloc(struct slab_cache *slab,
 		   const char *src, uint32_t line)
 {
 	struct slab_node *node;
-	char *buf;
+	char *buf = NULL;
 	int prio = -1;
 
 	// 最大バッファ数を超える場合は獲得させない。

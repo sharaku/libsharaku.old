@@ -77,14 +77,14 @@ mod_devupdate::pre_update(const float &interval, uint32_t retry_cnt)
 {
 	if (retry_cnt == 0) {
 		sharaku_db_trace("start", 0, 0, 0, 0, 0, 0);
-		for (int i = 0; i < _devindex; i++) {
+		for (unsigned int i = 0; i < _devindex; i++) {
 			_dev_list[i]->start_update();
 		}
 		return EAGAIN;
 	} else {
 		sharaku_db_trace("retry", 0, 0, 0, 0, 0, 0);
 		int completeed = 1;
-		for (int i = 0; i < _devindex; i++) {
+		for (unsigned int i = 0; i < _devindex; i++) {
 			if (_dev_list[i]->is_ioend() == 0) {
 				completeed = 0;
 			}
@@ -102,14 +102,14 @@ mod_devupdate::post_update(const float &interval, uint32_t retry_cnt)
 {
 	if (retry_cnt == 0) {
 		sharaku_db_trace("start", 0, 0, 0, 0, 0, 0);
-		for (int i = 0; i < _devindex; i++) {
+		for (unsigned int i = 0; i < _devindex; i++) {
 			_dev_list[i]->start_commit();
 		}
 		return EAGAIN;
 	} else {
 		sharaku_db_trace("retry", 0, 0, 0, 0, 0, 0);
 		int completeed = 1;
-		for (int i = 0; i < _devindex; i++) {
+		for (unsigned int i = 0; i < _devindex; i++) {
 			if (_dev_list[i]->is_ioend() == 0) {
 				completeed = 0;
 			}
