@@ -2,7 +2,7 @@
 
 # lib-platform
 
-obj-target	:= linux_sched_sample
+obj-target	:= linux_fd_poll_sample
 
 SHARAKU_DEPROY_PATH	:= ../../tools/integration/deproy/libsharaku
 INCLUDE_PATH	:= $(SHARAKU_DEPROY_PATH)/usr/local/include/libsharaku/x86-linux/
@@ -19,7 +19,7 @@ obj-defines	+= -Wno-unused-variable
 obj-defines	+= -Wno-invalid-offsetof
 obj-defines	+= -Wno-unused-but-set-variable
 
-src		+= sample.c
+src		+= sample_fd.c
 obj		:= $(src:.c=.o)
 
 all: $(obj-target)
