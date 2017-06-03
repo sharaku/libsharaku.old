@@ -47,13 +47,13 @@ uint32_t old_ms = 0;
 int _timerfd;
 
 static int
-file_count_fd(void)
+_timerfd_count_fd(void)
 {
 	return 1;
 }
 
 static int
-file_add_fd(struct pollfd *pfd, int cnt)
+_timerfd_add_fd(struct pollfd *pfd, int cnt)
 {
 	pfd[0].fd = _timerfd;
 	pfd[0].events = POLLIN;
@@ -62,7 +62,7 @@ file_add_fd(struct pollfd *pfd, int cnt)
 }
 
 static int
-file_do_fd(struct pollfd *pfd, int cnt)
+_timerfd_do_fd(struct pollfd *pfd, int cnt)
 {
 	uint64_t	work;
 
@@ -74,7 +74,7 @@ file_do_fd(struct pollfd *pfd, int cnt)
 }
 
 struct fd_operations	_ops[] = {
-	{file_count_fd, file_add_fd, file_do_fd}
+	{_timerfd_count_fd, _timerfd_add_fd, _timerfd_do_fd}
 };
 
 static void
@@ -92,13 +92,19 @@ static void
 sched_cb(struct sharaku_job *job)
 {
 	count ++;
+
+	// 登録されているFDを監視する。
+	// タイムアウトに0を指定することで即時応答する。
+	// sharaku jobと組み合わせる場合は0とすること。
 	fd_poll(_ops, 1, 0);
+
 	sharaku_async_message(job, sched_cb);
 }
 
 static void
 init_cb(struct sharaku_job *job)
 {
+	// タイマーの作成。
 	struct itimerspec iti;
 	iti.it_value.tv_sec	= 1;
 	iti.it_value.tv_nsec	= 0;
@@ -107,6 +113,7 @@ init_cb(struct sharaku_job *job)
 
 	_timerfd = timerfd_create(CLOCK_MONOTONIC, 0);
 	timerfd_settime(_timerfd, TFD_TIMER_ABSTIME, &iti, NULL);
+
 	sharaku_async_message(job, sched_cb);
 }
 
