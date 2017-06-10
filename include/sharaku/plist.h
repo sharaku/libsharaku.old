@@ -46,16 +46,14 @@ struct plist_node {
 	int64_t			prio;
 };
 
-#define PLIST_HEAD_INIT(head)		\
-{							\
-	.node_list = LIST_HEAD_INIT((head).node_list)	\
-}
+#define PLIST_HEAD_INIT(head)			\
+	LIST_HEAD_INIT((head).node_list)	\
 
 #define PLIST_NODE_INIT(node, _prio)	\
 	{						\
-		_prio,					\
+		LIST_HEAD_INIT((node).node_list),	\
 		LIST_HEAD_INIT((node).prio_list),	\
-		LIST_HEAD_INIT((node).node_list)	\
+		_prio					\
 	}
 
 
@@ -74,9 +72,6 @@ static inline int plist_empty(const struct plist_head *head)
 
 extern void plist_add(struct plist_node *node, struct plist_head *head);
 extern void plist_del(struct plist_node *node, struct plist_head *head);
-
-#define plist_for_each_safe(pos, n, head)		\
-	 list_for_each_entry_safe(pos, n, &(head)->node_list, node_list)
 
 #define plist_for_each_entry_safe(pos, n, head, type, member)	\
 	 list_for_each_entry_safe(pos, n, &(head)->node_list, type, member.node_list)

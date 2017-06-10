@@ -87,6 +87,9 @@ class pid
 	float get_Kp(void) { return _Kp; }
 	float get_Ki(void) { return _Ki; }
 	float get_Kd(void) { return _Kd; }
+
+	float get_ei(void) { return _ei; }
+	float get_el(void) { return _el; }
  protected:
 	float	_Kp;
 	float	_Ki;
