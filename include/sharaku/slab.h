@@ -30,6 +30,10 @@
 #include <sharaku/linux/list.h>
 #include <sharaku/plist.h>
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 // SLABを使用してメモリを確保する。
 // 確保するメモリの前後にはヘッダ、フッタが付属する。
 // ヘッダにはメモリを確保したソースと行数が記録されるため、デバッグに役に立つ。
@@ -157,6 +161,9 @@ slab_set_destructor(struct slab_cache *slab, slab_destructor destructor)
 	slab->s_destructor = destructor;
 }
 
+#if defined(__cplusplus)
+}
+#endif
 
 #endif /* _SHARAKU_SLAB_H */
 
