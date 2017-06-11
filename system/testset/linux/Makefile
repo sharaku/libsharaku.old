@@ -23,5 +23,4 @@ clean:
 	rm -f $(TARGET)
 
 test: $(TARGET)
-#	./$(TARGET) --gtest_filter=list.* --gtest_output=xml:test_result.xml
-	./$(TARGET) --gtest_output=xml:test_result.xml
+	./$(TARGET) --gtest_output=xml:gtest_result.linux-x86.xml

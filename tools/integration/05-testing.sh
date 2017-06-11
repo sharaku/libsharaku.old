@@ -1,3 +1,4 @@
+#!/bin/sh
 # ----------------------------------------------------------------------------
 #
 #  MIT License
@@ -24,27 +25,10 @@
 #
 # ----------------------------------------------------------------------------
 
-all: check build deproy packageing testing
+readonly LIBSHARAKU_PATH=../../
+readonly SYSTEM_LINUX_TEST=${LIBSHARAKU_PATH}system/testset/linux/
 
-check:
-	sh 01-static_check.sh
+make -C ${SYSTEM_LINUX_TEST} clean
+make -C ${SYSTEM_LINUX_TEST}
+mv ${SYSTEM_LINUX_TEST}gtest_result.linux-x86.xml result
 
-build:
-	sh 02-build.sh
-
-deproy:
-	sh 03-deproy.sh
-
-packageing:
-	sh 04-package.sh
-
-testing:
-	sh 05-testing.sh
-
-install:
-	@tar zxvf deproy/libsharaku-0.0.0.tgz -C /
-
-clean:
-	@rm -fr result
-	@rm -fr build
-	@rm -fr deproy
