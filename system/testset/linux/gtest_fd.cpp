@@ -2,7 +2,7 @@
  *
  * MIT License
  * 
- * Copyright (c) 2016 Abe Takafumi
+ * Copyright (c) 2017 Abe Takafumi
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,42 +20,80 @@
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE. *
+ * SOFTWARE.
  *
  */
 
+#include <sharaku/fd.h>
+#include <gtest/gtest.h>
 
-#ifndef _SHARAKU_DEVICES_HOOK_COLOR_H_
-#define _SHARAKU_DEVICES_HOOK_COLOR_H_
+static int _timer_cb_num;
+void
+timer_cb(void *_this)
+{
+	_timer_cb_num++;
+}
 
-#include <stdint.h>
-#include <devices/sensor-api.hpp>
-#include <devices/connection_interface.hpp>
+TEST(fd, timerfd_sample) {
+	struct timerfd_operations tfd_ope[] = {
+		{timer_cb, NULL}
+	};
+	struct timerfd_info _timerinfo;
+	struct fd_operations _fdope[] = {
+		FD_OPERATIONS_INIT(timerfd_count_fd,
+				timerfd_add_tfd,
+				timerfd_do_fd, &_timerinfo)
+	};
 
-NAMESPACE_SHARAKU_BEGIN
+	_timer_cb_num = 0;
+	
+	timerfd_create_fd(&_timerinfo, 1000, tfd_ope, 1);
+	fd_poll(_fdope, 1, -1);
+	timerfd_destroy_fd(&_timerinfo);
 
-class hook_color
- : public color_operations {
- public:
-	hook_color() {}
-	virtual ~hook_color() {}
-	// インターフェース接続(複数connect禁止)
-	connection_interface<color_operations>	out_color;
+	EXPECT_EQ(_timer_cb_num, 1);
+}
 
-	// インタフェースへのアクセス
-	operator color_operations*() {
-		return (color_operations *)this;
-	}
+#if 0
+TEST(fd, inotify_sample) {
+}
 
- public:
-	virtual int32_t	set_mode(color_operations::mode m);
-	virtual color_operations::mode	get_mode(void);
-	virtual int32_t	get_value(void);
-	virtual int32_t	get_red(void);
-	virtual int32_t get_green(void);
-	virtual int32_t	get_blue(void);
-};
+TEST(fd, signalfd_sample) {
+}
 
-NAMESPACE_SHARAKU_END
+TEST(fd, FD_OPERATIONS_INIT) {
+}
 
-#endif /* _SHARAKU_DEVICES_HOOK_COLOR_H_ */
+TEST(fd, INIT_FD_OPERATIONS) {
+}
+
+TEST(fd, fd_poll) {
+}
+
+TEST(fd, timerfd_count_fd) {
+}
+
+TEST(fd, timerfd_add_tfd) {
+}
+
+TEST(fd, timerfd_do_fd) {
+}
+
+TEST(fd, inotify_count_fd) {
+}
+
+TEST(fd, inotify_add_fd) {
+}
+
+TEST(fd, inotify_do_fd) {
+}
+
+TEST(fd, signalfd_count_fd) {
+}
+
+TEST(fd, signalfd_add_fd) {
+}
+
+TEST(fd, signalfd_do_fd) {
+}
+#endif

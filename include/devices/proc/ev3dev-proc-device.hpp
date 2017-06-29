@@ -78,21 +78,21 @@ int32_t ev3dev_lego_get_device_path(char* outpath, int outpath_len,
 	*RET = F.connect(EV3DEV_POWER_BASE#F);
 
 #define DEVICE_CONNECT_BEGIN				\
-	int32_t connect(const char* port) {		\
+	int32_t connect(const char* ___port___) {		\
 		int32_t ___result___; 			\
 		char buffer[DEVICE_FILEPATH_MAXLEN];	\
-		do {	const char* ___port___ = port;
+		do {
 
 #define DEVICE_TACHOMOTOR_CONNECT(NAME)					\
-			TACHOMOTOR_CONNECT(&___result___, port, NAME);	\
+			TACHOMOTOR_CONNECT(&___result___, ___port___, NAME);	\
 			if (___result___) break;
 
 #define DEVICE_TACHOMOTOR_CONNECT2(PATH, NAME)				\
-			TACHOMOTOR_CONNECT2(&___result___, port, PATH, NAME);	\
+			TACHOMOTOR_CONNECT2(&___result___, ___port___, PATH, NAME);	\
 			if (___result___) break;
 
 #define DEVICE_MSENSOR_CONNECT(NAME)					\
-			MSENSOR_CONNECT(&___result___, port, NAME);	\
+			MSENSOR_CONNECT(&___result___, ___port___, NAME);	\
 			if (___result___) break;
 
 #define DEVICE_CONNECT_END		\
@@ -104,7 +104,6 @@ int32_t ev3dev_lego_get_device_path(char* outpath, int outpath_len,
 #define DEVICE_POWER_CONNECT_BEGIN		\
 	int32_t connect(void) {			\
 		int32_t ___result___; 			\
-		char buffer[DEVICE_FILEPATH_MAXLEN];	\
 		do {
 
 #define DEVICE_POWER_CONNECT(NAME)					\

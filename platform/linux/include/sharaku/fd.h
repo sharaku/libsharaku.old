@@ -29,15 +29,36 @@
 
 #include <poll.h>
 #include <errno.h>
+#include <stdlib.h>
+#include <stdint.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 // ファイルディスクリプタリストを監視し、イベントがあった場合は
 // コールバックする。
 
 struct fd_operations {
-	int (*count_fd)(void);
-	int (*add_fd)(struct pollfd *pfd, int cnt);
-	int (*do_fd)(struct pollfd *pfd, int cnt);
+	int (*count_fd)(void *);
+	int (*add_fd)(void *, struct pollfd *, int);
+	int (*do_fd)(void *, struct pollfd *, int);
+	void *_this;
 };
+
+#define FD_OPERATIONS_INIT(C, A, D, THIS) {C, A, D, THIS}
+static inline void
+INIT_FD_OPERATIONS(struct fd_operations *ops,
+		   int (*count_fd)(void *),
+		   int (*add_fd)(void *, struct pollfd *, int),
+		   int (*do_fd)(void *, struct pollfd *, int),
+		   void *_this)
+{
+	ops->count_fd = count_fd;
+	ops->add_fd = add_fd;
+	ops->do_fd = do_fd;
+	ops->_this = _this;
+}
 
 // timeout 時間はシステムクロックの粒度に切り上げられ、 カーネルの
 // スケジューリング遅延により少しだけ長くなる可能性がある点に注意すること。
@@ -57,11 +78,11 @@ fd_poll(struct fd_operations *ops, int cnt, int timeout)
 	// 応答された数が監視対象のfd数。
 	// スタックから取れない場合もあるので、mallocを使用する。
 	for (i = 0, fdcnt = 0; i < cnt; i++) {
-		fdcnt += ops->count_fd();
+		fdcnt += ops->count_fd(ops->_this);
 	}
-	pfd = malloc(sizeof(struct pollfd) * fdcnt);
+	pfd = (struct pollfd*)malloc(sizeof(struct pollfd) * fdcnt);
 	for (i = 0, fdcnt2 = 0; i < cnt; i++) {
-		fdcnt2 += ops->add_fd(&(pfd[fdcnt2]), fdcnt - fdcnt2);
+		fdcnt2 += ops->add_fd(ops->_this, &(pfd[fdcnt2]), fdcnt - fdcnt2);
 	}
 
 	// EINTRであればループを繰り返す。それ以外であればループ終了。
@@ -72,12 +93,93 @@ retry:
 	}
 
 	for (i = 0, fdcnt2 = 0; i < cnt; i++) {
-		fdcnt2 += ops->do_fd(&(pfd[fdcnt2]), fdcnt - fdcnt2);
+		fdcnt2 += ops->do_fd(ops->_this, &(pfd[fdcnt2]), fdcnt - fdcnt2);
 	}
 	free(pfd);
 	return 0;
 }
 
+// タイマーFD制御
+// 
+// 使い方：
+// 	#include <sharaku/fd.h>
+// 	
+// 	void
+// 	timer_cb(void *this)
+// 	{
+// 	}
+// 	
+// 	struct timerfd_operations tfd_ope[] = {
+// 		{timer_cb, NULL}
+// 	};
+// 	
+// 	struct timerfd_info _timerinfo;
+// 	struct fd_operations _fdope;
+// 	
+// 	int
+// 	main(void)
+// 	{
+// 		timerfd_creat_fd(&_timerinfo, 1000, tfd_ope, 1);
+// 		INIT_FD_OPERATIONS(&_fdope, timerfd_count_fd,
+// 				timerfd_add_tfd, timerfd_do_fd, &_timerinfo);
+//		fd_poll(&_fdope, 1, -1);
+// 	}
+// 	
 
+// fd_poll用タイマーFDを監視、コールバック
+// timerfd_operationsを初期化し、thisとして登録すること。
+struct timerfd_operations
+{
+	void		(*t_cb)(void *);
+	void		*_this;
+};
+// fd_poll用タイマーFDを監視、コールバック
+// timerfd_operationsを初期化し、thisとして登録すること。
+struct timerfd_info
+{
+	int				t_fd;
+	uint32_t			t_ms;
+	int				t_ops_num;
+	struct timerfd_operations	*t_ops;
+};
+
+extern int timerfd_create_fd(struct timerfd_info *_this, uint32_t interval_ms,
+			 struct timerfd_operations *ops, int opsnum);
+extern int timerfd_destroy_fd(struct timerfd_info *_this);
+extern int timerfd_count_fd(void *_this);
+extern int timerfd_add_tfd(void *_this, struct pollfd *pfd, int cnt);
+extern int timerfd_do_fd(void *_this, struct pollfd *pfd, int cnt);
+
+// inotify
+// ファイルを監視し、イベントが発生したらコールバックする。
+struct inotify_operations
+{
+	void		(*i_cb)(void *);
+	int		i_mask;
+	void		*_this;
+};
+struct inotify_info
+{
+	int				i_fd;
+	int				i_ops_num;
+	struct inotify_operations	*i_ops;
+};
+
+// fd_poll用inotify監視、コールバック
+extern int inotify_create_fd(struct inotify_info *_this,
+			 struct inotify_operations *ops, int opsnum);
+extern int inotify_destroy_fd(struct timerfd_info *_this);
+extern int inotify_count_fd(void *_this);
+extern int inotify_add_fd(void *_this, struct pollfd *pfd, int cnt);
+extern int inotify_do_fd(void *_this, struct pollfd *pfd, int cnt);
+
+// fd_poll用signalfd監視、コールバック
+extern int signalfd_count_fd(void *_this);
+extern int signalfd_add_fd(void *_this, struct pollfd *pfd, int cnt);
+extern int signalfd_do_fd(void *_this, struct pollfd *pfd, int cnt);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // _SHARAKU_FD_H_

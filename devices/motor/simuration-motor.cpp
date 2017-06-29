@@ -79,8 +79,8 @@ motor_simuration::update(float second)
 
 tacho_motor_simuration::tacho_motor_simuration()
  : motor_simuration(0)
- , _speed_pid(1.0, 0.0f, 0.0f)
  , _hold_pid(1.0, 0.0f, 0.0f)
+ , _speed_pid(1.0, 0.0f, 0.0f)
 {
 	_position_mode = 0;
 	_position_sp = 0;

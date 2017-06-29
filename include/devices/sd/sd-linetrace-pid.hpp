@@ -87,8 +87,8 @@ class sd_linetrace_pid
 
  private:
 	sd_linetrace_pid() : _pid(0.0f, 0.0f, 0.0f), _lowpass(1.0f) {};
-	low_pass_filter	_lowpass;
 	pid		_pid;
+	low_pass_filter	_lowpass;
 	float 		_Kp, _Ki, _Kd, _q;
 	int32_t		_clear_flag:1;
 	int32_t		_lowpass_update_flag:1;

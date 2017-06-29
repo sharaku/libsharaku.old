@@ -131,19 +131,19 @@ class EV3way
 
  public:
 	sharaku::ev3dev_powersupply	power;		// 電源制御
-	sharaku::ev3dev_gyro		gyro;		// ジャイロセンサー
-	sharaku::ev3dev_color		color;		// カラーセンサー
 	sharaku::ev3dev_touch		touch;		// タッチセンサー
 	sharaku::ev3dev_ultrasonic	usonic;		// 超音波センサー
+	sharaku::ev3dev_color		color;		// カラーセンサー
+	sharaku::ev3dev_gyro		gyro;		// ジャイロセンサー
+	sharaku::ev3dev_tacho_motor	motor_t;	// 尻尾モータ
 	sharaku::ev3dev_tacho_motor	motor_r;	// モータ右
 	sharaku::ev3dev_tacho_motor	motor_l;	// モータ左
-	sharaku::ev3dev_tacho_motor	motor_t;	// 尻尾モータ
-	sharaku::dps2duty_motor<1020>	spd2duty_motor_r;
-	sharaku::dps2duty_motor<1020>	spd2duty_motor_l;
-	sharaku::ev3way_balancer	balancer;
 	sharaku::sd_linetrace_pid	linetrace;
 	sharaku::sd_position_move	target_move;
 	sharaku::sd_wheel_odometry	odo;
+	sharaku::dps2duty_motor<1020>	spd2duty_motor_r;
+	sharaku::dps2duty_motor<1020>	spd2duty_motor_l;
+	sharaku::ev3way_balancer	balancer;
 	sharaku::mod_devupdate		devupdate;
 };
 

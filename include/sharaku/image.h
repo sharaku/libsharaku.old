@@ -45,7 +45,7 @@ struct image_t {
 		width = 0;
 		height = 0;
 	}
-	color_t get_pixcel(int32_t x, int32_t y) {
+	color_t& get_pixcel(int32_t x, int32_t y) {
 		return map[y * width + x];
 	}
 	uint32_t width;

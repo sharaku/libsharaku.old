@@ -91,7 +91,7 @@ public:
 	void set_imagefile(const char *filename);
 
 protected:
-	color_t get_color(void) {
+	color_t& get_color(void) {
 		return _pxcel;
 	}
 	int32_t get_reflected(void) {

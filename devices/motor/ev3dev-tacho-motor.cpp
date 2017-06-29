@@ -34,7 +34,6 @@ NAMESPACE_SHARAKU_BEGIN
 
 int32_t ev3dev_tacho_motor::connect(const char* port)
 {
-	char *work;
 	sharaku_db_trace("start", 0, 0, 0, 0, 0, 0);
 
 	DEVICE_PROC_SET_READ_PROFNAME("ev3dev_tacho_motor<%s", port);

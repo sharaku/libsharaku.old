@@ -37,12 +37,14 @@ void sd_linetrace_pid::traveling_correction(int turn, int32_t &dps, int32_t &ste
 	int32_t		steer_percent	= 0;
 	int32_t		add_steer	= 0;
 	int32_t		light_value	= 0;
+	float		work;
 
 	// カラー値取得と、-100% ～ 100%の値への変換を行う。
 	light_value = get_correction_color(in_photo->get_value());
 
 	// Low-Passフィルタを通す。
-	light_value = _lowpass + light_value;
+	work = _lowpass + (float)light_value;
+	light_value = (int32_t)work;
 
 	// PIDを使用して旋回係数を求める。
 	// 使用するインターバルは今回のインターバル値

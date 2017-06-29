@@ -40,6 +40,18 @@ set(MODULE_SYSTEM
 	"system.c"
 	)
 
+if (${TARGET_OS} STREQUAL "linux")
+	# Linux用ビルド
+	set(MODULE_SYSTEM ${MODULE_SYSTEM}
+		"../platform/linux/fd-in.c"
+		)
+elseif (${TARGET_OS} STREQUAL "ev3dev")
+	# Linux用ビルド
+	set(MODULE_SYSTEM ${MODULE_SYSTEM}
+		"../platform/linux/fd-in.c"
+		)
+endif()
+
 add_library(sharaku-sys.${TARGET_SUFFIX} STATIC
 	${MODULE_SYSTEM}
 	)

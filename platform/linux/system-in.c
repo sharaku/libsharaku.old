@@ -70,9 +70,11 @@ static void* _cpu_handler(void* pparam)
 	pthread_exit(NULL);
 }
 
+static int _cpu_handler_id[WORKER_THREADS + 1];
+
 int sharaku_entry(void)
 {
-	int64_t			i;
+	int			i;
 	pthread_attr_t		thread_attr;
 	pthread_t		thread;
 
@@ -87,9 +89,12 @@ int sharaku_entry(void)
 	pthread_attr_init(&thread_attr);
 	pthread_attr_setdetachstate(&thread_attr, PTHREAD_CREATE_DETACHED);
 	for (i = 1; i < WORKER_THREADS ; i++) {
-		pthread_create(&thread, &thread_attr, _cpu_handler, (void *)i);
+		_cpu_handler_id[i] = i;
+		pthread_create(&thread, &thread_attr,
+				 _cpu_handler, (void *)&_cpu_handler_id[i]);
 	}
-	pthread_create(&thread, &thread_attr, _timer_handler, (void *)i);
+	pthread_create(&thread, &thread_attr,
+			 _timer_handler, (void *)&_cpu_handler_id[i]);
 
 	sharaku_cpu_handler();
 

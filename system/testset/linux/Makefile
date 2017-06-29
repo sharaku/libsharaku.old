@@ -3,12 +3,13 @@
 .PHONY: all clean
 
 CC       =g++
-CFLAGS   =-Wall -ansi -pedantic
+CFLAGS   =-Wall -ansi -pedantic -g
 TARGET   =libsharaku-unittest
 SRC      =gtest_list.cpp
 SRC      +=gtest_pid.cpp
 SRC      +=gtest_plist.cpp
 SRC      +=gtest_slab.cpp
+SRC      +=gtest_fd.cpp
 HEADERS  =
 INCLUDES =-I/usr/local/include/ -I../../../tools/integration/deproy/libsharaku/usr/local/include/libsharaku/x86-linux
 LDFLAGS  =-L/usr/local/lib/ -L../../../tools/integration/deproy/libsharaku/usr/local/lib/libsharaku/x86-linux

@@ -79,17 +79,6 @@
 #include <sharaku/plist.h>
 #include <sharaku/thread.h>
 
-
-#define SHARAKU_CONTEXT_INIT(context)	\
-	{							\
-		0,						\
-		0,						\
-		0,						\
-		0,						\
-		PLIST_HEAD_INIT((context).plist),		\
-		PLIST_HEAD_INIT((context).timer_plist),		\
-	}
-
 struct sharaku_sched_context {
 	uint8_t			is_initialize:1;
 	uint8_t			is_stop:1;
@@ -106,6 +95,17 @@ struct sharaku_sched_context {
 	sharaku_mutex_t		plist_mx;
 	sharaku_mutex_t		timer_plist_mx;
 };
+
+#define SHARAKU_CONTEXT_INIT(context)	\
+	{							\
+		0,						\
+		0,						\
+		0,						\
+		0,						\
+		PLIST_HEAD_INIT((context).plist),		\
+		PLIST_HEAD_INIT((context).timer_plist),		\
+	}
+
 
 struct sharaku_job;
 typedef void(*sharaku_job_stagefunc_t)(struct sharaku_job*);
