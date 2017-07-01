@@ -67,7 +67,7 @@ __slab_h2f(smem_header_t *h)
 static inline void*
 __slab_h2b(smem_header_t *h)
 {
-	return (void*)((char *)(h) + sizeof(smem_header_t));
+	return (void*)(h + 1);
 }
 
 // バッファからヘッダを取得する
@@ -144,11 +144,15 @@ __slab_free(void *buf)
 	smem_footer_t *f;
 
 	h = __slab_b2h(buf);
+	if (h->h_magic != SHARKAU_SLAB_MAGIC) {
+		// 不正アクセス。
+		return -EFAULT;
+	}
+
 	f = __slab_h2f(h);
 	node = h->h_node;
 
-	if (h->h_magic != SHARKAU_SLAB_MAGIC ||
-	    f->f_magic != SHARKAU_SLAB_MAGIC) {
+	if (f->f_magic != SHARKAU_SLAB_MAGIC) {
 		// 不正アクセス。
 		return -EFAULT;
 	}
@@ -225,8 +229,8 @@ _slab_alloc(struct slab_cache *slab,
 
 	// 最大バッファ数を超える場合は獲得させない。
 	if (slab->s_max_buf_cnt &&
-	    slab->s_max_buf_cnt >= slab->s_buf_cnt) {
-		return NULL;
+	    slab->s_max_buf_cnt <= slab->s_buf_cnt) {
+		return (void*)-EINVAL;
 	}
 
 	if (plist_empty(&slab->s_list)) {
@@ -261,8 +265,20 @@ slab_free(void *buf)
 	int prio;
 	int rc;
 
+	if (!buf) {
+		// 不正アクセス。
+		return -EFAULT;
+	}
 	h = __slab_b2h(buf);
+	if (h->h_magic != SHARKAU_SLAB_MAGIC) {
+		// 不正アクセス。
+		return -EFAULT;
+	}
 	node = h->h_node;
+	if (!node) {
+		// 不正アクセス。
+		return -EFAULT;
+	}
 	prio = __get_slab_prio(node);
 	if (node->sn_slab->s_destructor) {
 		node->sn_slab->s_destructor((void*)buf, node->sn_slab->s_size);

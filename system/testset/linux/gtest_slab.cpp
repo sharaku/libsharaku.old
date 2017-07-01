@@ -183,12 +183,63 @@ TEST(slab, slab_destroy) {
 }
 
 TEST(slab, _slab_alloc) {
+	struct slab_cache *slab;
+	char *slab_bufer[1024];
+	int i;
+	int rc;
+
+	slab = slab_create(256, 1048576, 128);
+	for (i = 0; i < 128; i++) {
+		slab_bufer[i] = (char*)_slab_alloc(slab, __FILE__, __LINE__);
+	}
+	for (i = 128; i < 256; i++) {
+		slab_bufer[i] = (char*)_slab_alloc(slab, __FILE__, __LINE__);
+	}
+
+	for (i = 0; i < 128; i++) {
+		rc = slab_free(slab_bufer[i]);
+		EXPECT_EQ(rc, 0);
+	}
+
+	slab_destroy(slab);
 }
 
 TEST(slab, slab_free) {
+	struct slab_cache *slab;
+	char *slab_bufer[1024];
+	int i;
+	int rc;
+
+	slab = slab_create(256, 1048576, 128);
+	for (i = 0; i < 128; i++) {
+		slab_bufer[i] = (char*)_slab_alloc(slab, __FILE__, __LINE__);
+	}
+
+	for (i = 0; i < 128; i++) {
+		rc = slab_free(slab_bufer[i]);
+		EXPECT_EQ(rc, 0);
+	}
+
+	slab_destroy(slab);
 }
 
 TEST(slab, slab_alloc) {
+	struct slab_cache *slab;
+	char *slab_bufer[1024];
+	int i;
+	int rc;
+
+	slab = slab_create(256, 1048576, 128);
+	for (i = 0; i < 128; i++) {
+		slab_bufer[i] = (char*)slab_alloc(slab);
+	}
+
+	for (i = 0; i < 128; i++) {
+		rc = slab_free(slab_bufer[i]);
+		EXPECT_EQ(rc, 0);
+	}
+
+	slab_destroy(slab);
 }
 
 TEST(slab, slab_set_constructor) {

@@ -116,6 +116,8 @@ struct slab_node {
 		(slab)->s_node_size = node_size;	\
 		(slab)->s_max_buf_cnt = max_cnt;	\
 		(slab)->s_buf_cnt = 0;			\
+		(slab)->s_constructor = NULL;		\
+		(slab)->s_destructor = NULL;		\
 	}
 
 #define INIT_SLAB_SZ(slab, size, node_size)	\
