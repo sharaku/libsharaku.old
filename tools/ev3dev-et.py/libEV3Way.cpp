@@ -40,6 +40,8 @@
 
 using namespace std;
 
+static const char libev3way_version[] = "1.0";
+
 static pthread_t		_th;
 static struct sharaku_job	_job_init;
 static struct sharaku_job	_job_exit;
@@ -103,7 +105,7 @@ static int32_t finalize(void)
 
 static void version(void)
 {
-	printf("%s.%s\n", __DATE__, __TIME__);
+	printf("%s\n", libev3way_version);
 	return;
 }
 
