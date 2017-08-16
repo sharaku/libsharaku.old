@@ -72,12 +72,33 @@ enum {
 #define _SHARAKU_LOG_NUMtoSTR(x) #x
 
 // ログ採取
-#define sharaku_db_trace(str, a1, a2, a3, a4, a5, a6) \
-	sharaku_dblog_internal(SHARAKU_LOG_LV_TRACE, str, a1, a2, a3, a4, a5, a6)
-#define sharaku_db_info(str, a1, a2, a3, a4, a5, a6) \
-	sharaku_dblog_internal(SHARAKU_LOG_LV_INFO, str, a1, a2, a3, a4, a5, a6)
-#define sharaku_db_error(str, a1, a2, a3, a4, a5, a6) \
-	sharaku_dblog_internal(SHARAKU_LOG_LV_ERROR, str, a1, a2, a3, a4, a5, a6)
+#define __dblog0(lv, fmt) \
+		sharaku_dblog_internal(lv, fmt, 0, 0, 0, 0, 0, 0)
+#define __dblog1(lv, fmt, a1) \
+		sharaku_dblog_internal(lv, fmt, a1, 0, 0, 0, 0, 0)
+#define __dblog2(lv, fmt, a1, a2) \
+		sharaku_dblog_internal(lv, fmt, a1, a2, 0, 0, 0, 0)
+#define __dblog3(lv, fmt, a1, a2, a3) \
+		sharaku_dblog_internal(lv, fmt, a1, a2, a3, 0, 0, 0)
+#define __dblog4(lv, fmt, a1, a2, a3, a4) \
+		sharaku_dblog_internal(lv, fmt, a1, a2, a3, a4, 0, 0)
+#define __dblog5(lv, fmt, a1, a2, a3, a4, a5) \
+		sharaku_dblog_internal(lv, fmt, a1, a2, a3, a4, a5, 0)
+#define __dblog6(lv, fmt, a1, a2, a3, a4, a5, a6) \
+		sharaku_dblog_internal(lv, fmt, a1, a2, a3, a4, a5, a6)
+#define GET_DBG_FUNC_NAME(_0, _1, _2, _3, _4, _5, _6, NAME, ...) NAME
+#define sharaku_db_trace(fmt, ...) \
+	GET_DBG_FUNC_NAME(0, __VA_ARGS__, __dblog6, __dblog5, __dblog4, \
+			  __dblog3, __dblog2, __dblog1, __dblog0) \
+			  (SHARAKU_LOG_LV_TRACE, fmt, __VA_ARGS__)
+#define sharaku_db_info(fmt, ...) \
+	GET_DBG_FUNC_NAME(0, __VA_ARGS__, __dblog6, __dblog5, __dblog4, \
+			  __dblog3, __dblog2, __dblog1, __dblog0) \
+			  (SHARAKU_LOG_LV_INFO, fmt, __VA_ARGS__)
+#define sharaku_db_error(fmt, ...) \
+	GET_DBG_FUNC_NAME(0, __VA_ARGS__, __dblog6, __dblog5, __dblog4, \
+			  __dblog3, __dblog2, __dblog1, __dblog0) \
+			  (SHARAKU_LOG_LV_ERROR, fmt, __VA_ARGS__)
 
 /******************************************************************************
 logger機能

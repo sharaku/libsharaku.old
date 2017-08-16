@@ -59,7 +59,7 @@ set(DEVICE_SD
 	"sd/sd-wheel-odometry.cpp"
 	)
 
-if (${TARGET_OS} STREQUAL "linux")
+if ("${TARGET_OS}" STREQUAL "linux")
 	# Linux用ビルド
 	set(DEVICE_PROC ${DEVICE_PROC}
 		"proc/linux-proc-device.cpp"
@@ -73,7 +73,7 @@ if (${TARGET_OS} STREQUAL "linux")
 endif()
 
 
-if (${TARGET_PLATFORM} STREQUAL "ev3dev")
+if ("${TARGET_PLATFORM}" STREQUAL "ev3dev")
 	# ev3dev用ビルド
 	set(DEVICE_PROC ${DEVICE_PROC}
 		"proc/linux-proc-device.cpp"
@@ -102,7 +102,7 @@ if (${TARGET_PLATFORM} STREQUAL "ev3dev")
 		"sd/ev3way/balancer_param.c"
 		"sd/ev3way/ev3way-balancer.cpp"
 		)
-elseif (${TARGET_PLATFORM} STREQUAL "ev3rt")
+elseif ("${TARGET_PLATFORM}" STREQUAL "ev3rt")
 	# EV3RT用ビルド
 	set(DEVICE_SD ${DEVICE_SD}
 		"sd/ev3way/balancer.c"

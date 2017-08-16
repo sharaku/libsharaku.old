@@ -35,15 +35,14 @@ NAMESPACE_SHARAKU_BEGIN
 
 // 定期的にprocを読み込んで更新する
 void
-linux_proc_device::update_device(struct sharaku_job *job)
+linux_proc_device::update_device(job_t *job)
 {
 	linux_proc_device *_this =
 			list_entry(job, linux_proc_device, _job_interval);
 
 	if (_this->_interval_ms) {
 		// intervalが0以外の場合は、スケジュールする。
-		sharaku_timer_message(job,
-				      _this->_interval_ms,
+		job_timer_sched(job, _this->_interval_ms,
 				      linux_proc_device::update_device);
 	} else {
 		sharaku_mutex_lock(&_this->_mutex_job_i);
@@ -79,13 +78,12 @@ linux_proc_device::update_device(struct sharaku_job *job)
 	}
 }
 void
-linux_proc_device::start_update_device(struct sharaku_job *job)
+linux_proc_device::start_update_device(job_t *job)
 {
 	linux_proc_device *_this = list_entry(job, linux_proc_device, _job_interval);
 	if (_this->_interval_ms) {
 		// intervalが0以外の場合は、スケジュールする。
-		sharaku_timer_message(job,
-				      _this->_interval_ms,
+		job_timer_sched(job, _this->_interval_ms,
 				      linux_proc_device::update_device);
 	} else {
 		sharaku_mutex_lock(&_this->_mutex_job_i);
@@ -115,13 +113,12 @@ linux_proc_device::start_update_device(struct sharaku_job *job)
 	}
 }
 void
-linux_proc_device::start_commit_device(struct sharaku_job *job)
+linux_proc_device::start_commit_device(job_t *job)
 {
 	linux_proc_device *_this = list_entry(job, linux_proc_device, _job_interval);
 	if (_this->_interval_ms) {
 		// intervalが0以外の場合は、スケジュールする。
-		sharaku_timer_message(job,
-				      _this->_interval_ms,
+		job_timer_sched(job, _this->_interval_ms,
 				      linux_proc_device::update_device);
 	} else {
 		sharaku_mutex_lock(&_this->_mutex_job_i);
@@ -150,7 +147,7 @@ linux_proc_device::start_commit_device(struct sharaku_job *job)
 }
 
 void
-linux_proc_device::io_submit(struct sharaku_job *job)
+linux_proc_device::io_submit(job_t *job)
 {
 	linux_proc_device *_this = list_entry(job, linux_proc_device, _job_update);
 
@@ -170,7 +167,7 @@ linux_proc_device::io_submit(struct sharaku_job *job)
 			sharaku_prof_add_notime(&_this->_prof_write_count);
 			break;
 		}
-		sharaku_async_message(job, linux_proc_device::io_submit);
+		job_async_sched(job, linux_proc_device::io_submit);
 	} else if (result != 0) {
 		sharaku_db_error("io_submit get_read_flag=0x%08x get_write_flag=0x%08x error=%d",
 				 _this->get_read_flag(), _this->get_write_flag(), result, 0, 0, 0);
@@ -181,7 +178,7 @@ linux_proc_device::io_submit(struct sharaku_job *job)
 }
 
 void
-linux_proc_device::io_end(struct sharaku_job *job)
+linux_proc_device::io_end(job_t *job)
 {
 	linux_proc_device *_this = list_entry(job, linux_proc_device, _job_update);
 	_this->__io_end(_this->_type);

@@ -64,8 +64,8 @@ mod_update::mod_update(uint32_t interval)
 	_time			= 0;
 	_interval_ms		= interval;
 	_is_stop		= 1;
-	sharaku_init_job(&_job_update);
-	sharaku_init_job(&_job_update_interval);
+	init_job(&_job_update);
+	init_job(&_job_update_interval);
 	INIT_LIST_HEAD(&_update_list);
 }
 mod_update::mod_update() {
@@ -76,7 +76,7 @@ mod_update::mod_update() {
 	_time			= 0;
 	_interval_ms		= 0;
 	_is_stop		= 1;
-	sharaku_init_job(&_job_update);
+	init_job(&_job_update);
 	INIT_LIST_HEAD(&_update_list);
 }
 
@@ -94,8 +94,8 @@ mod_update::start()
 		_update_count		= 0;
 		_update_start_time	= sharaku_get_usec();
 
-		sharaku_init_job(&_job_update);
-		sharaku_async_message(&_job_update, mod_update::mod_update_cycle);
+		init_job(&_job_update);
+		job_async_sched(&_job_update, mod_update::mod_update_cycle);
 		_is_stop = 0;
 	}
 }
@@ -105,7 +105,7 @@ mod_update::stop()
 {
 	if (!_is_stop) {
 		_is_stop = 1;
-		sharaku_cancel_message(&_job_update);
+		job_cancel_sched(&_job_update);
 	}
 }
 
@@ -153,7 +153,7 @@ mod_update_init(void)
 
 // -------------------------------------------------------------------------
 void
-mod_update::mod_update_cycle(struct sharaku_job* job)
+mod_update::mod_update_cycle(job_t* job)
 {
 	mod_update *_mod_update = (mod_update*)list_entry(job, mod_update, _job_update);
 	uint32_t interval = 0;
@@ -161,7 +161,7 @@ mod_update::mod_update_cycle(struct sharaku_job* job)
 	// 前のスケジュールが完了していない場合は、非同期で本関数を呼び出す。
 	if (!_mod_update->_job_update_i) {
 		sharaku_db_trace("update busy", 0, 0, 0, 0, 0, 0);
-		sharaku_async_message(job, mod_update_cycle);
+		job_async_sched(job, mod_update_cycle);
 		return;
 	}
 
@@ -193,7 +193,7 @@ mod_update::mod_update_cycle(struct sharaku_job* job)
 	// 最初にスケジュールすることで誤差を少なくする
 	// 本関数が終了するまでここでスケジュールした関数は起動しないため
 	// このタイミングで起動しても問題ない
-	sharaku_timer_message(job, _mod_update->_interval_ms, mod_update_cycle);
+	job_timer_sched(job, _mod_update->_interval_ms, mod_update_cycle);
 	_mod_update->_job_update_i = NULL;
 	mod_pre_update_begin(&_mod_update->_job_update_interval);
 }
@@ -201,7 +201,7 @@ mod_update::mod_update_cycle(struct sharaku_job* job)
 // -------------------------------------------------------------------------
 // pre_updateを処理する
 void
-mod_update::mod_pre_update_begin(struct sharaku_job* job)
+mod_update::mod_pre_update_begin(job_t* job)
 {
 	sharaku_db_trace("", 0, 0, 0, 0, 0, 0);
 	mod_update *_mod_update = (mod_update*)list_entry(job, mod_update, _job_update_interval);
@@ -212,7 +212,7 @@ mod_update::mod_pre_update_begin(struct sharaku_job* job)
 }
 
 void
-mod_update::mod_pre_update(struct sharaku_job* job)
+mod_update::mod_pre_update(job_t* job)
 {
 	mod_update *_mod_update = (mod_update*)list_entry(job, mod_update, _job_update_interval);
 	int32_t	rc = 0;
@@ -245,13 +245,13 @@ next:
 		goto next;
 	} else {
 		sharaku_prof_add_notime(&_mod_update->_update->_prof_pre_update_retry);
-		sharaku_async_message(job, mod_pre_update_retry);
+		job_async_sched(job, mod_pre_update_retry);
 		return;
 	}
 }
 
 void
-mod_update::mod_pre_update_retry(struct sharaku_job* job)
+mod_update::mod_pre_update_retry(job_t* job)
 {
 	mod_update *_mod_update = (mod_update*)list_entry(job, mod_update, _job_update_interval);
 	int32_t	rc = 0;
@@ -268,17 +268,17 @@ mod_update::mod_pre_update_retry(struct sharaku_job* job)
 		sharaku_prof_add(&_mod_update->_update->_prof_pre_update_process, _mod_update->_update->_prof_time_per_update_start, time_process);
 		_mod_update->_update = list_next_entry(_mod_update->_update,
 							update_operations, update_list);
-		sharaku_async_message(job, mod_pre_update);
+		job_async_sched(job, mod_pre_update);
 		return;
 	} else {
 		sharaku_prof_add_notime(&_mod_update->_update->_prof_pre_update_retry);
-		sharaku_async_message(job, mod_pre_update_retry);
+		job_async_sched(job, mod_pre_update_retry);
 		return;
 	}
 }
 
 void
-mod_update::mod_pre_update_end(struct sharaku_job* job)
+mod_update::mod_pre_update_end(job_t* job)
 {
 	sharaku_db_trace("", 0, 0, 0, 0, 0, 0);
 	mod_update *_mod_update = (mod_update*)list_entry(job, mod_update, _job_update_interval);
@@ -292,7 +292,7 @@ mod_update::mod_pre_update_end(struct sharaku_job* job)
 // -------------------------------------------------------------------------
 // updateを処理する
 void
-mod_update::mod_update_begin(struct sharaku_job* job)
+mod_update::mod_update_begin(job_t* job)
 {
 	sharaku_db_trace("", 0, 0, 0, 0, 0, 0);
 	mod_update *_mod_update = (mod_update*)list_entry(job, mod_update, _job_update_interval);
@@ -303,7 +303,7 @@ mod_update::mod_update_begin(struct sharaku_job* job)
 }
 
 void
-mod_update::mod_update_(struct sharaku_job* job)
+mod_update::mod_update_(job_t* job)
 {
 	mod_update *_mod_update = (mod_update*)list_entry(job, mod_update, _job_update_interval);
 	int32_t	rc = 0;
@@ -330,13 +330,13 @@ next:
 		goto next;
 	} else {
 		sharaku_prof_add_notime(&_mod_update->_update->_prof_update_retry);
-		sharaku_async_message(job, mod_update_retry);
+		job_async_sched(job, mod_update_retry);
 		return;
 	}
 }
 
 void
-mod_update::mod_update_retry(struct sharaku_job* job)
+mod_update::mod_update_retry(job_t* job)
 {
 	mod_update *_mod_update = (mod_update*)list_entry(job, mod_update, _job_update_interval);
 	int32_t	rc = 0;
@@ -352,15 +352,15 @@ mod_update::mod_update_retry(struct sharaku_job* job)
 		sharaku_prof_add(&_mod_update->_update->_prof_update_process, _mod_update->_update->_prof_time_update_start, time_process);
 		_mod_update->_update = list_next_entry(_mod_update->_update,
 							update_operations, update_list);
-		sharaku_async_message(job, mod_update_);
+		job_async_sched(job, mod_update_);
 	} else {
 		sharaku_prof_add_notime(&_mod_update->_update->_prof_update_retry);
-		sharaku_async_message(job, mod_update_retry);
+		job_async_sched(job, mod_update_retry);
 	}
 }
 
 void
-mod_update::mod_update_end(struct sharaku_job* job)
+mod_update::mod_update_end(job_t* job)
 {
 	sharaku_db_trace("", 0, 0, 0, 0, 0, 0);
 	mod_update *_mod_update = (mod_update*)list_entry(job, mod_update, _job_update_interval);
@@ -374,7 +374,7 @@ mod_update::mod_update_end(struct sharaku_job* job)
 // -------------------------------------------------------------------------
 // post_updateを処理する
 void
-mod_update::mod_post_update_begin(struct sharaku_job* job)
+mod_update::mod_post_update_begin(job_t* job)
 {
 	sharaku_db_trace("", 0, 0, 0, 0, 0, 0);
 	mod_update *_mod_update = (mod_update*)list_entry(job, mod_update, _job_update_interval);
@@ -385,7 +385,7 @@ mod_update::mod_post_update_begin(struct sharaku_job* job)
 }
 
 void
-mod_update::mod_post_update(struct sharaku_job* job)
+mod_update::mod_post_update(job_t* job)
 {
 	mod_update *_mod_update = (mod_update*)list_entry(job, mod_update, _job_update_interval);
 	int32_t	rc = 0;
@@ -413,13 +413,13 @@ next:
 		goto next;
 	} else {
 		sharaku_prof_add_notime(&_mod_update->_update->_prof_post_update_retry);
-		sharaku_async_message(job, mod_post_update_retry);
+		job_async_sched(job, mod_post_update_retry);
 		return;
 	}
 }
 
 void
-mod_update::mod_post_update_retry(struct sharaku_job* job)
+mod_update::mod_post_update_retry(job_t* job)
 {
 	mod_update *_mod_update = (mod_update*)list_entry(job, mod_update, _job_update_interval);
 	int32_t	rc = 0;
@@ -436,17 +436,17 @@ mod_update::mod_post_update_retry(struct sharaku_job* job)
 		sharaku_prof_add(&_mod_update->_update->_prof_post_update_process, _mod_update->_update->_prof_time_post_update_start, time_process);
 		_mod_update->_update = list_prev_entry(_mod_update->_update,
 							update_operations, update_list);
-		sharaku_async_message(job, mod_post_update);
+		job_async_sched(job, mod_post_update);
 		return;
 	} else {
 		sharaku_prof_add_notime(&_mod_update->_update->_prof_post_update_retry);
-		sharaku_async_message(job, mod_post_update_retry);
+		job_async_sched(job, mod_post_update_retry);
 		return;
 	}
 }
 
 void
-mod_update::mod_post_update_end(struct sharaku_job* job)
+mod_update::mod_post_update_end(job_t* job)
 {
 	sharaku_db_trace("", 0, 0, 0, 0, 0, 0);
 	mod_update *_mod_update = (mod_update*)list_entry(job, mod_update, _job_update_interval);

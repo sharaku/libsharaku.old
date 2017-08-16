@@ -48,7 +48,7 @@ static values section
 static FILE			*__prof_file;
 static struct list_head		__prof_list = LIST_HEAD_INIT(__prof_list);
 #if (SHARAKU_PROF_FLASH_INTERVALE == 0)
-static struct sharaku_job	__prof_job;
+static job_t	__prof_job;
 #endif
 
 /******************************************************************************
@@ -88,10 +88,10 @@ __sharaku_prof_flash(void)
 
 #if (SHARAKU_PROF_FLASH_INTERVALE == 0)
 static void
-__sharaku_prof_flashjob(struct sharaku_job *job)
+__sharaku_prof_flashjob(job_t *job)
 {
 	__sharaku_prof_flash();
-	sharaku_timer_message(job, SHARAKU_PROF_FLASH_INTERVALE,
+	job_timer_sched(job, SHARAKU_PROF_FLASH_INTERVALE,
 			      __sharaku_prof_flashjob);
 }
 #endif
@@ -100,8 +100,8 @@ void sharaku_init_prof(void)
 {
 	__prof_file = fopen(SHARAKU_PROF_FILENAME, "w+");
 #if (SHARAKU_PROF_FLASH_INTERVALE == 0)
-	sharaku_init_job(&__prof_job);
-	sharaku_timer_message(&__prof_job, SHARAKU_PROF_FLASH_INTERVALE,
+	init_job(&__prof_job);
+	job_timer_sched(&__prof_job, SHARAKU_PROF_FLASH_INTERVALE,
 			       __sharaku_prof_flashjob);
 #endif
 }

@@ -62,6 +62,6 @@ add_subdirectory(modules)
 install(FILES ${CMAKE_SOURCE_DIR}/include/sharaku/vector.hpp DESTINATION include/sharaku)
 
 # ’Ç‰Áƒrƒ‹ƒh
-if (${TARGET_PLATFORM} STREQUAL "ev3dev")
+if ("${TARGET_PLATFORM}" STREQUAL "ev3dev")
 	add_subdirectory(tools/ev3dev-et.py)
 endif()

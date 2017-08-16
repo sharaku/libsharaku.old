@@ -1,9 +1,26 @@
-﻿/*
- * Copyright Abe Takafumi All Rights Reserved, 2004-2017
- * Author Abe Takafumi
- *
- */
+/* --
+MIT License
 
+Copyright (c) 2004-2017 Abe Takafumi
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+**/
 
 #include <stdlib.h>
 #include <assert.h>
@@ -14,7 +31,7 @@
 
 //#define SCHED_PROFILE_ENABLE
 
-static struct sharaku_sched_context _default_context
+static struct sched_context _default_context
 	= SHARAKU_CONTEXT_INIT(_default_context);
 
 #ifdef SCHED_PROFILE_ENABLE
@@ -36,13 +53,13 @@ static sharaku_prof_t	_prof_task_timer_msg;
 #endif
 
 static inline int
-_is_initialize(struct sharaku_sched_context* context)
+_is_initialize(struct sched_context* context)
 {
 	return context->is_initialize;
 }
 
 static inline void
-_context_init(struct sharaku_sched_context* context)
+_context_init(struct sched_context* context)
 {
 	context->is_initialize	= 0;
 	context->is_stop	= 0;
@@ -55,7 +72,7 @@ _context_init(struct sharaku_sched_context* context)
 }
 
 static inline void
-_context_finl(struct sharaku_sched_context* context)
+_context_finl(struct sched_context* context)
 {
 	context->is_stop	= 1;
 	context->is_initialize	= 0;
@@ -65,8 +82,7 @@ _context_finl(struct sharaku_sched_context* context)
 }
 
 static inline void
-_push_sched(struct sharaku_job *job,
-		struct sharaku_sched_context *context)
+_push_sched(job_t *job, struct sched_context *context)
 {
 	// 初期化前の場合はミューテックスをかけられないため、排他せずに
 	// 登録する。
@@ -81,8 +97,7 @@ _push_sched(struct sharaku_job *job,
 }
 
 static inline void
-_push_timer(struct sharaku_job *job,
-		struct sharaku_sched_context *context)
+_push_timer(job_t *job, struct sched_context *context)
 {
 	// 初期化前の場合はミューテックスをかけられないため、排他せずに
 	// 登録する。
@@ -109,7 +124,7 @@ sharaku_finl_sched(void)
 }
 
 void
-sharaku_init_job_prio(struct sharaku_job *job, int prio)
+init_job_prio(job_t *job, int prio)
 {
 	INIT_PLIST_NODE(&(job->node), prio);
 	job->callback	= NULL;
@@ -122,14 +137,13 @@ sharaku_init_job_prio(struct sharaku_job *job, int prio)
 }
 
 void
-sharaku_init_job(struct sharaku_job *job)
+init_job(job_t *job)
 {
-	sharaku_init_job_prio(job, SHARAKU_DEFAULT_PRIO);
+	init_job_prio(job, SHARAKU_DEFAULT_PRIO);
 }
 
 void
-sharaku_async_message(struct sharaku_job *job,
-			sharaku_job_stagefunc_t cb)
+job_async_sched(job_t *job, job_stagefunc_t cb)
 {
 #ifdef SCHED_PROFILE_ENABLE
 	sharaku_usec_t time_start;
@@ -155,8 +169,7 @@ sharaku_async_message(struct sharaku_job *job,
 }
 
 void
-sharaku_timer_message(struct sharaku_job *job,
-			uint32_t ms, sharaku_job_stagefunc_t cb)
+job_timer_sched(job_t *job, uint32_t ms, job_stagefunc_t cb)
 {
 #ifdef SCHED_PROFILE_ENABLE
 	sharaku_usec_t time_start;
@@ -180,9 +193,9 @@ sharaku_timer_message(struct sharaku_job *job,
 }
 
 void
-sharaku_cancel_message(struct sharaku_job *job)
+job_cancel_sched(job_t *job)
 {
-	struct sharaku_sched_context *context = job->context;
+	struct sched_context *context = job->context;
 	// スケジューラからjobを削除する。
 	// 起動中でない限り、この操作で削除可能
 	job->status = SHARAKU_JOB_STATUS_SUSPEND;
@@ -208,10 +221,10 @@ sharaku_cancel_message(struct sharaku_job *job)
 }
 
 static inline void
-_do_sched_timer(struct sharaku_sched_context* context)
+_do_sched_timer(struct sched_context* context)
 {
-	struct sharaku_job	*job;
-	struct sharaku_job	*n;
+	job_t	*job;
+	job_t	*n;
 	struct list_head	list;
 #ifdef SCHED_PROFILE_ENABLE
 	sharaku_usec_t time_start;
@@ -239,7 +252,7 @@ _do_sched_timer(struct sharaku_sched_context* context)
 	// タイマーのリストは昇順に並んでいる。
 	sharaku_mutex_lock(&context->timer_plist_mx);
 	plist_for_each_entry_safe(job, n, &context->timer_plist,
-					 struct sharaku_job, node) {
+					 job_t, node) {
 		if (job->milli_sec > context->base_time) {
 			break;
 		}
@@ -251,9 +264,9 @@ _do_sched_timer(struct sharaku_sched_context* context)
 
 	// jobごとにスケジューラが異なるかもしれないため、1jobずつ
 	// スケジュールする
-	list_for_each_entry_safe(job, n, &list, struct sharaku_job, node.node_list) {
+	list_for_each_entry_safe(job, n, &list, job_t, node.node_list) {
 		list_del_init(&(job->node.node_list));
-		sharaku_async_message(job, job->callback);
+		job_async_sched(job, job->callback);
 	}
 
 #ifdef SCHED_PROFILE_ENABLE
@@ -266,9 +279,9 @@ out:
 
 // jobのサイクル処理
 static inline void
-_do_sched(struct sharaku_sched_context* context)
+_do_sched(struct sched_context* context)
 {
-	struct sharaku_job	*job;
+	job_t	*job;
 #ifdef SCHED_PROFILE_ENABLE
 	sharaku_usec_t time_start;
 	sharaku_usec_t time_end;
@@ -283,7 +296,7 @@ _do_sched(struct sharaku_sched_context* context)
 	}
 	// 先頭を取り出す
 	job = list_entry(context->plist.node_list.next,
-				struct sharaku_job, node.node_list);
+				job_t, node.node_list);
 	plist_del(&(job->node), &(context->plist));
 	sharaku_mutex_unlock(&(context->plist_mx));
 

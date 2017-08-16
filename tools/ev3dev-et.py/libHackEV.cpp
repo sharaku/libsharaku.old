@@ -42,45 +42,45 @@ using namespace std;
 
 static const char libhackev_version[] = "1.0";
 
-static pthread_t		_th;
-static struct sharaku_job	_job_init;
-static struct sharaku_job	_job_exit;
-static HackEV			_hackev;
+static pthread_t	_th;
+static job_t		_job_init;
+static job_t		_job_exit;
+static HackEV		_hackev;
 
 //////////////////////////////////////////////////////////////////////////
 // ---------------------------------------------------------------------
 // メイン制御
 // ---------------------------------------------------------------------
-static void job_init(struct sharaku_job *job)
+static void job_init(job_t *job)
 {
 	// HackEVを開始する
 	_hackev.start();
 }
 
-static void job_exit_end(struct sharaku_job *job)
+static void job_exit_end(job_t *job)
 {
 	// 終了する。
 	// これにより、sharaku_entryが終了する。
 	sharaku_exit_message(0);
 }
 
-static void job_exit(struct sharaku_job *job)
+static void job_exit(job_t *job)
 {
 	// HackEVを終了する
 	_hackev.stop();
 
 	// スケジュールされているjobをキャンセルする
-	sharaku_cancel_message(&_job_init);
+	job_cancel_sched(&_job_init);
 
 	// 終了するまで100ms待つ。その間にモータ等を終了させる
-	sharaku_timer_message(&_job_exit, 100, job_exit_end);
+	job_timer_sched(&_job_exit, 100, job_exit_end);
 }
 
 
 static void* start_routine(void *arg)
 {
-	sharaku_init_job(&_job_init);
-	sharaku_async_message(&_job_init, job_init);
+	init_job(&_job_init);
+	job_async_sched(&_job_init, job_init);
 	sharaku_entry();
 	return NULL;
 }
@@ -102,8 +102,8 @@ static int32_t initialize(void)
 
 static int32_t finalize(void)
 {
-	sharaku_init_job(&_job_exit);
-	sharaku_async_message(&_job_exit, job_exit);
+	init_job(&_job_exit);
+	job_async_sched(&_job_exit, job_exit);
 	pthread_join(_th, NULL);
 	return 0;
 }

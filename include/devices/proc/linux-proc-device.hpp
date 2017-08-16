@@ -338,8 +338,8 @@ class linux_proc_device
  public:
 	linux_proc_device(uint32_t interval_ms) {
 		// 変数初期化
-		sharaku_init_job(&_job_interval);
-		sharaku_init_job(&_job_update);
+		init_job(&_job_interval);
+		init_job(&_job_update);
 		sharaku_mutex_init(&_mutex_job_i);
 		_job = &_job_update;
 		_job_i = &_job_interval;
@@ -381,7 +381,7 @@ class linux_proc_device
 		if (_job_i) {
 			_job_i = NULL;
 			_type = PROC_IOTYPE_RW;
-			sharaku_async_message(&_job_interval,
+			job_async_sched(&_job_interval,
 					linux_proc_device::update_device);
 		}
 		sharaku_mutex_unlock(&_mutex_job_i);
@@ -392,7 +392,7 @@ class linux_proc_device
 		if (_job_i) {
 			_job_i = NULL;
 			_type = PROC_IOTYPE_READ;
-			sharaku_async_message(&_job_interval,
+			job_async_sched(&_job_interval,
 					linux_proc_device::start_update_device);
 		}
 		sharaku_mutex_unlock(&_mutex_job_i);
@@ -402,7 +402,7 @@ class linux_proc_device
 		if (_job_i) {
 			_job_i = NULL;
 			_type = PROC_IOTYPE_WRITE;
-			sharaku_async_message(&_job_interval,
+			job_async_sched(&_job_interval,
 					linux_proc_device::start_commit_device);
 		}
 		sharaku_mutex_unlock(&_mutex_job_i);
@@ -413,7 +413,7 @@ class linux_proc_device
 		return ret;
 	}
 	virtual int32_t stop(void) {
-		sharaku_cancel_message(&_job_update);
+		job_cancel_sched(&_job_update);
 		return 0;
 	}
 	virtual int32_t set_interval(uint32_t interval) {
@@ -436,11 +436,11 @@ class linux_proc_device
 	}
 
  protected:
-	static void update_device(struct sharaku_job* job);
-	static void start_update_device(struct sharaku_job* job);
-	static void start_commit_device(struct sharaku_job* job);
-	static void io_submit(struct sharaku_job* job);
-	static void io_end(struct sharaku_job* job);
+	static void update_device(job_t* job);
+	static void start_update_device(job_t* job);
+	static void start_commit_device(job_t* job);
+	static void io_submit(job_t* job);
+	static void io_end(job_t* job);
 
  protected:
 	enum PROC_IOTYPE {
@@ -454,10 +454,10 @@ class linux_proc_device
 	virtual void __io_end(PROC_IOTYPE type) = 0;
 
  protected:
-	sharaku_job		_job_interval;
-	sharaku_job		_job_update;
-	sharaku_job*		_job;
-	sharaku_job*		_job_i;
+	job_t			_job_interval;
+	job_t			_job_update;
+	job_t*			_job;
+	job_t*			_job_i;
 	sharaku_mutex_t		_mutex_job_i;
 	uint32_t		_interval_ms;
 	uint32_t		_write_flags;

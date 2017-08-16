@@ -36,22 +36,22 @@ static HackEV		*_vehicle;
 
 ///////////////////////////////////////////////////////////////
 // job構造体
-static struct sharaku_job	_job_exec;
-static struct sharaku_job	_job_exit;
-static struct sharaku_job	_job_timer;
+static job_t	_job_exec;
+static job_t	_job_exit;
+static job_t	_job_timer;
 static int			_stop_flag = 0;
 
 ///////////////////////////////////////////////////////////////
-static void job_init_stage(struct sharaku_job *job);
-static void job_exec_stage1(struct sharaku_job *job);
-static void job_exec_stage2(struct sharaku_job *job);
+static void job_init_stage(job_t *job);
+static void job_exec_stage1(job_t *job);
+static void job_exec_stage2(job_t *job);
 static void sample_sigint(int sig);
-static void sample_exit(struct sharaku_job *job);
-static void sample_exit_end(struct sharaku_job *job);
+static void sample_exit(job_t *job);
+static void sample_exit_end(job_t *job);
 ///////////////////////////////////////////////////////////////
 
 static void
-job_init_stage(struct sharaku_job *job)
+job_init_stage(job_t *job)
 {
 #ifdef CONF_VEHICLE_TYPE_EV3way
 	_vehicle = new EV3way();
@@ -73,10 +73,10 @@ job_init_stage(struct sharaku_job *job)
 }
 
 static void
-job_exec_stage1(struct sharaku_job *job)
+job_exec_stage1(job_t *job)
 {
 	if(_stop_flag) {
-		sharaku_async_message(&_job_exit, sample_exit);
+		job_async_sched(&_job_exit, sample_exit);
 		_stop_flag = 0;
 	}
 
@@ -94,24 +94,24 @@ job_exec_stage1(struct sharaku_job *job)
 		_vehicle->set_move_ctrl(500, -45);
 
 		// 走行ループに移行する
-		sharaku_async_message(job, job_exec_stage2);
+		job_async_sched(job, job_exec_stage2);
 	} else {
 		// ボタンが押されていない間は、50ms間隔でループする
-		sharaku_timer_message(job, 50, job_exec_stage1);
+		job_timer_sched(job, 50, job_exec_stage1);
 	}
 }
 
 static void
-job_exec_stage2(struct sharaku_job *job)
+job_exec_stage2(job_t *job)
 {
 	if(_stop_flag) {
-		sharaku_async_message(&_job_exit, sample_exit);
+		job_async_sched(&_job_exit, sample_exit);
 		_stop_flag = 0;
 	}
 	// 無限に待ち合わせる
 	// スケジュールしなくても問題ないが、処理を追加しやすいように
 	// ステージ化してループするようにしておく
-	sharaku_timer_message(job, 50, job_exec_stage2);
+	job_timer_sched(job, 50, job_exec_stage2);
 }
 
 static void
@@ -122,21 +122,21 @@ sample_sigint(int sig)
 }
 
 static void
-sample_exit(struct sharaku_job *job)
+sample_exit(job_t *job)
 {
 	// スケジュールされているjobをキャンセルする
-	sharaku_cancel_message(&_job_exec);
+	job_cancel_sched(&_job_exec);
 
 	// 車両の停止を行う
 	_vehicle->stop();
-	sharaku_init_job(&_job_exit);
+	init_job(&_job_exit);
 
 	// 終了するまで100ms待つ。その間にモータ等を終了させる
 	sharaku_timer_message(&_job_exit, 100, sample_exit_end);
 }
 
 static void
-sample_exit_end(struct sharaku_job *job)
+sample_exit_end(job_t *job)
 {
 	// 終了する。
 	// これにより、sharaku_entryが終了する。
@@ -158,9 +158,9 @@ main(void)
 		return 0;
 	}
 
-	sharaku_init_job(&_job_exec);
-	sharaku_init_job(&_job_exit);
-	sharaku_async_message(&_job_exec, job_init_stage);
+	init_job(&_job_exec);
+	init_job(&_job_exit);
+	job_async_sched(&_job_exec, job_init_stage);
 	result = sharaku_entry();
 
 	return result;

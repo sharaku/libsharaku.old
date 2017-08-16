@@ -1,32 +1,30 @@
 /* --
- *
- * MIT License
- * 
- * Copyright (c) 2004-2017 Abe Takafumi
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- * 
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- *
- */
+MIT License
+
+Copyright (c) 2004-2017 Abe Takafumi
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+**/
 
 // 
 //
-//  +---------+               sharaku_async_message             +-------+
+//  +---------+                  job_async_sched                +-------+
 //  |  READY  | <---------------------------------------------- |  RUN  |
 //  |         | ----------------------------------------------> |       |
 //  +---------+                   スケジュール                  +-------+
@@ -34,18 +32,18 @@
 //   ｜｜ ｜                                                      ｜｜
 //   ｜｜ ｜                                                      ｜｜
 //   ｜｜ ｜                                                      ｜｜
-//   ｜｜ ｜    時間経過        +---------+ sharaku_timer_message ｜｜
+//   ｜｜ ｜    時間経過        +---------+    job_timer_sched    ｜｜
 //   ｜｜  -------------------- |  WAIT   | <---------------------- ｜
 //   ｜｜                       |         |                         ｜
 //   ｜｜                       +---------+                         ｜
 //   ｜｜                          ｜↑                             ｜
-//   ｜｜    sharaku_cancel_message｜｜sharaku_timer_message        ｜
+//   ｜｜          job_cancel_sched｜｜job_timer_sched              ｜
 //   ｜｜                          ↓｜                             ｜
-//   ｜｜ sharaku_async_message +---------+                         ｜
+//   ｜｜    job_async_sched    +---------+                         ｜
 //   ｜ ----------------------- | SUSPEND | <------------------------
 //    ------------------------> |         |   job関数終了後、スケジュールなし
-//    sharaku_cancel_message    +---------+
-//                              ↑ sharaku_init_job
+//          job_cancel_sched    +---------+
+//                              ↑ init_job
 //
 //
 //       +---------+    +---------+    +---------+    +---------+
@@ -79,7 +77,7 @@
 #include <sharaku/plist.h>
 #include <sharaku/thread.h>
 
-struct sharaku_sched_context {
+struct sched_context {
 	uint8_t			is_initialize:1;
 	uint8_t			is_stop:1;
 	uint8_t			rsv:7;
@@ -107,16 +105,15 @@ struct sharaku_sched_context {
 	}
 
 
-struct sharaku_job;
-typedef void(*sharaku_job_stagefunc_t)(struct sharaku_job*);
+struct job;
+typedef void(*job_stagefunc_t)(struct job*);
 
-struct sharaku_job {
+typedef struct job {
 	struct plist_node	node;		///< スケジューラのノード
-	sharaku_job_stagefunc_t	callback;	///< コールバック
+	job_stagefunc_t		callback;	///< コールバック
 	int32_t			prio;		///< 優先度
 	int64_t			milli_sec;	///< タイムアウト値
-	struct sharaku_sched_context*
-				context;	///< スケジューラコンテキスト
+	struct sched_context*	context;	///< スケジューラコンテキスト
 	uint8_t			status;		///< 現在の状態
 #define SHARAKU_JOB_STATUS_SUSPEND	1
 #define SHARAKU_JOB_STATUS_READY	2
@@ -127,7 +124,7 @@ struct sharaku_job {
 	uint8_t			rsv_flg:7;	///< 
 	uint32_t		magic;		// マジックコード
 #define SHARAKU_TASK_MAGIC	0xF58AABE3
-};
+} job_t;
 
 #define SHARAKU_DEFAULT_PRIO 128
 
@@ -143,13 +140,11 @@ extern void sharaku_finl_sched(void);
 extern void sharaku_workqueue(void);
 
 // スケジューラへの登録
-extern void sharaku_init_job(struct sharaku_job *job);
-extern void sharaku_init_job_prio(struct sharaku_job *job, int prio);
-extern void sharaku_async_message(struct sharaku_job *job,
-				sharaku_job_stagefunc_t cb);
-extern void sharaku_timer_message(struct sharaku_job *job,
-				uint32_t ms, sharaku_job_stagefunc_t cb);
-extern void sharaku_cancel_message(struct sharaku_job *job);
+extern void init_job(job_t *job);
+extern void init_job_prio(job_t *job, int prio);
+extern void job_async_sched(job_t *job, job_stagefunc_t cb);
+extern void job_timer_sched(job_t *job, uint32_t ms, job_stagefunc_t cb);
+extern void job_cancel_sched(job_t *job);
 #if defined(__cplusplus)
 }
 #endif

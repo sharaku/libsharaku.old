@@ -36,8 +36,8 @@
 #include <sharaku/jiffies.h>
 #include <sharaku/fd.h>
 
-struct sharaku_job	_job;
-struct sharaku_job	_timer_job;
+job_t	_job;
+job_t	_timer_job;
 
 uint32_t count = 0;
 uint32_t old_us = 0;
@@ -78,18 +78,18 @@ struct fd_operations	_ops[] = {
 };
 
 static void
-timer_sched_cb(struct sharaku_job *job)
+timer_sched_cb(job_t *job)
 {
 	uint32_t us = sharaku_get_usec();
 	uint32_t ms = sharaku_get_msec();
-	sharaku_timer_message(job, 1000, timer_sched_cb);
+	job_timer_sched(job, 1000, timer_sched_cb);
 	printf("<%-10u, %-10u, %-10u, %-10u>: %-10u\n", us, us - old_us, ms, ms - old_ms, count);
 	old_us = us;
 	old_ms = ms;
 }
 
 static void
-sched_cb(struct sharaku_job *job)
+sched_cb(job_t *job)
 {
 	count ++;
 
@@ -98,11 +98,11 @@ sched_cb(struct sharaku_job *job)
 	// sharaku jobと組み合わせる場合は0とすること。
 	fd_poll(_ops, 1, 0);
 
-	sharaku_async_message(job, sched_cb);
+	job_async_sched(job, sched_cb);
 }
 
 static void
-init_cb(struct sharaku_job *job)
+init_cb(job_t *job)
 {
 	// タイマーの作成。
 	struct itimerspec iti;
@@ -114,7 +114,7 @@ init_cb(struct sharaku_job *job)
 	_timerfd = timerfd_create(CLOCK_MONOTONIC, 0);
 	timerfd_settime(_timerfd, TFD_TIMER_ABSTIME, &iti, NULL);
 
-	sharaku_async_message(job, sched_cb);
+	job_async_sched(job, sched_cb);
 }
 
 int
@@ -123,10 +123,10 @@ main(void)
 	old_us = sharaku_get_usec();
 
 	printf("<now us    ,interval us,now ms     ,interval ms>: count\n");
-	sharaku_init_job(&_job);
-	sharaku_init_job_prio(&_timer_job, 0);
-	sharaku_async_message(&_job, init_cb);
-	sharaku_async_message(&_timer_job, timer_sched_cb);
+	init_job(&_job);
+	init_job_prio(&_timer_job, 0);
+	job_async_sched(&_job, init_cb);
+	job_async_sched(&_timer_job, timer_sched_cb);
 	sharaku_entry();
 }
 

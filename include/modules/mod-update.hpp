@@ -58,19 +58,19 @@ class mod_update
 	sharaku_usec_t get_prof_usec_processing();
 
  protected:
-	static void mod_update_cycle(struct sharaku_job* job);
-	static void mod_pre_update_begin(struct sharaku_job* job);
-	static void mod_pre_update(struct sharaku_job* job);
-	static void mod_pre_update_retry(struct sharaku_job* job);
-	static void mod_pre_update_end(struct sharaku_job* job);
-	static void mod_update_begin(struct sharaku_job* job);
-	static void mod_update_(struct sharaku_job* job);
-	static void mod_update_retry(struct sharaku_job* job);
-	static void mod_update_end(struct sharaku_job* job);
-	static void mod_post_update_begin(struct sharaku_job* job);
-	static void mod_post_update(struct sharaku_job* job);
-	static void mod_post_update_retry(struct sharaku_job* job);
-	static void mod_post_update_end(struct sharaku_job* job);
+	static void mod_update_cycle(job_t* job);
+	static void mod_pre_update_begin(job_t* job);
+	static void mod_pre_update(job_t* job);
+	static void mod_pre_update_retry(job_t* job);
+	static void mod_pre_update_end(job_t* job);
+	static void mod_update_begin(job_t* job);
+	static void mod_update_(job_t* job);
+	static void mod_update_retry(job_t* job);
+	static void mod_update_end(job_t* job);
+	static void mod_post_update_begin(job_t* job);
+	static void mod_post_update(job_t* job);
+	static void mod_post_update_retry(job_t* job);
+	static void mod_post_update_end(job_t* job);
 
  private:
 	mod_update();
@@ -78,9 +78,9 @@ class mod_update
  private:
 	sharaku_usec_t		_time;		// 前回実行時の時間
 
-	struct sharaku_job	_job_update;
-	struct sharaku_job	_job_update_interval;
-	struct sharaku_job	*_job_update_i;
+	job_t			_job_update;
+	job_t			_job_update_interval;
+	job_t			*_job_update_i;
 	update_operations	*_update;
 
 	uint32_t		_update_count;

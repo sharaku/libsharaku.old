@@ -42,45 +42,45 @@ using namespace std;
 
 static const char libev3way_version[] = "1.0";
 
-static pthread_t		_th;
-static struct sharaku_job	_job_init;
-static struct sharaku_job	_job_exit;
-static EV3way			_ev3way;
+static pthread_t	_th;
+static struct job	_job_init;
+static struct job	_job_exit;
+static EV3way		_ev3way;
 
 //////////////////////////////////////////////////////////////////////////
 // ---------------------------------------------------------------------
 // メイン制御
 // ---------------------------------------------------------------------
-static void job_init(struct sharaku_job *job)
+static void job_init(struct job *job)
 {
 	// EV3wayを開始する
 	_ev3way.start();
 }
 
-static void job_exit_end(struct sharaku_job *job)
+static void job_exit_end(struct job *job)
 {
 	// 終了する。
 	// これにより、sharaku_entryが終了する。
 	sharaku_exit_message(0);
 }
 
-static void job_exit(struct sharaku_job *job)
+static void job_exit(struct job *job)
 {
 	// EV3wayを終了する
 	_ev3way.stop();
 
 	// スケジュールされているjobをキャンセルする
-	sharaku_cancel_message(&_job_init);
+	job_cancel_sched(&_job_init);
 
 	// 終了するまで100ms待つ。その間にモータ等を終了させる
-	sharaku_timer_message(&_job_exit, 100, job_exit_end);
+	job_timer_sched(&_job_exit, 100, job_exit_end);
 }
 
 
 static void* start_routine(void *arg)
 {
-	sharaku_init_job(&_job_init);
-	sharaku_async_message(&_job_init, job_init);
+	init_job(&_job_init);
+	job_async_sched(&_job_init, job_init);
 	sharaku_entry();
 	return NULL;
 }
@@ -97,8 +97,8 @@ static int32_t initialize(void)
 
 static int32_t finalize(void)
 {
-	sharaku_init_job(&_job_exit);
-	sharaku_async_message(&_job_exit, job_exit);
+	init_job(&_job_exit);
+	job_async_sched(&_job_exit, job_exit);
 	pthread_join(_th, NULL);
 	return 0;
 }
@@ -582,7 +582,6 @@ static int32_t Reset(void)
 
 };
 
-
 //////////////////////////////////////////////////////////////////////////
 // ---------------------------------------------------------------------
 // センサー
@@ -777,5 +776,3 @@ BOOST_PYTHON_MODULE(libEV3Way)
 	export_submodule_targetmove();
 	export_submodule_baranser();
 }
-
-

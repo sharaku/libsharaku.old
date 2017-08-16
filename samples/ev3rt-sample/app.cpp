@@ -35,7 +35,7 @@ extern "C" {
 #include "kernel_cfg.h"
 #endif
 
-extern void job_entry(struct sharaku_job *job);
+extern void job_entry(job_t *job);
 extern void balancer_cycle(void);
 
 #include <sharaku/utime.h>
@@ -46,7 +46,7 @@ extern void balancer_cycle(void);
 // ---------------------------------------------------------------------
 // 定義
 // ---------------------------------------------------------------------
-static struct sharaku_job	_job_init;
+static job_t	_job_init;
 
 // ---------------------------------------------------------------------
 // タスクエントリ
@@ -79,8 +79,8 @@ void main_task(intptr_t unused)
 	act_tsk(CYCLE_TASK);
 
 	ev3_led_set_color(LED_ORANGE); /* 初期化完了通知 */
-	sharaku_init_job(&_job_init);
-	sharaku_async_message(&_job_init, job_entry);
+	init_job(&_job_init);
+	job_async_sched(&_job_init, job_entry);
 
 	sharaku_entry();
 }
