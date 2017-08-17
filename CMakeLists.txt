@@ -25,7 +25,29 @@
 #
 #  Modules CMake file for libsharaku
 # ----------------------------------------------------------------------------
+
+# ---------------------------------------------------------------
 cmake_minimum_required(VERSION 3.5)
+
+# ---------------------------------------------------------------
+# windowsの場合は、ここで設定を取り込む
+if(NOT CMAKE_TOOLCHAIN_FILE)
+	if(WIN32)
+		include(tools/cmake/win10-x86.cmake)
+	endif()
+endif(NOT CMAKE_TOOLCHAIN_FILE)
+
+# コンパイラ引数
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CROSS_FLAGS_C}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CROSS_FLAGS_CXX}")
+set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} ${CROSS_FLAGS_C} -O0")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${CROSS_FLAGS_CXX} -O0")
+set(CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO} ${CROSS_FLAGS_C}-O2")
+set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} ${CROSS_FLAGS_CXX} -O2")
+set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} ${CROSS_FLAGS_C} -O2")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${CROSS_FLAGS_CXX} -O2")
+set(CMAKE_C_FLAGS_MINSIZEREL "${CMAKE_C_FLAGS_MINSIZEREL} ${CROSS_FLAGS_C} -O3")
+set(CMAKE_CXX_FLAGS_MINSIZEREL "${CMAKE_CXX_FLAGS_MINSIZEREL} ${CROSS_FLAGS_CXX} -O3")
 
 set(SHARAKU_INCLUDE_PATH
 	"${CMAKE_SOURCE_DIR}/platform/${TARGET_OS}/${TARGET_ARCH}/${TARGET_PLATFORM}/include"
@@ -41,18 +63,6 @@ set(SHARAKU_LIB_PATH
 	"${CMAKE_SOURCE_DIR}/modules"
 	"${CMAKE_SOURCE_DIR}/system"
 	)
-
-
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CROSS_FLAGS} -g")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CROSS_FLAGS} -Wno-invalid-offsetof -g")
-set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} ${CROSS_FLAGS} -g -O0")
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${CROSS_FLAGS} -Wno-invalid-offsetof -g -O0")
-set(CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO} ${CROSS_FLAGS} -g -O2")
-set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} ${CROSS_FLAGS} -Wno-invalid-offsetof -g -O2")
-set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} ${CROSS_FLAGS} -O2")
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${CROSS_FLAGS} -Wno-invalid-offsetof -O2")
-set(CMAKE_C_FLAGS_MINSIZEREL "${CMAKE_C_FLAGS_MINSIZEREL} ${CROSS_FLAGS} -Wno-invalid-offsetof -O3")
-set(CMAKE_CXX_FLAGS_MINSIZEREL "${CMAKE_CXX_FLAGS_MINSIZEREL} ${CROSS_FLAGS} -Wno-invalid-offsetof -O3")
 
 add_subdirectory(system)
 add_subdirectory(devices)

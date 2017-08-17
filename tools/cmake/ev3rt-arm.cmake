@@ -49,6 +49,13 @@ set(EV3RT_INCLUDE_PATH
 set(CMAKE_SYSTEM_NAME Generic)
 set(toolchain   ""      CACHE FILEPATH     "")
 
+# sharakuの設定
+set(TARGET_OS itron)
+set(TARGET_ARCH arm)
+set(TARGET_PLATFORM ev3rt)
+set(TARGET_SUFFIX "ev3rt.${TARGET_ARCH}")
+
+
 set(CROSS_TOOLCHAIN_PATH /usr/lib/arm-none-eabi)
 set(CROSS_FLAGS "-Wall -Wno-unused-function -Wunused-variable")
 set(CROSS_FLAGS "${CROSS_FLAGS} -Dgcc -mcpu=arm926ej-s -mlittle-endian -DUSE_CFG_PASS3 -g -Wall -O2 -DBUILD_EV3_PLATFORM -DCONFIG_FB_DEFERRED_IO -D__TARGET_ARCH_ARM=5")
@@ -61,79 +68,111 @@ set(CROSS_FLAGS "${CROSS_FLAGS} -D__ev3rt__")
 # ----------------------------------------------------------------------
 # gcc静的解析
 # ----------------------------------------------------------------------
+set(CROSS_FLAGS_C "${CROSS_FLAGS}")
+set(CROSS_FLAGS_CXX "${CROSS_FLAGS}")
 
 # 関数がaggregate(配列や構造体など?)を返す場合に警告を出す。
-set(CROSS_FLAGS "${CROSS_FLAGS} -Waggregate-return")
+set(CROSS_FLAGS_C "${CROSS_FLAGS_C} -Waggregate-return")
+set(CROSS_FLAGS_CXX "${CROSS_FLAGS_CXX} -Waggregate-return")
 
 # # 関数呼び出しがマッチしない型にキャストされている場合に警告を出す。
 # # C/ObjC
-# set(CROSS_FLAGS "${CROSS_FLAGS} -Wbad-function-cast")
+# set(CROSS_FLAGS_C "${CROSS_FLAGS_C} -Wbad-function-cast")
+# set(CROSS_FLAGS_CXX "${CROSS_FLAGS_CXX} -Wbad-function-cast")
 
 # type qualifier(const,volatileなど)を外すようなポインタのキャストに警告を出す。
-set(CROSS_FLAGS "${CROSS_FLAGS} -Wcast-qual")
+set(CROSS_FLAGS_C "${CROSS_FLAGS_C} -Wcast-qual")
+set(CROSS_FLAGS_CXX "${CROSS_FLAGS_CXX} -Wcast-qual")
 
 # # 暗黙型変換のうち、表す値が変わる可能性のあるものに警告を出す。
-# set(CROSS_FLAGS "${CROSS_FLAGS} -Wconversion")
+# set(CROSS_FLAGS_C "${CROSS_FLAGS_C} -Wconversion")
+# set(CROSS_FLAGS_CXX "${CROSS_FLAGS_CXX} -Wconversion")
 
 # 全てのコンストラクタ・デストラクタがprivateであり、かつfriendもpublic static関数も持たないクラス(=使用できないクラス)に対して警告を出す。
-set(CROSS_FLAGS "${CROSS_FLAGS} -Wctor-dtor-privacy")
+#set(CROSS_FLAGS_C "${CROSS_FLAGS_C} -Wctor-dtor-privacy")
+set(CROSS_FLAGS_CXX "${CROSS_FLAGS_CXX} -Wctor-dtor-privacy")
 
 # __TIME__,__DATE__,__TIMESTAMP__マクロを使用している場合に警告を出す。
-set(CROSS_FLAGS "${CROSS_FLAGS} -Wdate-time")
+set(CROSS_FLAGS_C "${CROSS_FLAGS_C} -Wdate-time")
+set(CROSS_FLAGS_CXX "${CROSS_FLAGS_CXX} -Wdate-time")
 
 # 仮想関数を持っているのにデストラクタが仮想関数でないクラスに対して、deleteを使っている場合に警告を出す。
-set(CROSS_FLAGS "${CROSS_FLAGS} -Wdelete-non-virtual-dtor")
+#set(CROSS_FLAGS_C "${CROSS_FLAGS_C} -Wdelete-non-virtual-dtor")
+set(CROSS_FLAGS_CXX "${CROSS_FLAGS_CXX} -Wdelete-non-virtual-dtor")
 
 # コードが長すぎたり複雑すぎたりして、コンパイラが最適化を実行できない場合に警告を出す。
-set(CROSS_FLAGS "${CROSS_FLAGS} -Wdisabled-optimization")
+set(CROSS_FLAGS_C "${CROSS_FLAGS_C} -Wdisabled-optimization")
+set(CROSS_FLAGS_CXX "${CROSS_FLAGS_CXX} -Wdisabled-optimization")
 
 # # float型が暗黙にdoubleにキャストされている場合に警告を出す。
-# set(CROSS_FLAGS "${CROSS_FLAGS} -Wdouble-promotion")
+# set(CROSS_FLAGS_C "${CROSS_FLAGS_C} -Wdouble-promotion")
+# set(CROSS_FLAGS_CXX "${CROSS_FLAGS_CXX} -Wdouble-promotion")
 # # Scott Meyers の Effective C++ による次の方針に沿わない記述に警告を出す。
-# set(CROSS_FLAGS "${CROSS_FLAGS} -Weffc++")
+# set(CROSS_FLAGS_C "${CROSS_FLAGS_C} -Weffc++")
+# set(CROSS_FLAGS_CXX "${CROSS_FLAGS_CXX} -Weffc++")
 # # 浮動小数点数を==や!=で比較している場合に警告を出す。
-# set(CROSS_FLAGS "${CROSS_FLAGS} -Wfloat-equal")
+# set(CROSS_FLAGS_C "${CROSS_FLAGS_C} -Wfloat-equal")
+# set(CROSS_FLAGS_CXX "${CROSS_FLAGS_CXX} -Wfloat-equal")
 # # -Wuninitializedが指定されている場合に、初期化されていない変数をそれ自身で初期化している場合に警告を出す。
-# set(CROSS_FLAGS "${CROSS_FLAGS} -Winit-self")
+# set(CROSS_FLAGS_C "${CROSS_FLAGS_C} -Winit-self")
+# set(CROSS_FLAGS_CXX "${CROSS_FLAGS_CXX} -Winit-self")
 # # inline指定されている関数を、コンパイラが(関数が長すぎるなどの理由で)インライン展開しなかった場合に警告を出す。
-# set(CROSS_FLAGS "${CROSS_FLAGS} -Winline")
+# set(CROSS_FLAGS_C "${CROSS_FLAGS_C} -Winline")
+# set(CROSS_FLAGS_CXX "${CROSS_FLAGS_CXX} -Winline")
 # # gotoやswitchで変数宣言を通り過ぎる場合に警告を出す。
-# set(CROSS_FLAGS "${CROSS_FLAGS} -Wjump-misses-init")
+# set(CROSS_FLAGS_C "${CROSS_FLAGS_C} -Wjump-misses-init")
+# set(CROSS_FLAGS_CXX "${CROSS_FLAGS_CXX} -Wjump-misses-init")
 # # 論理演算子の間違っているかもしれない使用に対して警告を出す。
-# set(CROSS_FLAGS "${CROSS_FLAGS} -Wlogical-op")
+# set(CROSS_FLAGS_C "${CROSS_FLAGS_C} -Wlogical-op")
+# set(CROSS_FLAGS_CXX "${CROSS_FLAGS_CXX} -Wlogical-op")
 # # #includeで指定されたディレクトリが見つからない場合に警告を出す。
-# set(CROSS_FLAGS "${CROSS_FLAGS} -Wmissing-include-dirs")
+# set(CROSS_FLAGS_C "${CROSS_FLAGS_C} -Wmissing-include-dirs")
+# set(CROSS_FLAGS_CXX "${CROSS_FLAGS_CXX} -Wmissing-include-dirs")
 # # 複数の文字を含む文字リテラルに対して警告を出す。
-# set(CROSS_FLAGS "${CROSS_FLAGS} -Wmultichar")
+# set(CROSS_FLAGS_C "${CROSS_FLAGS_C} -Wmultichar")
+# set(CROSS_FLAGS_CXX "${CROSS_FLAGS_CXX} -Wmultichar")
 # # Cにおいて、規格で定められた文字列長の「最小限の最大長」を超える文字列に対して警告を出す。
-# set(CROSS_FLAGS "${CROSS_FLAGS} -Woverlength-strings")
+# set(CROSS_FLAGS_C "${CROSS_FLAGS_C} -Woverlength-strings")
+# set(CROSS_FLAGS_CXX "${CROSS_FLAGS_CXX} -Woverlength-strings")
 # # 派生クラスの関数との名前被りによって、基底クラスのvirtual関数が使えなくなる場合に警告を出す。
-# set(CROSS_FLAGS "${CROSS_FLAGS} -Woverloaded-virtual")
+# set(CROSS_FLAGS_C "${CROSS_FLAGS_C} -Woverloaded-virtual")
+# set(CROSS_FLAGS_CXX "${CROSS_FLAGS_CXX} -Woverloaded-virtual")
 # # 関数型、void型に対するsizeofの適用に対して警告を出す。
-# set(CROSS_FLAGS "${CROSS_FLAGS} -Wpointer-arith")
+# set(CROSS_FLAGS_C "${CROSS_FLAGS_C} -Wpointer-arith")
+# set(CROSS_FLAGS_CXX "${CROSS_FLAGS_CXX} -Wpointer-arith")
 # # コンストラクタのメンバ初期化子と、メンバ変数の宣言の順番が異なる場合に警告を出す。
-# set(CROSS_FLAGS "${CROSS_FLAGS} -Wreorder")
+# set(CROSS_FLAGS_C "${CROSS_FLAGS_C} -Wreorder")
+# set(CROSS_FLAGS_CXX "${CROSS_FLAGS_CXX} -Wreorder")
 # # オーバーロードによってunsigned ~やenumが、signed ~に型変換される場合に警告を出す。
-# set(CROSS_FLAGS "${CROSS_FLAGS} -Wsign-promo")
+# set(CROSS_FLAGS_C "${CROSS_FLAGS_C} -Wsign-promo")
+# set(CROSS_FLAGS_CXX "${CROSS_FLAGS_CXX} -Wsign-promo")
 # # -fstack-protectorが指定されている場合に、スタック保護がなされなかった関数が存在する場合に警告を出す。
-# set(CROSS_FLAGS "${CROSS_FLAGS} -Wstack-protector")
+# set(CROSS_FLAGS_C "${CROSS_FLAGS_C} -Wstack-protector")
+# set(CROSS_FLAGS_CXX "${CROSS_FLAGS_CXX} -Wstack-protector")
 # # switch文がdefaultラベルの文を持たない場合に警告を出す。
-# set(CROSS_FLAGS "${CROSS_FLAGS} -Wswitch-default")
+# set(CROSS_FLAGS_C "${CROSS_FLAGS_C} -Wswitch-default")
+# set(CROSS_FLAGS_CXX "${CROSS_FLAGS_CXX} -Wswitch-default")
 # # switch文の対象になる値がenumで、ラベルがenumのすべての値には対応していない場合に警告を出す。
-# set(CROSS_FLAGS "${CROSS_FLAGS} -Wswitch-enum")
+# set(CROSS_FLAGS_C "${CROSS_FLAGS_C} -Wswitch-enum")
+# set(CROSS_FLAGS_CXX "${CROSS_FLAGS_CXX} -Wswitch-enum")
 # # ループカウンタがオーバーフローする可能性があって、ループを最適化できない場合に警告を出す。
-# set(CROSS_FLAGS "${CROSS_FLAGS} -Wunsafe-loop-optimizations")
+# set(CROSS_FLAGS_C "${CROSS_FLAGS_C} -Wunsafe-loop-optimizations")
+# set(CROSS_FLAGS_CXX "${CROSS_FLAGS_CXX} -Wunsafe-loop-optimizations")
 # # 接尾辞のついていない浮動小数点数リテラルに対して警告を出す。
-# set(CROSS_FLAGS "${CROSS_FLAGS} -Wunsuffixed-float-constants")
+# set(CROSS_FLAGS_C "${CROSS_FLAGS_C} -Wunsuffixed-float-constants")
+# set(CROSS_FLAGS_CXX "${CROSS_FLAGS_CXX} -Wunsuffixed-float-constants")
 #
 # # 変数を、その変数自身の型にキャストしている(無意味である)場合に警告を出す。
-# set(CROSS_FLAGS "${CROSS_FLAGS} -Wuseless-cast")
+# set(CROSS_FLAGS_C "${CROSS_FLAGS_C} -Wuseless-cast")
+# set(CROSS_FLAGS_CXX "${CROSS_FLAGS_CXX} -Wuseless-cast")
 
 # 文字列リテラル(const char*)をchar*へ型変換する場合に警告を出す。
-set(CROSS_FLAGS "${CROSS_FLAGS} -Wwrite-strings")
+set(CROSS_FLAGS_C "${CROSS_FLAGS_C} -Wwrite-strings")
+set(CROSS_FLAGS_CXX "${CROSS_FLAGS_CXX} -Wwrite-strings")
 
 # # 整数リテラル'0'がヌルポインタを示す定数として使われている場合に警告を出力する。
-# set(CROSS_FLAGS "${CROSS_FLAGS} -Wzero-as-null-pointer-constant")
+# set(CROSS_FLAGS_C "${CROSS_FLAGS_C} -Wzero-as-null-pointer-constant")
+# set(CROSS_FLAGS_CXX "${CROSS_FLAGS_CXX} -Wzero-as-null-pointer-constant")
 
 # ----------------------------------------------------------------------
 
@@ -144,10 +183,5 @@ set(CMAKE_ASM_COMPILER "${CROSS_COMPILE}as")
 set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} ${CROSS_TOOLCHAIN_PATH}/include)
 set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} ${CROSS_TOOLCHAIN_PATH}/lib)
 set(CMAKE_INSTALL_PREFIX ${CROSS_TOOLCHAIN_PATH}/)
-
-set(TARGET_OS itron)
-set(TARGET_ARCH arm)
-set(TARGET_PLATFORM ev3rt)
-set(TARGET_SUFFIX "ev3rt.${TARGET_ARCH}")
 
 include_directories(${EV3RT_INCLUDE_PATH})
