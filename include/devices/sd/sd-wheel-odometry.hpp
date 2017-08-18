@@ -35,7 +35,6 @@
 #include <devices/motor-api.hpp>
 #include <devices/sensor-api.hpp>
 #include <devices/odmetry-api.hpp>
-#include <devices/connection_interface.hpp>
 
 NAMESPACE_SHARAKU_BEGIN
 
@@ -47,10 +46,10 @@ class sd_wheel_odometry
 {
  public:
 	// インターフェース接続
-	connection_interface<speed_motor_operations>	in_speed_motor_l;
-	connection_interface<speed_motor_operations>	in_speed_motor_r;
-	connection_interface<gyro_operations>		in_gyro_x;	// X軸のGyro
-	connection_interface<gyro_operations>		in_gyro_y;	// Y軸のGyro
+	speed_motor_operations		*in_speed_motor_l;
+	speed_motor_operations		*in_speed_motor_r;
+	gyro_operations			*in_gyro_x;	// X軸のGyro
+	gyro_operations			*in_gyro_y;	// Y軸のGyro
 
 	operator odmetry_operations*() { return (odmetry_operations*)this;}
 	operator update_operations*() { return (update_operations*)this;}

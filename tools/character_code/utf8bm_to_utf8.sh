@@ -27,31 +27,31 @@
 
 readonly DEF_NKF=/usr/bin/nkf
 
-find ../../devices -type f -name "*.c" | xargs ${DEF_NKF} -w --overwrite
-find ../../devices -type f -name "*.cpp" | xargs ${DEF_NKF} -w --overwrite
-find ../../devices -type f -name "*.h" | xargs ${DEF_NKF} -w --overwrite
-find ../../devices -type f -name "*.hpp" | xargs ${DEF_NKF} -w --overwrite
+find ../../devices -type f -name "*.c" | xargs ${DEF_NKF} -w -Lu --overwrite
+find ../../devices -type f -name "*.cpp" | xargs ${DEF_NKF} -w -Lu --overwrite
+find ../../devices -type f -name "*.h" | xargs ${DEF_NKF} -w -Lu --overwrite
+find ../../devices -type f -name "*.hpp" | xargs ${DEF_NKF} -w -Lu --overwrite
 
-find ../../include -type f -name "*.h" | xargs ${DEF_NKF} -w --overwrite
-find ../../include -type f -name "*.hpp" | xargs ${DEF_NKF} -w --overwrite
+find ../../include -type f -name "*.h" | xargs ${DEF_NKF} -w -Lu --overwrite
+find ../../include -type f -name "*.hpp" | xargs ${DEF_NKF} -w -Lu --overwrite
 
-find ../../modules -type f -name "*.c" | xargs ${DEF_NKF} -w --overwrite
-find ../../modules -type f -name "*.cpp" | xargs ${DEF_NKF} -w --overwrite
-find ../../modules -type f -name "*.h" | xargs ${DEF_NKF} -w --overwrite
-find ../../modules -type f -name "*.hpp" | xargs  ${DEF_NKF} -w --overwrite
+find ../../modules -type f -name "*.c" | xargs ${DEF_NKF} -w -Lu --overwrite
+find ../../modules -type f -name "*.cpp" | xargs ${DEF_NKF} -w -Lu --overwrite
+find ../../modules -type f -name "*.h" | xargs ${DEF_NKF} -w -Lu --overwrite
+find ../../modules -type f -name "*.hpp" | xargs  ${DEF_NKF} -w -Lu --overwrite
 
-find ../../platform -type f -name "*.c" | xargs ${DEF_NKF} -w --overwrite
-find ../../platform -type f -name "*.cpp" | xargs ${DEF_NKF} -w --overwrite
-find ../../platform -type f -name "*.h" | xargs ${DEF_NKF} -w --overwrite
-find ../../platform -type f -name "*.hpp" | xargs ${DEF_NKF} -w --overwrite
+find ../../platform -type f -name "*.c" | xargs ${DEF_NKF} -w -Lu --overwrite
+find ../../platform -type f -name "*.cpp" | xargs ${DEF_NKF} -w -Lu --overwrite
+find ../../platform -type f -name "*.h" | xargs ${DEF_NKF} -w -Lu --overwrite
+find ../../platform -type f -name "*.hpp" | xargs ${DEF_NKF} -w -Lu --overwrite
 
-find ../../samples -type f -name "*.c" | xargs ${DEF_NKF} -w --overwrite
-find ../../samples -type f -name "*.cpp" | xargs ${DEF_NKF} -w --overwrite
-find ../../samples -type f -name "*.h" | xargs ${DEF_NKF} -w --overwrite
-find ../../samples -type f -name "*.hpp" | xargs ${DEF_NKF} -w --overwrite
+find ../../samples -type f -name "*.c" | xargs ${DEF_NKF} -w -Lu --overwrite
+find ../../samples -type f -name "*.cpp" | xargs ${DEF_NKF} -w -Lu --overwrite
+find ../../samples -type f -name "*.h" | xargs ${DEF_NKF} -w -Lu --overwrite
+find ../../samples -type f -name "*.hpp" | xargs ${DEF_NKF} -w -Lu --overwrite
 
-find ../../system -type f -name "*.c" | xargs ${DEF_NKF} -w --overwrite
-find ../../system -type f -name "*.cpp" | xargs ${DEF_NKF} -w --overwrite
-find ../../system -type f -name "*.h" | xargs ${DEF_NKF} -w --overwrite
-find ../../system -type f -name "*.hpp" | xargs ${DEF_NKF} -w --overwrite
+find ../../system -type f -name "*.c" | xargs ${DEF_NKF} -w -Lu --overwrite
+find ../../system -type f -name "*.cpp" | xargs ${DEF_NKF} -w -Lu --overwrite
+find ../../system -type f -name "*.h" | xargs ${DEF_NKF} -w -Lu --overwrite
+find ../../system -type f -name "*.hpp" | xargs ${DEF_NKF} -w -Lu --overwrite
 

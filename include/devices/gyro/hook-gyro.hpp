@@ -29,7 +29,6 @@
 
 #include <stdint.h>
 #include <devices/sensor-api.hpp>
-#include <devices/connection_interface.hpp>
 
 NAMESPACE_SHARAKU_BEGIN
 
@@ -39,7 +38,7 @@ class hook_gyro
 	hook_gyro() {}
 	virtual ~hook_gyro() {}
 	// インターフェース接続(複数connect禁止)
-	connection_interface<gyro_operations>	out_gyro;
+	gyro_operations		*out_gyro;
 
 	// インタフェースへのアクセス
 	operator gyro_operations*() {

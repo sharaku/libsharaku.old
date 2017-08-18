@@ -74,7 +74,7 @@ __slab_h2b(smem_header_t *h)
 static inline smem_header_t*
 __slab_b2h(void *buf)
 {
-	return (smem_header_t *)(((void *)buf) - sizeof(smem_header_t));
+	return (smem_header_t *)(((char *)buf) - sizeof(smem_header_t));
 }
 
 // slab獲得の優先度キューの再登録を行う。

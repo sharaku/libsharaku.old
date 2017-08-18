@@ -40,7 +40,7 @@ class sd_motor_pos_filter
 {
  public:
 	// インターフェース接続(複数connect禁止)
-	connection_interface<speed_motor_operations>	out_motor;
+	speed_motor_operations		*out_motor;
 
 	operator speed_motor_operations* () {
 		return (speed_motor_operations*) this;

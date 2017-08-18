@@ -33,7 +33,7 @@
 extern "C" {
 #endif
 
-extern void sharaku_timer_handler(uint32_t cyc_ms);
+extern void sharaku_timer_handler(void);
 extern void sharaku_cpu_handler(void);
 extern void sharaku_exit_message(int result);
 extern int sharaku_get_exit_message(void);

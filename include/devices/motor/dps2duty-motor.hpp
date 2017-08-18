@@ -29,7 +29,6 @@
 
 #include <stdint.h>
 #include <devices/motor-api.hpp>
-#include <devices/connection_interface.hpp>
 
 NAMESPACE_SHARAKU_BEGIN
 
@@ -41,7 +40,7 @@ class dps2duty_motor
 {
  public:
 	// インターフェース接続(複数connect禁止)
-	connection_interface<duty_motor_operations>	out_motor;
+	duty_motor_operations		*out_motor;
 
 	operator motor_ctrl_operations*() {
 		return (motor_ctrl_operations *)this;

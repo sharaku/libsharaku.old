@@ -33,7 +33,6 @@
 #include <devices/update-api.hpp>
 #include <devices/moving-api.hpp>
 #include <devices/motor-api.hpp>
-#include <devices/connection_interface.hpp>
 
 NAMESPACE_SHARAKU_BEGIN
 
@@ -45,10 +44,10 @@ class sd_motors
 {
  public:
 	// インターフェース接続
-	connection_interface<speed_motor_operations>	out_speed_motor_l;
-	connection_interface<speed_motor_operations>	out_speed_motor_r;
-	connection_interface<device_update_operations>	out_device_update_l;
-	connection_interface<device_update_operations>	out_device_update_r;
+	speed_motor_operations		*out_speed_motor_l;
+	speed_motor_operations		*out_speed_motor_r;
+	device_update_operations	*out_device_update_l;
+	device_update_operations	*out_device_update_r;
 
 	operator move_operations*() { return (move_operations*)this;}
 	operator update_operations*() { return (update_operations*)this;}

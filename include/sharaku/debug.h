@@ -72,6 +72,14 @@ enum {
 #define _SHARAKU_LOG_NUMtoSTR(x) #x
 
 // ログ採取
+#if 1
+#define sharaku_db_trace(str, a1, a2, a3, a4, a5, a6) \
+	sharaku_dblog_internal(SHARAKU_LOG_LV_TRACE, str, a1, a2, a3, a4, a5, a6)
+#define sharaku_db_info(str, a1, a2, a3, a4, a5, a6) \
+	sharaku_dblog_internal(SHARAKU_LOG_LV_INFO, str, a1, a2, a3, a4, a5, a6)
+#define sharaku_db_error(str, a1, a2, a3, a4, a5, a6) \
+	sharaku_dblog_internal(SHARAKU_LOG_LV_ERROR, str, a1, a2, a3, a4, a5, a6)
+#else
 #define __dblog0(lv, fmt) \
 		sharaku_dblog_internal(lv, fmt, 0, 0, 0, 0, 0, 0)
 #define __dblog1(lv, fmt, a1) \
@@ -99,6 +107,7 @@ enum {
 	GET_DBG_FUNC_NAME(0, __VA_ARGS__, __dblog6, __dblog5, __dblog4, \
 			  __dblog3, __dblog2, __dblog1, __dblog0) \
 			  (SHARAKU_LOG_LV_ERROR, fmt, __VA_ARGS__)
+#endif
 
 /******************************************************************************
 logger機能
@@ -164,7 +173,7 @@ extern void _sharaku_dblog_internal(const char* format, const char* function, in
 // その他コンパイラ
 #define sharaku_dblog_internal(lv, str, a1, a2, a3, a4, a5, a6)	\
 	if (SHARAKU_DBLOG_LEVEL <= lv)		\
-		_sharaku_dblog_internal(__FILE__"(" SHARAKU_LOG_NUMtoSTR(__LINE__) ")  %s(): "str"\n", __func__, a1, a2, a3, a4, a5, a6)
+		_sharaku_dblog_internal(__FILE__"(" SHARAKU_LOG_NUMtoSTR(__LINE__) ")  %s(): "str"\n", __FUNCTION__, a1, a2, a3, a4, a5, a6)
 #endif
 
 /******************************************************************************

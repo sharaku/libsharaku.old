@@ -42,17 +42,9 @@
 
 static void* _timer_handler(void* pparam)
 {
-	int64_t	start_us, now_ms, now_us,diff_ms;
-
-	// start_us が now_ms = 0の情報。
-	// 差分は、(now_us - start_us) / 1000
-	start_us = sharaku_get_usec();
 	while (!_is_exit()) {
 		usleep(JIFFIES_HZ / 1000);
-		now_us = sharaku_get_usec();
-		now_ms = sharaku_get_msec();
-		diff_ms = (now_us - start_us) / 1000 - now_ms;
-		sharaku_timer_handler(diff_ms);
+		sharaku_timer_handler();
 	}
 
 	pthread_exit(NULL);

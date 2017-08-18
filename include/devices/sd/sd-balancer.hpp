@@ -32,7 +32,6 @@
 #include <devices/update-api.hpp>
 #include <devices/moving-api.hpp>
 #include <devices/sensor-api.hpp>
-#include <devices/connection_interface.hpp>
 
 NAMESPACE_SHARAKU_BEGIN
 
@@ -45,8 +44,8 @@ class sd_balancer
 	sd_balancer(float wheel_length, float max_speed);
 
 	// インターフェース接続
-	connection_interface<move_operations>	out_move;
-	connection_interface<gyro_operations>	in_gyro;
+	move_operations		*out_move;
+	gyro_operations		*in_gyro;
 
 	operator move_operations*() { return (move_operations*)this;}
 	operator update_operations*() { return (update_operations*)this;}

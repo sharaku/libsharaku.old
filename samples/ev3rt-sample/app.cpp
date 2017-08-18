@@ -53,14 +53,8 @@ static job_t	_job_init;
 // ---------------------------------------------------------------------
 void
 timer_task(intptr_t unused) {
-	int64_t	start_us, now_ms, now_us,diff_ms;
-	start_us = sharaku_get_usec();
-	// 1ms周期で起動する
 	while(1) {
 		tslp_tsk(2);
-		now_us = sharaku_get_usec();
-		now_ms = sharaku_get_msec();
-		diff_ms = (now_us - start_us) / 1000 - now_ms;
 		sharaku_timer_handler(diff_ms);
 	}
 }

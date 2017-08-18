@@ -29,7 +29,6 @@
 
 #include <stdint.h>
 #include <devices/sensor-api.hpp>
-#include <devices/connection_interface.hpp>
 
 NAMESPACE_SHARAKU_BEGIN
 
@@ -39,7 +38,7 @@ class hook_ultrasonic
 	hook_ultrasonic() {}
 	virtual ~hook_ultrasonic(){}
 	// インターフェース接続(複数connect禁止)
-	connection_interface<usonic_operations> out_usonic;
+	usonic_operations	*out_usonic;
 
 	// インタフェースへのアクセス
 	operator usonic_operations*() {

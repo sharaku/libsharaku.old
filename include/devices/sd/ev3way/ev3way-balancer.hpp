@@ -33,7 +33,6 @@
 #include <devices/moving-api.hpp>
 #include <devices/sensor-api.hpp>
 #include <devices/motor-api.hpp>
-#include <devices/connection_interface.hpp>
 #include <sharaku/digital-filter.hpp>
 
 NAMESPACE_SHARAKU_BEGIN
@@ -50,10 +49,10 @@ class ev3way_balancer
 {
  public:
 	// インターフェース接続
-	connection_interface<powersupply_operations>	in_power;
-	connection_interface<gyro_operations>		in_gyro;
-	connection_interface<duty_motor_operations>	out_duty_motor_l;
-	connection_interface<duty_motor_operations>	out_duty_motor_r;
+	powersupply_operations		*in_power;
+	gyro_operations			*in_gyro;
+	duty_motor_operations		*out_duty_motor_l;
+	duty_motor_operations		*out_duty_motor_r;
 
 	operator move_operations*() { return (move_operations*)this;}
 	operator update_operations*() { return (update_operations*)this;}

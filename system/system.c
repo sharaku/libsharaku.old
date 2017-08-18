@@ -31,10 +31,13 @@
 
 static volatile int static_exit_flag = 0;
 static volatile int static_exit_code = 0;
+static sharaku_usec_t static_start_us = 0;
 
 static inline void
 _sharaku_init(void)
 {
+	static_start_us = sharaku_get_usec();
+
 	sharaku_init_dblog();
 	sharaku_init_prof();
 	sharaku_init_sched();
@@ -55,8 +58,16 @@ _is_exit(void)
 }
 
 void
-sharaku_timer_handler(uint32_t cyc_ms)
+sharaku_timer_handler(void)
 {
+	int64_t	now_ms, now_us, cyc_ms;
+
+	// start_us が now_ms = 0の情報。
+	// 差分は、(now_us - start_us) / 1000
+	now_us = sharaku_get_usec();
+	now_ms = sharaku_get_msec();
+	cyc_ms = (now_us - static_start_us) / 1000 - now_ms;
+
 	// 周期呼び出しにより、jiffiseを更新する。
 	jiffies += cyc_ms;
 }

@@ -29,7 +29,6 @@
 
 #include <stdint.h>
 #include <devices/motor-api.hpp>
-#include <devices/connection_interface.hpp>
 
 NAMESPACE_SHARAKU_BEGIN
 
@@ -43,9 +42,9 @@ class hook_motor
 	hook_motor() {}
 	virtual ~hook_motor() {}
 	// インターフェース接続(複数connect禁止)
-	connection_interface<speed_motor_operations> out_speed;
-	connection_interface<angle_motor_operations> out_angle;
-	connection_interface<duty_motor_operations> out_duty;
+	speed_motor_operations		*out_speed;
+	angle_motor_operations		*out_angle;
+	duty_motor_operations		*out_duty;
 
 	// インタフェースへのアクセス
 	operator motor_ctrl_operations*() {

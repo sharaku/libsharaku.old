@@ -32,7 +32,6 @@
 #include <devices/update-api.hpp>
 #include <devices/moving-api.hpp>
 #include <devices/sensor-api.hpp>
-#include <devices/connection_interface.hpp>
 
 NAMESPACE_SHARAKU_BEGIN
 
@@ -59,8 +58,8 @@ class sd_linetrace
 	sd_linetrace();
 
 	// インターフェース接続
-	connection_interface<move_operations>	out_move;
-	connection_interface<color_operations>	in_photo;
+	move_operations		*out_move;
+	color_operations	*in_photo;
 
 	operator move_operations*() { return (move_operations*)this;}
 	operator update_operations*() { return (update_operations*)this;}

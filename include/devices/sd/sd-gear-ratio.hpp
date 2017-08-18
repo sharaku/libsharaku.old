@@ -48,7 +48,7 @@ class sd_gearratio_speed
 {
  public:
 	// インターフェース接続(複数connect禁止)
-	connection_interface<speed_motor_operations>	out_motor;
+	speed_motor_operations		*out_motor;
 
 	operator speed_motor_operations* () {
 		return (speed_motor_operations*) this;
@@ -151,7 +151,7 @@ class sd_gearratio_angle
 {
  public:
 	// インターフェース接続(複数connect禁止)
-	connection_interface<angle_motor_operations>	out_motor;
+	angle_motor_operations		*out_motor;
 
 	operator angle_motor_operations* () {
 		return (angle_motor_operations*) this;

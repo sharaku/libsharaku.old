@@ -48,10 +48,10 @@ class EV3way
 		_gyro.reset();
 
 		// 両輪を制御するmotorsモジュールに対して左右のモータを接続する
-		_balancer.in_power.connect(_power);
-		_balancer.in_gyro.connect(_gyro);
-		_balancer.out_duty_motor_l.connect(_motor_l);
-		_balancer.out_duty_motor_r.connect(_motor_r);
+		_balancer.in_power		= _power;
+		_balancer.in_gyro		= _gyro;
+		_balancer.out_duty_motor_l	= _motor_l;
+		_balancer.out_duty_motor_r	= _motor_r;
 
 		// 車両クラスに対して定期アップデートを登録する
 		// デバイス類は自前で定期アップデートするため、登録不要

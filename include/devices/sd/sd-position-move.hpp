@@ -35,7 +35,6 @@
 #include <devices/update-api.hpp>
 #include <devices/moving-api.hpp>
 #include <devices/odmetry-api.hpp>
-#include <devices/connection_interface.hpp>
 
 NAMESPACE_SHARAKU_BEGIN
 
@@ -63,8 +62,8 @@ class sd_position_move
 	};
 
 	// インターフェース接続
-	connection_interface<move_operations>		out_move;
-	connection_interface<odmetry_operations>	in_odo;
+	move_operations			*out_move;
+	odmetry_operations		*in_odo;
 
 	operator position_move_operations*() { return (position_move_operations*)this;}
 	operator update_operations*() { return (update_operations*)this;}

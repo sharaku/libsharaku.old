@@ -30,7 +30,6 @@
 
 #include <stdint.h>
 #include <devices/sensor-api.hpp>
-#include <devices/connection_interface.hpp>
 
 NAMESPACE_SHARAKU_BEGIN
 
@@ -40,7 +39,7 @@ class hook_color
 	hook_color() {}
 	virtual ~hook_color() {}
 	// インターフェース接続(複数connect禁止)
-	connection_interface<color_operations>	out_color;
+	color_operations	*out_color;
 
 	// インタフェースへのアクセス
 	operator color_operations*() {

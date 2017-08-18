@@ -29,7 +29,6 @@
 
 #include <stdint.h>
 #include <devices/sensor-api.hpp>
-#include <devices/connection_interface.hpp>
 
 NAMESPACE_SHARAKU_BEGIN
 
@@ -39,7 +38,7 @@ class hook_touch
 	hook_touch() {}
 	virtual ~hook_touch() {}
 	// インターフェース接続(複数connect禁止)
-	connection_interface<touch_operations> out_touch;
+	touch_operations	*out_touch;
 
 	// インタフェースへのアクセス
 	operator touch_operations*() {
