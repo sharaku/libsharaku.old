@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright Abe Takafumi All Rights Reserved, 2016
  * Author Abe Takafumi
  *
